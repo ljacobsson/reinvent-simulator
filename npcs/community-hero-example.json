@@ -1,0 +1,47 @@
+{
+  "id": "casey-cloudwalker",
+  "name": "Casey Cloudwalker",
+  "title": "Community Builder · Containers",
+  "tagline": "Turns deployment postmortems into meetup talks.",
+  "photoUrl": "https://images.example.com/npcs/casey-cloudwalker.jpg",
+  "links": {
+    "linkedin": "https://www.linkedin.com/in/example-casey-cloudwalker",
+    "x": "https://x.com/examplecasey",
+    "blog": "https://example.com/casey-cloudwalker",
+    "youtube": "https://www.youtube.com/@examplecasey",
+    "website": "https://example.com"
+  },
+  "appearance": {
+    "gender": "male",
+    "skinTone": "medium",
+    "hair": { "style": "curly-short", "color": "dark-brown" },
+    "top": { "style": "zip-hoodie", "color": "aws-orange" },
+    "bottom": { "style": "jeans", "color": "indigo" },
+    "accessories": ["conference-badge", "backpack", "sneakers"],
+    "emote": "friendly-wave"
+  },
+  "factoids": [
+    "Runs a monthly cloud-native study group.",
+    "Believes the hallway track is the best conference track.",
+    "Can explain a Kubernetes rollout with a whiteboard and three sticky notes."
+  ],
+  "jokes": [
+    "I tried to make a container joke, but it would not run outside my cluster.",
+    "My deployment is very social: it always needs a rolling update."
+  ],
+  "roaming": {
+    "spawnAreas": ["venetian", "expo", "caesars"],
+    "walkSpeed": 6,
+    "pauseSeconds": { "min": 3, "max": 9 },
+    "wanderRadius": 55
+  },
+  "interaction": {
+    "greeting": "Hi! Looking for a session, a coffee, or a good architecture debate?",
+    "dialogue": [
+      "The best community conversations start with a specific problem.",
+      "If you are heading to the Expo, pace yourself — it is bigger than it looks."
+    ],
+    "rewards": { "social": 8, "knowledge": 4, "vibes": 3 },
+    "cooldownSeconds": 90
+  }
+}

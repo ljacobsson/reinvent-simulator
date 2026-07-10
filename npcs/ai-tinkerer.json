@@ -1,0 +1,26 @@
+{
+  "id": "zoe-aitinkerer",
+  "name": "Zoe Aitinkerer",
+  "title": "Machine Learning Engineer · Prototyper",
+  "tagline": "Carries three notebooks and trusts none of their outputs blindly.",
+  "photoUrl": "https://images.example.com/npcs/zoe-aitinkerer.jpg",
+  "links": { "website": "https://example.com/zoe-aitinkerer", "x": "https://x.com/examplezoeai" },
+  "appearance": {
+    "gender": "female",
+    "skinTone": "light",
+    "hair": { "style": "ponytail", "color": "dark-brown" },
+    "top": { "style": "graphic-tee", "color": "violet" },
+    "bottom": { "style": "jeans", "color": "black" },
+    "accessories": ["conference-badge", "laptop-backpack", "headphones"],
+    "emote": "animated-talk"
+  },
+  "factoids": ["Builds evaluation sets before polishing demos.", "Teaches a workshop on finding confident nonsense in model output."],
+  "jokes": ["The model hallucinated a shorter coffee line, so I followed it.", "My prompt has seventeen examples and one unresolved identity crisis."],
+  "roaming": { "spawnAreas": ["venetian", "wynn", "expo"], "walkSpeed": 6, "pauseSeconds": { "min": 2, "max": 9 }, "wanderRadius": 64 },
+  "interaction": {
+    "greeting": "Hi! Want to compare evaluation failures or coffee recommendations?",
+    "dialogue": ["A polished demo is not evidence of reliable behavior.", "Write down what success means before changing the prompt again."],
+    "rewards": { "social": 6, "knowledge": 8, "vibes": 4 },
+    "cooldownSeconds": 95
+  }
+}

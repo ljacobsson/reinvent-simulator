@@ -1,0 +1,26 @@
+{
+  "id": "marcus-finopsnavigator",
+  "name": "Marcus Finopsnavigator",
+  "title": "FinOps Lead · Cloud Economics",
+  "tagline": "Can spot an idle instance from across the Expo hall.",
+  "photoUrl": "https://images.example.com/npcs/marcus-finopsnavigator.jpg",
+  "links": { "blog": "https://example.com/marcus-finopsnavigator", "linkedin": "https://www.linkedin.com/in/example-marcus-finopsnavigator" },
+  "appearance": {
+    "gender": "male",
+    "skinTone": "deep",
+    "hair": { "style": "bald", "color": "black" },
+    "top": { "style": "polo", "color": "aws-orange" },
+    "bottom": { "style": "chinos", "color": "indigo" },
+    "accessories": ["conference-badge", "smartwatch", "bright-sneakers"],
+    "emote": "friendly-wave"
+  },
+  "factoids": ["Helped engineering teams cut waste without imposing deployment gates.", "Keeps a tiny reserved-instance calculator on his phone."],
+  "jokes": ["The cloud bill was highly available in every executive meeting.", "I terminated an idle instance. We are both running more efficiently now."],
+  "roaming": { "spawnAreas": ["caesars", "bellagio", "venetian"], "walkSpeed": 5.4, "pauseSeconds": { "min": 3, "max": 8 }, "wanderRadius": 48 },
+  "interaction": {
+    "greeting": "Good to meet you! Want a cost-saving tip that will not ruin developer velocity?",
+    "dialogue": ["Unit economics make cost conversations useful instead of frightening.", "Give teams timely feedback before adding approval gates."],
+    "rewards": { "social": 7, "knowledge": 7, "vibes": 2 },
+    "cooldownSeconds": 90
+  }
+}

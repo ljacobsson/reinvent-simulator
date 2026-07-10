@@ -1,0 +1,42 @@
+{
+  "id": "morgan-eventloop",
+  "name": "Morgan Eventloop",
+  "title": "Serverless Advocate · Community Speaker",
+  "tagline": "Collects event-driven architecture diagrams and excellent coffee.",
+  "photoUrl": "https://images.example.com/npcs/morgan-eventloop.jpg",
+  "links": {
+    "linkedin": "https://www.linkedin.com/in/example-morgan-eventloop",
+    "x": "https://x.com/examplemorgan",
+    "blog": "https://example.com/morgan-eventloop",
+    "youtube": "https://www.youtube.com/@examplemorgan"
+  },
+  "appearance": {
+    "gender": "female",
+    "skinTone": "deep",
+    "hair": { "style": "braided-bun", "color": "black" },
+    "top": { "style": "graphic-tee", "color": "cyan" },
+    "bottom": { "style": "chinos", "color": "charcoal" },
+    "accessories": ["conference-badge", "laptop-sleeve", "round-glasses"],
+    "emote": "animated-talk"
+  },
+  "factoids": [
+    "Once gave a lightning talk using only a queue of sticky notes.",
+    "Maintains an open-source collection of event-driven patterns."
+  ],
+  "jokes": [
+    "My function has commitment issues: it only runs when invoked.",
+    "I asked the event bus for directions. It sent my question everywhere."
+  ],
+  "roaming": {
+    "spawnAreas": ["venetian", "wynn", "expo"],
+    "walkSpeed": 5.5,
+    "pauseSeconds": { "min": 4, "max": 11 },
+    "wanderRadius": 60
+  },
+  "interaction": {
+    "greeting": "Want to trade a serverless pattern for a conference survival tip?",
+    "dialogue": ["Events are easy; knowing which ones matter is the real design work."],
+    "rewards": { "social": 6, "knowledge": 7, "vibes": 2 },
+    "cooldownSeconds": 90
+  }
+}

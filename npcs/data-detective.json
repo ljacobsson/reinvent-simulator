@@ -1,0 +1,26 @@
+{
+  "id": "priya-datadetective",
+  "name": "Priya Datadetective",
+  "title": "Data Architect · Analytics Community",
+  "tagline": "Finds missing lineage before breakfast.",
+  "photoUrl": "https://images.example.com/npcs/priya-datadetective.jpg",
+  "links": { "website": "https://example.com/priya-datadetective", "youtube": "https://www.youtube.com/@examplepriyadata" },
+  "appearance": {
+    "gender": "female",
+    "skinTone": "deep",
+    "hair": { "style": "long-wavy", "color": "black" },
+    "top": { "style": "blazer", "color": "cyan" },
+    "bottom": { "style": "trousers", "color": "charcoal" },
+    "accessories": ["conference-badge", "glasses", "tablet"],
+    "emote": "thoughtful-nod"
+  },
+  "factoids": ["Can trace a broken dashboard back through seven transformations.", "Runs a data-modeling clinic for early-career engineers."],
+  "jokes": ["The data lake became a swamp because nobody documented the tributaries.", "My query was expensive, but at least it had a full table scan of confidence."],
+  "roaming": { "spawnAreas": ["wynn", "venetian", "expo"], "walkSpeed": 4.8, "pauseSeconds": { "min": 5, "max": 12 }, "wanderRadius": 52 },
+  "interaction": {
+    "greeting": "Hello! Is your dashboard telling a story or concealing a mystery?",
+    "dialogue": ["Start with the decision the data needs to support.", "Lineage is operational documentation, not decoration."],
+    "rewards": { "social": 5, "knowledge": 9, "vibes": 2 },
+    "cooldownSeconds": 100
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "npcs": [
+    "community-hero-example.json",
+    "serverless-storyteller.json",
+    "security-sage.json",
+    "platform-pioneer.json",
+    "data-detective.json",
+    "finops-navigator.json",
+    "ai-tinkerer.json"
+  ]
+}

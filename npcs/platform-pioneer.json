@@ -1,0 +1,26 @@
+{
+  "id": "alex-platformpioneer",
+  "name": "Alex Platformpioneer",
+  "title": "Platform Engineer · Developer Experience",
+  "tagline": "Builds paved roads without putting up toll booths.",
+  "photoUrl": "https://images.example.com/npcs/alex-platformpioneer.jpg",
+  "links": { "blog": "https://example.com/alex-platformpioneer", "linkedin": "https://www.linkedin.com/in/example-alex-platformpioneer" },
+  "appearance": {
+    "gender": "neutral",
+    "skinTone": "medium",
+    "hair": { "style": "mohawk", "color": "auburn" },
+    "top": { "style": "bomber-jacket", "color": "violet" },
+    "bottom": { "style": "cargo-pants", "color": "black" },
+    "accessories": ["conference-badge", "earrings", "high-top-sneakers"],
+    "emote": "animated-talk"
+  },
+  "factoids": ["Maintains an internal developer portal used by sixty teams.", "Measures platform success by how few tickets developers need to open."],
+  "jokes": ["Our golden path is mostly YAML painted yellow.", "I built a self-service platform. It immediately asked me for support."],
+  "roaming": { "spawnAreas": ["venetian", "expo"], "walkSpeed": 6.2, "pauseSeconds": { "min": 2, "max": 7 }, "wanderRadius": 58 },
+  "interaction": {
+    "greeting": "Hey! Are you building a platform, or has a platform started building you?",
+    "dialogue": ["A good abstraction removes decisions without hiding escape hatches.", "Talk to your developers before choosing another portal plugin."],
+    "rewards": { "social": 7, "knowledge": 6, "vibes": 3 },
+    "cooldownSeconds": 90
+  }
+}

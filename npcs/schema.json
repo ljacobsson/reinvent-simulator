@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "re:Invent Sim NPC config",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "name", "title", "photoUrl", "links", "appearance", "factoids", "jokes", "roaming", "interaction"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+    "name": { "type": "string", "minLength": 1 },
+    "title": { "type": "string", "minLength": 1 },
+    "tagline": { "type": "string" },
+    "photoUrl": { "type": "string", "format": "uri" },
+    "links": { "type": "object", "additionalProperties": { "type": "string", "format": "uri" } },
+    "appearance": {
+      "type": "object", "additionalProperties": false,
+      "required": ["gender", "skinTone", "hair", "top", "bottom", "accessories", "emote"],
+      "properties": {
+        "gender": { "type": "string", "enum": ["female", "male", "neutral"] },
+        "skinTone": { "type": "string" },
+        "hair": {
+          "allOf": [{ "$ref": "#/$defs/styleColor" }],
+          "description": "Supported styles: bald, buzz-cut, short, curly-short, side-part, braided-bun, long-straight, long-wavy, ponytail, bob, mohawk."
+        },
+        "top": { "$ref": "#/$defs/styleColor" },
+        "bottom": { "$ref": "#/$defs/styleColor" },
+        "accessories": { "type": "array", "items": { "type": "string" } },
+        "emote": { "type": "string" }
+      }
+    },
+    "factoids": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+    "jokes": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+    "roaming": {
+      "type": "object", "additionalProperties": false,
+      "required": ["spawnAreas", "walkSpeed", "pauseSeconds", "wanderRadius"],
+      "properties": {
+        "spawnAreas": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+        "walkSpeed": { "type": "number", "exclusiveMinimum": 0 },
+        "pauseSeconds": {
+          "type": "object", "additionalProperties": false, "required": ["min", "max"],
+          "properties": { "min": { "type": "number", "minimum": 0 }, "max": { "type": "number", "minimum": 0 } }
+        },
+        "wanderRadius": { "type": "number", "exclusiveMinimum": 0 }
+      }
+    },
+    "interaction": {
+      "type": "object", "additionalProperties": false,
+      "required": ["greeting", "dialogue", "rewards", "cooldownSeconds"],
+      "properties": {
+        "greeting": { "type": "string" },
+        "dialogue": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+        "rewards": {
+          "type": "object", "additionalProperties": false,
+          "properties": { "social": { "type": "number" }, "knowledge": { "type": "number" }, "vibes": { "type": "number" } }
+        },
+        "cooldownSeconds": { "type": "number", "minimum": 0 }
+      }
+    }
+  },
+  "$defs": {
+    "styleColor": {
+      "type": "object", "additionalProperties": false, "required": ["style", "color"],
+      "properties": { "style": { "type": "string" }, "color": { "type": "string" } }
+    }
+  }
+}

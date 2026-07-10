@@ -1,0 +1,42 @@
+{
+  "id": "riley-leastprivilege",
+  "name": "Riley Leastprivilege",
+  "title": "Security Community Mentor",
+  "tagline": "Makes least privilege feel practical, not punitive.",
+  "photoUrl": "https://images.example.com/npcs/riley-leastprivilege.jpg",
+  "links": {
+    "linkedin": "https://www.linkedin.com/in/example-riley-leastprivilege",
+    "blog": "https://example.com/riley-leastprivilege",
+    "youtube": "https://www.youtube.com/@exampleriley",
+    "website": "https://example.com"
+  },
+  "appearance": {
+    "gender": "male",
+    "skinTone": "light",
+    "hair": { "style": "side-part", "color": "auburn" },
+    "top": { "style": "overshirt", "color": "violet" },
+    "bottom": { "style": "jeans", "color": "black" },
+    "accessories": ["conference-badge", "smartwatch", "sneakers"],
+    "emote": "thoughtful-nod"
+  },
+  "factoids": [
+    "Hosts beginner-friendly threat-modeling workshops.",
+    "Always asks which identity should be allowed before discussing permissions."
+  ],
+  "jokes": [
+    "My IAM policy and I are taking space. It is a very small action list.",
+    "Trust is earned; permissions are explicitly granted."
+  ],
+  "roaming": {
+    "spawnAreas": ["caesars", "bellagio", "venetian"],
+    "walkSpeed": 5,
+    "pauseSeconds": { "min": 5, "max": 12 },
+    "wanderRadius": 50
+  },
+  "interaction": {
+    "greeting": "Hi! Have you granted yourself a water break today?",
+    "dialogue": ["Start with the smallest permission that solves the problem, then learn from the logs."],
+    "rewards": { "social": 5, "knowledge": 8, "vibes": 2 },
+    "cooldownSeconds": 90
+  }
+}
