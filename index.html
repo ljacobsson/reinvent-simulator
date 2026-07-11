@@ -59,13 +59,15 @@
     font-family:var(--mono);font-size:12.5px;letter-spacing:1px;padding:6px 16px;
     box-shadow:0 6px 20px rgba(0,0,0,.6);opacity:0;transition:opacity .4s;pointer-events:none;text-align:center;max-width:86vw}
 
-  #toasts{position:fixed;left:10px;bottom:12px;display:flex;flex-direction:column;gap:5px;max-width:78vw;z-index:10}
+  #toasts{position:fixed;left:50%;top:55%;display:flex;flex-direction:column;align-items:center;gap:5px;max-width:min(520px,78vw);z-index:30;transform:translate(-50%,0);pointer-events:none}
   .toast{background:rgba(16,9,30,.92);border-left:3px solid var(--amber);border-radius:6px;
     padding:6px 11px;font-size:12.5px;color:#e8e2fa;opacity:0;transform:translateX(-14px);
     animation:tin .3s ease forwards;max-width:340px}
   .toast.good{border-left-color:var(--green)}.toast.bad{border-left-color:#ff3b5c}.toast.info{border-left-color:var(--cyan)}
   @keyframes tin{to{opacity:1;transform:none}}
   .toast.out{transition:opacity .5s;opacity:0!important}
+  .showgirlBubble{position:fixed;z-index:29;display:none;max-width:210px;padding:8px 11px;border-radius:14px;background:#fff;color:#25152b;border:2px solid #ff5ce1;font:12px/1.3 var(--mono);text-align:center;transform:translate(-50%,-115%);box-shadow:0 5px 18px #0008;pointer-events:none}
+  .showgirlBubble:after{content:"";position:absolute;left:50%;bottom:-9px;transform:translateX(-50%);border-width:9px 8px 0;border-style:solid;border-color:#ff5ce1 transparent transparent}
 
   #minimap{position:fixed;left:12px;bottom:12px;z-index:10;border:2px solid rgba(230,235,255,.85);border-radius:50%;background:radial-gradient(circle at 50% 50%,#202534 0,#141827 62%,#080a12 100%);opacity:.96;box-shadow:0 0 0 3px rgba(0,0,0,.55),0 6px 24px rgba(0,0,0,.65)}
 
@@ -134,10 +136,46 @@
     padding:8px 12px;background:rgba(12,22,38,.88);color:var(--cyan);font-family:var(--mono);font-size:11px;cursor:pointer;
     box-shadow:0 0 16px rgba(37,224,255,.22)}
   #spawnNpcBtn:hover{background:rgba(37,224,255,.18);color:#fff}
+  #designNpcBtn{position:fixed;right:16px;top:118px;z-index:20;border:1px solid var(--violet);border-radius:999px;padding:8px 12px;background:rgba(20,14,40,.9);color:#c9c0ff;font:11px var(--mono);cursor:pointer}
+  #npcDesigner{position:fixed;inset:0;z-index:90;display:none;align-items:center;justify-content:center;background:rgba(4,3,12,.84);backdrop-filter:blur(7px)}
+  #npcDesigner .designerCard{width:min(920px,94vw);max-height:90vh;overflow:auto;background:#100b20;border:1px solid #554681;border-radius:18px;padding:20px;box-shadow:0 24px 80px #000}
+  .designerGrid{display:grid;grid-template-columns:repeat(3,minmax(150px,1fr));gap:12px}.designerGrid label{display:flex;flex-direction:column;gap:5px;color:#aaa0c7;font:11px var(--mono)}
+  .designerGrid input,.designerGrid select,.designerGrid textarea{background:#090713;border:1px solid #3b3158;border-radius:7px;color:#fff;padding:8px;font:12px var(--mono)}
+  .designerGrid textarea{min-height:64px;resize:vertical}.designerWide{grid-column:span 3}.designerActions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}.designerActions button{border:1px solid var(--cyan);background:#142033;color:#fff;border-radius:999px;padding:9px 14px;cursor:pointer;font:11px var(--mono)}
+  #designerStatus{margin-top:10px;color:var(--dim);font:11px var(--mono);white-space:pre-wrap}@media(max-width:700px){.designerGrid{grid-template-columns:1fr}.designerWide{grid-column:span 1}}
+  #arrestScene{position:fixed;inset:0;z-index:120;display:none;overflow:hidden;background:#050711;color:#fff;font-family:var(--mono)}
+  #arrestScene .sky{position:absolute;inset:0;background:linear-gradient(#111b35 0 48%,#16131d 48%)}
+  #arrestScene .roadlines{position:absolute;left:-20%;right:-20%;top:62%;height:8px;background:repeating-linear-gradient(90deg,#ffd45a 0 70px,transparent 70px 130px);animation:arrestRoad .45s linear infinite}
+  #arrestScene .car{position:absolute;left:50%;top:50%;width:430px;height:170px;transform:translate(-50%,-50%);border-radius:72px 92px 24px 20px;background:linear-gradient(#f1f4f7 0 47%,#182742 48% 78%,#0a101c 79%);border:5px solid #070a10;box-shadow:0 18px 0 #05060a,0 28px 30px #000b;transition:.7s}
+  #arrestScene .car:before{content:"POLICE  ·  LAS VEGAS";position:absolute;left:128px;top:99px;color:#fff;font:bold 17px Arial;letter-spacing:2px}.car:after{content:"";position:absolute;left:-12px;right:-12px;bottom:18px;height:12px;border-radius:8px;background:linear-gradient(#aeb7c2,#343b46);border:3px solid #090b0f}
+  #arrestScene .window{position:absolute;left:78px;top:17px;width:250px;height:72px;border-radius:42px 50px 8px 8px;background:linear-gradient(135deg,#9fc2df,#385473);border:6px solid #080b12;overflow:hidden}
+  #arrestScene .window:after{content:"";position:absolute;left:47%;top:0;bottom:0;width:7px;background:#080b12}
+  #arrestScene .prisoner{position:absolute;left:145px;top:18px;width:43px;height:43px;border-radius:48% 48% 44% 44%;background:#e2b08a;border:2px solid #6b4635}
+  #arrestScene .prisoner:before{content:"";position:absolute;left:-8px;top:38px;width:58px;height:70px;border-radius:18px 18px 8px 8px;background:#ff9900;border:3px solid #6d4100}.prisoner:after{content:"•  •\A  —";white-space:pre;position:absolute;left:8px;top:7px;color:#24202a;font:bold 14px/13px Arial;text-align:center}
+  #arrestScene .officer{position:absolute;left:39px;top:18px;width:40px;height:40px;border-radius:50%;background:#c89168;box-shadow:0 38px 0 10px #17233b}
+  #arrestScene .bars{position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 28px,#111 28px 34px)}
+  #arrestScene .lightbar{position:absolute;left:174px;top:-27px;width:96px;height:24px;border:3px solid #080b12;border-radius:5px;background:linear-gradient(90deg,#ff334f 0 48%,#eee 48% 52%,#398cff 52%);animation:policeFlash .35s steps(1) infinite}
+  #arrestScene .headlight{position:absolute;right:-2px;top:78px;width:28px;height:25px;border-radius:5px 15px 15px 5px;background:#fff5bd;box-shadow:8px 0 28px #fff5bd}.taillight{position:absolute;left:-3px;top:80px;width:20px;height:28px;background:#ff3048;box-shadow:-5px 0 22px #ff3048}
+  #arrestScene .wheel{position:absolute;top:124px;width:72px;height:72px;border-radius:50%;background:radial-gradient(circle,#aeb7c2 0 18%,#313844 19% 42%,#08090d 43% 100%);border:6px solid #050608;z-index:2}.wheel.a{left:50px}.wheel.b{right:50px}
+  #arrestScene .cell{display:none;position:absolute;inset:4% 7%;background:radial-gradient(ellipse at 50% 8%,#69717a 0,#353a42 34%,#171a20 82%);border:18px solid #292d34;box-shadow:inset 0 0 150px #000,0 0 0 5px #111}
+  #arrestScene .cell:before{content:"";position:absolute;left:0;right:0;bottom:0;height:31%;background:repeating-linear-gradient(90deg,#555b62 0 90px,#4b5158 90px 94px);transform:perspective(400px) rotateX(52deg);transform-origin:bottom}
+  #arrestScene .cell:after{content:"";position:absolute;inset:-5px;background:repeating-linear-gradient(90deg,transparent 0 68px,#9ba0a7 68px 79px);z-index:5;box-shadow:inset 0 0 30px #0008}
+  #arrestScene .cell .prisoner{display:none}
+  #arrestScene .cell .limb{position:absolute;display:block;z-index:4;background:#ff9900;border:2px solid #6d4100;transform-origin:top}.cell .arm{top:48px;width:15px;height:61px;border-radius:8px}.cell .arm.l{left:-17px;transform:rotate(12deg)}.cell .arm.r{right:-17px;transform:rotate(-12deg)}.cell .arm:after{content:"";position:absolute;left:-2px;bottom:-9px;width:17px;height:17px;border-radius:50%;background:#e2b08a;border:2px solid #6b4635}.cell .leg{top:102px;width:22px;height:69px;border-radius:6px;background:#24304a;border-color:#101726}.cell .leg.l{left:-3px;transform:rotate(4deg)}.cell .leg.r{right:-3px;transform:rotate(-4deg)}.cell .leg:after{content:"";position:absolute;left:-3px;bottom:-10px;width:30px;height:16px;border-radius:8px;background:#111827}
+  #arrestScene .bunk{position:absolute;left:6%;bottom:18%;width:34%;height:17%;background:#76808b;border:8px solid #252930;box-shadow:0 13px 0 #191c21}.bunk:after{content:"";position:absolute;inset:8px;background:#9aa2a9;border-radius:5px}
+  #arrestScene .toilet{position:absolute;right:7%;bottom:16%;width:70px;height:82px;border-radius:35px 35px 20px 20px;background:linear-gradient(#d2d7da,#707880);border:5px solid #30353a}.toilet:before{content:"";position:absolute;left:-5px;top:-22px;width:70px;height:28px;border-radius:50%;background:#aeb5ba;border:5px solid #30353a}
+  #arrestScene .cellLight{position:absolute;left:50%;top:2%;width:180px;height:16px;transform:translateX(-50%);background:#e9f5ff;box-shadow:0 0 55px #d9eeff}
+  #arrestScene .cellDoor{position:absolute;right:3%;top:9%;width:21%;height:70%;border:13px solid #171a1f;background:repeating-linear-gradient(90deg,transparent 0 29px,#777e87 29px 38px);box-shadow:inset 0 0 35px #000,0 0 20px #0008}.cellDoor:after{content:"HOLDING  04";position:absolute;top:-35px;left:0;color:#c7ccd2;font:bold 13px var(--mono);letter-spacing:2px}
+  #arrestScene .sink{position:absolute;right:29%;bottom:30%;width:78px;height:28px;border-radius:8px 8px 24px 24px;background:linear-gradient(#e0e4e7,#737b82);border:5px solid #292e33}.sink:after{content:"";position:absolute;left:33px;top:-24px;width:12px;height:25px;border:5px solid #737b82;border-bottom:0;border-radius:9px 9px 0 0}
+  #arrestScene .wallMarks{position:absolute;left:44%;top:18%;color:#171a20;font:18px/26px monospace;opacity:.55;transform:rotate(-3deg)}
+  #cellFrontBars{position:fixed;inset:4% 7%;z-index:128;display:none;pointer-events:none;background:repeating-linear-gradient(90deg,transparent 0 68px,#9299a2 68px 79px);box-shadow:inset 0 0 45px #0009;border:18px solid transparent}
+  #arrestScene .caption{position:absolute;left:50%;bottom:8%;transform:translateX(-50%);z-index:8;font-size:clamp(16px,2.5vw,27px);letter-spacing:2px;text-align:center;text-shadow:0 2px 8px #000}
+  #arrestScene.cellStage .car,#arrestScene.cellStage .roadlines{display:none}#arrestScene.cellStage .cell{display:block}#arrestScene.releaseStage{background:#748ba6}#arrestScene.releaseStage .car{left:115%;transform:translate(-50%,-50%) rotate(-2deg)}
+  @keyframes arrestRoad{to{transform:translateX(-130px)}}@keyframes policeFlash{50%{filter:hue-rotate(180deg);box-shadow:0 0 30px #fff}}@keyframes cellIdle{50%{transform:translate(-50%,-52%) rotate(1deg)}}
   @media (pointer:coarse){
     #joy,#actBtn,#camBtn{display:block}
     #vitals{bottom:182px;width:150px;left:178px}
-    #toasts{bottom:290px;left:auto;right:106px;align-items:flex-end;max-width:52vw}
+    #toasts{max-width:72vw}
     #minimap{bottom:12px;top:auto;left:12px}
   }
 
@@ -187,6 +225,30 @@
 <button id="actBtn">ENTER</button>
 <button id="camBtn">↺</button>
 <button id="spawnNpcBtn">+ SPAWN NPC</button>
+<button id="designNpcBtn">✎ DESIGN NPC</button>
+
+<div id="npcDesigner">
+ <div class="designerCard">
+  <h2 style="margin:0 0 5px">Design an NPC</h2><p style="margin:0 0 16px;color:var(--dim);font:12px var(--mono)">Creates a validated config and opens GitHub’s contribution editor for a PR to <b>ljacobsson/reinvent-simulator</b>.</p>
+  <div class="designerGrid">
+   <label>Name<input id="ndName" value="Taylor Cloudsmith"></label><label>Title<input id="ndTitle" value="Cloud Community Builder"></label><label>ID<input id="ndId" value="taylor-cloudsmith"></label>
+   <label>Gender<select id="ndGender"><option>neutral</option><option>female</option><option>male</option></select></label>
+   <label>Skin tone<select id="ndSkin"><option>medium</option><option>light</option><option>deep</option></select></label>
+   <label>Hair style<select id="ndHair"><option>short</option><option>curly-short</option><option>side-part</option><option>braided-bun</option><option>long-straight</option><option>long-wavy</option><option>ponytail</option><option>bob</option><option>mohawk</option><option>buzz-cut</option><option>bald</option></select></label>
+   <label>Hair color<select id="ndHairColor"><option>dark-brown</option><option>black</option><option>auburn</option></select></label><label>Top color<select id="ndTop"><option>aws-orange</option><option>cyan</option><option>violet</option></select></label><label>Bottom color<select id="ndBottom"><option>indigo</option><option>charcoal</option><option>black</option></select></label>
+   <label>Emote<select id="ndEmote"><option>friendly-wave</option><option>animated-talk</option><option>thoughtful-nod</option></select></label><label>Walk speed<input id="ndSpeed" type="number" value="5.5" min="1" max="10" step=".5"></label><label>Wander radius<input id="ndRadius" type="number" value="55" min="10" max="100"></label>
+   <label class="designerWide">Tagline<input id="ndTagline" value="Always has time for a hallway-track conversation."></label>
+   <label class="designerWide">Greeting<input id="ndGreeting" value="Hi! What are you building this week?"></label>
+   <label class="designerWide">Dialogue (one per line)<textarea id="ndDialogue">The best architecture starts with a clear problem.
+Remember to leave time for the hallway track.</textarea></label>
+   <label class="designerWide">Factoids (one per line)<textarea id="ndFacts">Runs a local cloud meetup.
+Never travels without a spare charging cable.</textarea></label>
+   <label class="designerWide">Jokes (one per line)<textarea id="ndJokes">My architecture diagram is eventually consistent.</textarea></label>
+  </div>
+  <div class="designerActions"><button id="ndPreview">SPAWN PREVIEW</button><button id="ndDownload">DOWNLOAD JSON</button><button id="ndGithub">CONTRIBUTE VIA GITHUB ↗</button><button id="ndClose">CLOSE</button></div><div id="designerStatus"></div>
+ </div>
+</div>
+<div id="arrestScene"><div class="sky"></div><div class="roadlines"></div><div class="car"><div class="lightbar"></div><div class="headlight"></div><div class="taillight"></div><div class="window"><div class="officer"></div><div class="prisoner"></div><div class="bars"></div></div><div class="wheel a"></div><div class="wheel b"></div></div><div class="cell"><div class="cellLight"></div><div class="bunk"></div><div class="toilet"></div><div class="sink"></div><div class="cellDoor"></div><div class="wallMarks">||||  |||<br>DON'T TOUCH<br>THE FOUNTAINS</div></div><div class="caption" id="arrestCaption"></div></div><div id="cellFrontBars"></div>
 
 <div id="timeTravel">
   <span class="label">TIME TEST</span>
@@ -299,7 +361,7 @@ var started=false,ended=false,paused=true,worldReady=false;
 /* type: venue=enterable conference hotel, photo=landmark, hotel=your motel, replay=festival */
 var PLACES=[
  {id:"sign",  name:"Welcome to Fabulous Las Vegas", lat:36.08211, lng:-115.17351, w:16,d:8, h:14,  color:0x101a2e, sign:0xffe14d, type:"photo", shape:"sign"},
- {id:"mandalay",name:"Mandalay Bay",                lat:36.09117, lng:-115.17497, w:180,d:120,h:150, color:0xc9a03a, sign:0xffbe3d, type:"venue", tracks:["DOP","STG","SUP"], shape:"gold"},
+ {id:"mandalay",name:"Mandalay Bay",                lat:36.09117, lng:-115.17497, w:180,d:120,h:150, color:0xc9a03a, sign:0xffbe3d, type:"photo", shape:"gold"},
  {id:"luxor", name:"Luxor",                         lat:36.09554, lng:-115.17612, w:150,d:150,h:110, color:0x1b1622, sign:0xe8d9a0, type:"photo", shape:"pyramid"},
  {id:"excalibur",name:"Excalibur",                  lat:36.09872, lng:-115.17500, w:150,d:120,h:70,  color:0xf0ead8, sign:0xff5c5c, type:"photo", shape:"castle"},
  {id:"nyny",  name:"New York-New York",             lat:36.10244, lng:-115.17452, w:150,d:120,h:120, color:0x7a8a9a, sign:0xffbe3d, type:"photo", shape:"nyny"},
@@ -311,12 +373,13 @@ var PLACES=[
  {id:"paris", name:"Paris Las Vegas",               lat:36.11245, lng:-115.17030, w:130,d:110,h:90,  color:0xc8b8e0, sign:0xffd27a, type:"photo", shape:"eiffel"},
  {id:"planet",name:"Planet Hollywood",              lat:36.10990, lng:-115.17150, w:120,d:90, h:110, color:0x3a2a5a, sign:0x25e0ff, type:"photo", shape:"box"},
  {id:"caesars",name:"Caesars Forum",                lat:36.11895, lng:-115.16670, w:190,d:140,h:60,  color:0xf2ecdc, sign:0x25e0ff, type:"venue", tracks:["ARC","SEC","SAA"], shape:"forum"},
- {id:"caesarsp",name:"Caesars Palace",              lat:36.11620, lng:-115.17480, w:170,d:130,h:90,  color:0xf2ecdc, sign:0xffe14d, type:"photo", shape:"forum"},
+ {id:"caesarsp",name:"Caesars Palace",              lat:36.11620, lng:-115.17480, w:220,d:160,h:120, color:0xf2ecdc, sign:0xffd54d, type:"venue", tracks:["NET","GAM","SUP"], shape:"palace"},
  {id:"linq",  name:"The High Roller",               lat:36.11750, lng:-115.16830, w:20, d:20, h:170, color:0x2a2440, sign:0xc85cff, type:"photo", shape:"wheel"},
- {id:"mirage",name:"The Mirage",                    lat:36.12140, lng:-115.17420, w:160,d:120,h:100, color:0x3a2f2a, sign:0xffbe3d, type:"photo", shape:"box"},
+ {id:"hardrock",name:"Hard Rock Las Vegas",         lat:36.12140, lng:-115.17420, w:160,d:120,h:210, color:0x273447, sign:0x35e9ff, type:"photo", shape:"guitar",descText:"Future Hard Rock Hotel & Casino and Guitar Hotel Las Vegas, rising on the former Mirage site for its planned 2027 debut."},
  {id:"venetian",name:"The Venetian",                lat:36.12130, lng:-115.16990, w:210,d:160,h:140, color:0xf2e6cc, sign:0xff2d95, type:"venue", main:true, tracks:["DAT","AIM","ANT"], shape:"venetian"},
  {id:"sphere",name:"The Sphere",                    lat:36.12110, lng:-115.16200, w:120,d:120,h:110, color:0x1a1030, sign:0xff9a4d, type:"photo", shape:"sphere"},
- {id:"wynn",  name:"Wynn · Encore",                 lat:36.12680, lng:-115.16550, w:180,d:140,h:150, color:0x8a6a48, sign:0xc9a227, type:"venue", tracks:["SVS","API","BIZ"], shape:"wynn"},
+ {id:"wynn",  name:"Wynn",                          lat:36.12680, lng:-115.16550, w:180,d:140,h:150, color:0x8a6a48, sign:0xc9a227, type:"venue", tracks:["SVS","API","BIZ"], shape:"wynn"},
+ {id:"encore",name:"Encore",                        lat:36.12910, lng:-115.16520, w:160,d:125,h:155, color:0x9a7954, sign:0xffc857, type:"venue", tracks:["DOP","STG","AIM"], shape:"wynn"},
  {id:"hotel", name:"Budget-tel",                    lat:36.11500, lng:-115.15600, w:70, d:50, h:24,  color:0xb89a86, sign:0xff5ce1, type:"hotel", shape:"motel"},
  {id:"replay",name:"re:Play Festival Grounds",      lat:36.13300, lng:-115.16150, w:220,d:160,h:8,   color:0x241c3a, sign:0xff5ce1, type:"replay", shape:"replay"}
 ];
@@ -910,11 +973,12 @@ function checkVitals(){
 /* ================= 3D WORLD (Three.js) ================= */
 var THREEJS, renderer, overlayRenderer, scene, overlayScene, cssRenderer, cssScene, cam, clock;
 var player3d, playerGroup, legL, legR, armL, armR, torso, pack;
-var buildings=[], doorPoints=[], exteriorHotelAreas=[], palms=[], cars=[], helicopters=[], starField, moon;
+var buildings=[], doorPoints=[], exteriorHotelAreas=[], palms=[], cars=[], helicopters=[], showgirls=[], cowboys=[], starField, moon;
 var npcs=[],npcConfigs=[],nextNpcConfig=0;
 var hotelDayMaterials=[];
 var bellagioFountainRoot=null, bellagioFountainJets=[];
 var bellagioFountainWorldCenter=null, bellagioTrespassActive=false, bellagioTrespassDone=false, bellagioPolice=[], bellagioArrestTimer=0;
+var policeStationRoot=null,policeStationRelease=null,arrestSequenceActive=false,arrestSequenceStage='';
 var sphereRoot=null, sphereMesh=null, sphereBase=null, sphereCanvas=null, sphereCtx=null, sphereTexture=null;
 var parisEiffelRoot=null;
 var highRollerRoot=null, highRollerCabins=[], highRollerRideTriggerWorld=null, ridingHighRoller=false, highRollerRideCabinIndex=0, highRollerRideSavedPos=null, highRollerWheelSpeed=0.10;
@@ -924,7 +988,7 @@ var osmRoot=null, osmLoaded=false, osmBuildingCount=0;
 var heading=0, camYaw=0, camPitch=0.32, moved=0;
 var keys={}, joy={active:false,x:0,y:0,id:null}, camDragBase=null;
 var SCALE=0.48, WORLD={cx:0,cz:0};
-var BUILDING_FOOTPRINT_SCALE=0.74, BUILDING_HEIGHT_SCALE=0.36;
+var BUILDING_FOOTPRINT_SCALE=0.80, BUILDING_HEIGHT_SCALE=0.36;
 var nearPlace=null, SPAWN={x:0,z:0};
 var interiorMode=false, interiorRoot=null, interiorPlace=null, interiorDoors=[], interiorColliders=[];
 var lectureMode=false, lectureRoot=null, lectureExit=null, lectureCtx=null, lectureIframe=null, lectureCssObject=null;
@@ -960,6 +1024,40 @@ async function loadNpcConfigs(){
   }));
   if(npcConfigs.length)$("spawnNpcBtn").textContent='+ SPAWN NPC · '+npcConfigs.length+' LOOKS';
 }
+
+function npcDesignerConfig(){
+  function val(id){return $(id).value.trim();}
+  function lines(id){return val(id).split(/\n+/).map(function(s){return s.trim();}).filter(Boolean);}
+  var id=val('ndId').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');$('ndId').value=id;
+  var cfg={
+    id:id,name:val('ndName'),title:val('ndTitle'),tagline:val('ndTagline'),photoUrl:'https://images.example.com/npcs/'+id+'.jpg',
+    links:{website:'https://example.com/'+id},
+    appearance:{gender:val('ndGender'),skinTone:val('ndSkin'),hair:{style:val('ndHair'),color:val('ndHairColor')},top:{style:'conference-top',color:val('ndTop')},bottom:{style:'conference-pants',color:val('ndBottom')},accessories:['conference-badge'],emote:val('ndEmote')},
+    factoids:lines('ndFacts'),jokes:lines('ndJokes'),
+    roaming:{spawnAreas:['venetian','expo'],walkSpeed:Number(val('ndSpeed')),pauseSeconds:{min:3,max:9},wanderRadius:Number(val('ndRadius'))},
+    interaction:{greeting:val('ndGreeting'),dialogue:lines('ndDialogue'),rewards:{social:6,knowledge:6,vibes:3},cooldownSeconds:90}
+  };
+  var errors=[];
+  if(!cfg.id)errors.push('ID is required.');if(!cfg.name)errors.push('Name is required.');if(!cfg.title)errors.push('Title is required.');
+  if(!cfg.interaction.greeting)errors.push('Greeting is required.');if(!cfg.interaction.dialogue.length)errors.push('Add at least one dialogue line.');if(!cfg.factoids.length)errors.push('Add at least one factoid.');if(!cfg.jokes.length)errors.push('Add at least one joke.');
+  if(errors.length)throw new Error(errors.join('\n'));
+  return cfg;
+}
+function npcDesignerJson(){return JSON.stringify(npcDesignerConfig(),null,2)+'\n';}
+function npcDesignerStatus(message,bad){$('designerStatus').style.color=bad?'#ff8fae':'#8fffc2';$('designerStatus').textContent=message;}
+$('designNpcBtn').onclick=function(){paused=true;$('npcDesigner').style.display='flex';npcDesignerStatus('Ready. Preview locally or contribute the generated JSON through GitHub.',false);};
+$('ndClose').onclick=function(){$('npcDesigner').style.display='none';paused=false;};
+$('ndPreview').onclick=function(){try{var cfg=npcDesignerConfig();npcConfigs.push(cfg);nextNpcConfig=npcConfigs.length-1;$('npcDesigner').style.display='none';paused=false;spawnNpcNearPlayer();npcDesignerStatus('',false);}catch(e){npcDesignerStatus(e.message,true);}};
+$('ndDownload').onclick=function(){try{var cfg=npcDesignerConfig(),blob=new Blob([JSON.stringify(cfg,null,2)+'\n'],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=cfg.id+'.json';a.click();setTimeout(function(){URL.revokeObjectURL(a.href);},1000);npcDesignerStatus('Downloaded '+cfg.id+'.json',false);}catch(e){npcDesignerStatus(e.message,true);}};
+$('ndGithub').onclick=function(){
+  try{
+    var cfg=npcDesignerConfig(),content=JSON.stringify(cfg,null,2)+'\n';
+    navigator.clipboard&&navigator.clipboard.writeText(content).catch(function(){});
+    var url='https://github.com/ljacobsson/reinvent-simulator/new/main/npcs?filename='+encodeURIComponent(cfg.id+'.json')+'&value='+encodeURIComponent(content)+'&message='+encodeURIComponent('Add NPC '+cfg.name);
+    window.open(url,'_blank','noopener');
+    npcDesignerStatus('Opened GitHub with the NPC file prefilled. Commit to a new branch, add "'+cfg.id+'.json" to npcs/index.json, then choose “Create pull request”. The JSON is also copied to your clipboard.',false);
+  }catch(e){npcDesignerStatus(e.message,true);}
+};
 
 /* ---- textures ---- */
 function windowTexture(baseHex,litHex,cols,rows){
@@ -1331,6 +1429,40 @@ function buildBellagioFountains(){
   bellagioFountainWorldCenter=root.localToWorld(new THREEJS.Vector3(0,0,0));
 }
 
+function buildPoliceStation(){
+  // A compact LVMPD-style station south of Mandalay Bay.
+  var q=project(36.08765,-115.16875),root=new THREEJS.Group();root.position.set(q.x,0,q.z);
+  var concrete=new THREEJS.MeshStandardMaterial({color:0xaab0b7,roughness:.68,metalness:.12});
+  var dark=new THREEJS.MeshStandardMaterial({color:0x25324a,roughness:.34,metalness:.42});
+  var glass=new THREEJS.MeshStandardMaterial({color:0x31577b,roughness:.14,metalness:.3,emissive:new THREEJS.Color(0x142a45),emissiveIntensity:.35});
+  var main=new THREEJS.Mesh(new THREEJS.BoxGeometry(48,15,30),concrete);main.position.y=7.5;root.add(main);
+  var upper=new THREEJS.Mesh(new THREEJS.BoxGeometry(31,8,24),dark);upper.position.set(-5,19,0);root.add(upper);
+  for(var w=-16;w<=16;w+=8){var win=new THREEJS.Mesh(new THREEJS.BoxGeometry(4.8,3.2,.35),glass);win.position.set(w,10,15.2);root.add(win);}
+  var doors=new THREEJS.Mesh(new THREEJS.BoxGeometry(9,6,.5),glass);doors.position.set(0,3.2,15.3);root.add(doors);
+  var canopy=new THREEJS.Mesh(new THREEJS.BoxGeometry(18,.8,7),dark);canopy.position.set(0,7,17.5);root.add(canopy);
+  var sign=signSprite('LAS VEGAS POLICE',0x59c2ff,{fontSize:42,width:36,height:5,glow:10,depthTest:true,renderOrder:4});sign.position.set(0,18,16);sign.userData.billboard=true;root.add(sign);
+  var badge=new THREEJS.Mesh(new THREEJS.CylinderGeometry(2.4,2.4,.35,6),new THREEJS.MeshStandardMaterial({color:0xd9b84a,metalness:.85,roughness:.25}));badge.rotation.x=Math.PI/2;badge.position.set(18,18,15.5);root.add(badge);
+  // Two parked patrol cars make the building readable from the road.
+  for(var c=-1;c<=1;c+=2){var car=new THREEJS.Group(),body=new THREEJS.Mesh(new THREEJS.BoxGeometry(8,2.2,4),dark);body.position.y=1.4;car.add(body);var cab=new THREEJS.Mesh(new THREEJS.BoxGeometry(4.5,1.8,3.5),glass);cab.position.set(0,3,0);car.add(cab);var bar=new THREEJS.Mesh(new THREEJS.BoxGeometry(2.8,.35,.5),new THREEJS.MeshBasicMaterial({color:c<0?0xff334f:0x398cff}));bar.position.set(0,4,0);car.add(bar);car.position.set(c*14,0,27);root.add(car);}
+  root.userData.aabb={cx:q.x,cz:q.z,hw:24,hd:15};buildings.push(root);scene.add(root);policeStationRoot=root;
+  policeStationRelease={x:q.x,z:q.z+35};
+}
+
+function finishArrestSequence(){
+  var overlay=$("arrestScene");overlay.style.display='none';overlay.className='';$("cellFrontBars").style.display='none';arrestSequenceActive=false;arrestSequenceStage='';
+  setPlayerOverlayMode(false);if(overlayRenderer)overlayRenderer.domElement.style.zIndex='9';
+  var target=policeStationRelease||project(36.08765,-115.16875),safe=null;
+  for(var radius=0;radius<=30&&!safe;radius+=5)for(var i=0;i<16;i++){var a=i/16*Math.PI*2,x=target.x+Math.cos(a)*radius,z=target.z+Math.sin(a)*radius;if(!exteriorBlocked(x,z,2.2)){safe={x:x,z:z};break;}}
+  safe=safe||target;player3d.x=safe.x;player3d.z=safe.z;playerGroup.position.set(safe.x,0,safe.z);heading=Math.PI;camYaw=Math.PI;playerGroup.rotation.y=heading;
+  paused=false;compass('Released outside the police station near Mandalay Bay. One conference day lost.');toast('Released from custody. Try staying out of the fountains.','info');updHUD();
+}
+function playArrestSequence(){
+  arrestSequenceActive=true;arrestSequenceStage='car';paused=true;var overlay=$("arrestScene"),caption=$("arrestCaption");overlay.className='';overlay.style.display='block';caption.textContent='ARRESTED · transported in the back of a patrol car';
+  setTimeout(function(){if(!arrestSequenceActive)return;arrestSequenceStage='cell';overlay.className='cellStage';caption.textContent='BOOKED · thrown into a holding cell overnight';setPlayerOverlayMode(true);playerGroup.position.set(0,0,0);playerGroup.rotation.y=0;if(overlayRenderer){overlayRenderer.domElement.style.zIndex='124';overlayRenderer.domElement.style.display='block';}$("cellFrontBars").style.display='block';},3000);
+  setTimeout(function(){if(!arrestSequenceActive)return;arrestSequenceStage='release';setPlayerOverlayMode(false);if(overlayRenderer)overlayRenderer.domElement.style.zIndex='9';$("cellFrontBars").style.display='none';overlay.className='releaseStage';caption.textContent='09:30 · released outside the police station';},6500);
+  setTimeout(function(){if(arrestSequenceActive)finishArrestSequence();},8500);
+}
+
 function makePoliceOfficer(){
   var g=new THREEJS.Group();
   var dark=new THREEJS.MeshLambertMaterial({color:0x111a33,emissive:new THREEJS.Color(0x050812),emissiveIntensity:0.15});
@@ -1382,7 +1514,10 @@ function updateBellagioTrespass(dt){
 
   var dx=player3d.x-bellagioFountainWorldCenter.x;
   var dz=player3d.z-bellagioFountainWorldCenter.z;
-  var inFountain=(Math.abs(dx)<80 && Math.abs(dz)<48);
+  // The visible lake is an ellipse (~74 x 45). Trigger only inside its deep central
+  // 55%, leaving a broad shallow/edge zone where the player receives no police response.
+  var lakeDepth=Math.sqrt((dx*dx)/(74*74)+(dz*dz)/(45*45));
+  var inFountain=lakeDepth<0.55;
 
   if(inFountain&&!bellagioTrespassActive&&!bellagioTrespassDone){
     bellagioTrespassActive=true;
@@ -1443,10 +1578,7 @@ function arrestAtBellagio(){
     st.min=9*60+30;
   }
 
-  toast("Arrested for trespassing in the Bellagio fountains.","bad");
-  setTimeout(function(){toast("You spent the night in jail and missed conference sessions.","bad");},900);
-  compass("Released from jail. One conference day lost.");
-  updHUD();
+  toast("Arrested for trespassing in the Bellagio fountains.","bad");updHUD();playArrestSequence();
 }
 
 function buildParisEiffelTower(){
@@ -1605,6 +1737,221 @@ function buildParisEiffelTower(){
 
   parisEiffelRoot=root;
   scene.add(root);
+}
+
+function buildVenetianLandmark(){
+  var p=null;for(var i=0;i<PLACES.length;i++)if(PLACES[i].id==='venetian'){p=PLACES[i];break;}if(!p)return;
+  var q=project(p.lat,p.lng),venetianX=q.x+42,venetianZ=q.z-24,root=new THREEJS.Group();root.position.set(venetianX,0,venetianZ);
+  // Local +Z is the ornate front; point it west toward Las Vegas Boulevard.
+  root.rotation.y=-Math.PI/2-.06;
+  var stone=new THREEJS.MeshStandardMaterial({color:0xe9dcc2,roughness:.62,metalness:.05}),trim=new THREEJS.MeshStandardMaterial({color:0xf8efd9,roughness:.55}),roof=new THREEJS.MeshStandardMaterial({color:0x9c4938,roughness:.72}),glass=new THREEJS.MeshStandardMaterial({color:0x315678,emissive:new THREEJS.Color(0x173451),emissiveIntensity:.42,roughness:.2});
+  function block(x,y,z,w,h,d,mat){var m=new THREEJS.Mesh(new THREEJS.BoxGeometry(w,h,d),mat);m.position.set(x,y,z);root.add(m);return m;}
+  function facade(x,z,w,h,d){
+    block(x,h/2,z,w,h,d,stone);block(x,h+.8,z,w+1.2,1.6,d+1.2,trim);block(x,h+3,z,w*.92,4,d*.9,roof);
+    for(var floor=0;floor<4;floor++)for(var col=-Math.floor(w/8)/2;col<=Math.floor(w/8)/2;col++){var win=new THREEJS.Mesh(new THREEJS.PlaneGeometry(3.2,4.3),glass);win.position.set(x+col*7,7+floor*7,z+d/2+.03);root.add(win);var arch=new THREEJS.Mesh(new THREEJS.TorusGeometry(1.6,.18,6,12,Math.PI),trim);arch.position.set(x+col*7,9.15+floor*7,z+d/2+.12);root.add(arch);}
+  }
+  // Palazzo-style wings and stepped resort towers.
+  facade(-28,-2,48,37,28);facade(25,-8,54,43,32);facade(3,24,78,29,24);
+  block(-28,42,-2,38,10,22,stone);block(-28,48,-2,34,2,20,roof);block(25,49,-8,42,12,25,stone);block(25,56,-8,38,2.5,23,roof);
+  // The two dominant hotel towers rise behind the ornate Strip frontage.
+  function hotelTower(x,z,w,d,h,label){
+    var towerMat=new THREEJS.MeshLambertMaterial({color:0xd8c6a7,map:windowTexture(0x786e65,0xffdc91,7,16),emissive:new THREEJS.Color(0xffd9a0),emissiveIntensity:.34});towerMat.emissiveMap=towerMat.map;
+    var body=block(x,h/2,z,w,h,d,towerMat);
+    // Shallow side wings and vertical pilasters break up the slab silhouette.
+    block(x-w*.43,h*.48,z+2,w*.16,h*.90,d+4,stone);block(x+w*.43,h*.48,z+2,w*.16,h*.90,d+4,stone);
+    for(var pil=-2;pil<=2;pil++){var pilar=block(x+pil*w*.18,h*.49,z+d/2+.35,.42,h*.92,.45,trim);}
+    var crown1=block(x,h+3,z,w+2,6,d+2,trim),crown2=block(x,h+7,z,w*.78,3,d*.82,roof);
+    var pediment=new THREEJS.Mesh(new THREEJS.ConeGeometry(w*.24,8,4),roof);pediment.position.set(x,h+12,z);pediment.rotation.y=Math.PI/4;root.add(pediment);
+    var towerSign=signSprite(label,0xffd27a,{fontSize:34,width:w*.72,height:4.8,glow:10,depthTest:true,renderOrder:4});towerSign.position.set(x,h-8,z+d/2+1);towerSign.userData.billboard=true;root.add(towerSign);
+  }
+  hotelTower(-24,-34,38,27,100,'VENETIAN');
+  hotelTower(28,-39,42,30,112,'PALAZZO');
+  // St Mark's campanile replica with belfry and pyramidal copper roof.
+  block(-48,35,25,10,70,10,stone);
+  for(var side=-1;side<=1;side+=2){var slit=block(-48+side*2.4,60,30.05,2.2,7,.25,glass);}
+  var belfry=block(-48,73,25,14,9,14,trim);var bell=new THREEJS.Mesh(new THREEJS.TorusGeometry(2.1,.55,8,18),new THREEJS.MeshStandardMaterial({color:0x6d5132,metalness:.7,roughness:.35}));bell.position.set(-48,73,32.2);root.add(bell);
+  var spire=new THREEJS.Mesh(new THREEJS.ConeGeometry(8,16,4),new THREEJS.MeshStandardMaterial({color:0x5f8b78,metalness:.55,roughness:.48}));spire.position.set(-48,85.5,25);spire.rotation.y=Math.PI/4;root.add(spire);
+  // Central dome and lantern.
+  var dome=new THREEJS.Mesh(new THREEJS.SphereGeometry(10,20,12,0,Math.PI*2,0,Math.PI/2),new THREEJS.MeshStandardMaterial({color:0x6d9985,metalness:.48,roughness:.42}));dome.position.set(7,33,26);root.add(dome);var lantern=block(7,43,26,4,7,4,trim);var orb=new THREEJS.Mesh(new THREEJS.SphereGeometry(1.2,10,8),new THREEJS.MeshStandardMaterial({color:0xd6b34a,metalness:.85,roughness:.25}));orb.position.set(7,48,26);root.add(orb);
+  // Grand colonnade facing the Strip.
+  for(var c=-6;c<=6;c++){var column=new THREEJS.Mesh(new THREEJS.CylinderGeometry(.7,.9,10,12),trim);column.position.set(c*5,5,38);root.add(column);}block(0,11,38,68,2,5,trim);
+  // Blue canal, stone promenade, and a small arched Rialto-inspired bridge.
+  var canal=block(0,.12,49,78,.22,13,new THREEJS.MeshBasicMaterial({color:0x1c7496,transparent:true,opacity:.9}));
+  for(var bs=-1;bs<=1;bs+=2){var bridge=new THREEJS.Mesh(new THREEJS.TorusGeometry(9,1.1,8,28,Math.PI),trim);bridge.position.set(bs*22,1.1,49);bridge.rotation.x=Math.PI/2;root.add(bridge);}
+  var sign=signSprite('THE VENETIAN',0xff2d95,{fontSize:55,width:58,height:8,glow:18,depthTest:true,renderOrder:5});sign.position.set(0,39,40);sign.userData.billboard=true;root.add(sign);
+  root.userData.placeId='venetian';root.userData.aabb={cx:venetianX,cz:venetianZ,hw:58,hd:60};buildings.push(root);scene.add(root);registerHotelVisuals(root,1.16);registerExteriorEntry(p,venetianX,venetianZ,116,120);
+}
+
+function buildCaesarsPalaceLandmark(){
+  var p=null;for(var i=0;i<PLACES.length;i++)if(PLACES[i].id==='caesarsp'){p=PLACES[i];break;}if(!p)return;
+  var q=project(p.lat,p.lng),root=new THREEJS.Group();
+  // Local +Z is the Strip-facing side.
+  root.position.set(q.x-10,0,q.z-8);
+  root.rotation.y=Math.PI/2-.05;
+  var ivory=new THREEJS.MeshStandardMaterial({color:0xf0e2c8,roughness:.66,metalness:.05});
+  var marble=new THREEJS.MeshStandardMaterial({color:0xf9f1e4,roughness:.5,metalness:.08});
+  var rose=new THREEJS.MeshStandardMaterial({color:0xc99b7d,roughness:.74,metalness:.02});
+  var gold=new THREEJS.MeshStandardMaterial({color:0xd6b14a,roughness:.28,metalness:.88});
+  var water=new THREEJS.MeshStandardMaterial({color:0x184d74,roughness:.16,metalness:.08,transparent:true,opacity:.93});
+  function block(x,y,z,w,h,d,mat){var m=new THREEJS.Mesh(new THREEJS.BoxGeometry(w,h,d),mat);m.position.set(x,y,z);root.add(m);return m;}
+  function archRow(x,z,count,spacing,y,h,mat){
+    for(var a=-(count-1)/2;a<=(count-1)/2;a++){
+      var col=new THREEJS.Mesh(new THREEJS.CylinderGeometry(1.15,1.35,h,12),mat);col.position.set(x+a*spacing,y+h/2,z);root.add(col);
+      var arch=new THREEJS.Mesh(new THREEJS.TorusGeometry(3.15,0.28,6,14,Math.PI),mat);arch.position.set(x+a*spacing,y+h+1.6,z+1.3);arch.rotation.x=Math.PI/2;root.add(arch);
+    }
+  }
+  function tower(x,z,w,d,h){
+    block(x,h/2,z,w,h,d,ivory);
+    block(x,h+2.4,z,w*1.06,2.2,d*1.06,marble);
+    block(x,h+4.6,z,w*.88,2.8,d*.88,rose);
+    var cap=new THREEJS.Mesh(new THREEJS.ConeGeometry(Math.max(w,d)*0.25,9,4),gold);cap.position.set(x,h+10.5,z);cap.rotation.y=Math.PI/4;root.add(cap);
+    var band=new THREEJS.Mesh(new THREEJS.BoxGeometry(w*1.08,1.2,d*1.08),gold);band.position.set(x,h*0.72,z);root.add(band);
+  }
+  // Broad palace body with a central rotunda and flanking wings.
+  block(0,26,-6,112,52,40,ivory);
+  block(0,57,-6,92,6,34,marble);
+  block(0,68,-6,66,16,28,rose);
+  var dome=new THREEJS.Mesh(new THREEJS.SphereGeometry(15,20,14,0,Math.PI*2,0,Math.PI/2),new THREEJS.MeshStandardMaterial({color:0xdcb78d,roughness:.42,metalness:.22}));dome.position.set(0,78,-2);root.add(dome);
+  block(-70,20,-6,36,40,32,ivory);block(70,20,-6,36,40,32,ivory);
+  block(-70,47,-6,28,6,26,rose);block(70,47,-6,28,6,26,rose);
+  tower(-86,-8,18,18,88);tower(86,-8,18,18,88);
+  tower(-56,18,20,20,96);tower(56,18,20,20,96);
+  tower(-32,-34,16,16,78);tower(32,-34,16,16,78);
+  // Strip-facing colonnade and the long ceremonial entry court.
+  block(0,6,34,124,4,10,marble);
+  archRow(0,36,13,8,0,9,marble);
+  block(0,13,46,108,1.5,12,gold);
+  block(0,1.2,60,132,1.5,16,new THREEJS.MeshStandardMaterial({color:0x29506f,roughness:.24,metalness:.08}));
+  var fountain=new THREEJS.Mesh(new THREEJS.CircleGeometry(24,32),water);fountain.rotation.x=-Math.PI/2;fountain.position.set(0,1.25,60);root.add(fountain);
+  for(var f=0;f<10;f++){
+    var fa=f/10*Math.PI*2;
+    var jet=new THREEJS.Mesh(new THREEJS.CylinderGeometry(.45,.45,8,8),new THREEJS.MeshBasicMaterial({color:0x8fd5ff,transparent:true,opacity:.72}));
+    jet.position.set(Math.cos(fa)*14,5.1,60+Math.sin(fa)*14);root.add(jet);
+    var basin=new THREEJS.Mesh(new THREEJS.SphereGeometry(1.1,8,8),gold);basin.position.set(Math.cos(fa)*17,1.6,60+Math.sin(fa)*17);root.add(basin);
+  }
+  // Classical entry walk and a pair of obelisks framing the porte-cochère.
+  block(0,0.7,76,52,1.4,10,rose);
+  for(var ob=-1;ob<=1;ob+=2){
+    var obelisk=new THREEJS.Mesh(new THREEJS.CylinderGeometry(1.4,2.4,26,5),marble);obelisk.position.set(ob*22,13,72);obelisk.rotation.y=Math.PI/5;root.add(obelisk);
+    var tip2=new THREEJS.Mesh(new THREEJS.ConeGeometry(2.1,5,5),gold);tip2.position.set(ob*22,27,72);tip2.rotation.y=Math.PI/5;root.add(tip2);
+  }
+  for(var s=-1;s<=1;s+=2){
+    var statue=new THREEJS.Mesh(new THREEJS.SphereGeometry(2.5,16,12),new THREEJS.MeshStandardMaterial({color:0xcdb08b,roughness:.38,metalness:.12}));statue.position.set(s*42,6,48);root.add(statue);
+    var plinth=new THREEJS.Mesh(new THREEJS.BoxGeometry(5,8,5),rose);plinth.position.set(s*42,4,48);root.add(plinth);
+  }
+  var sign=signSprite('CAESARS PALACE',0xffd54d,{fontSize:56,width:66,height:8,glow:18,depthTest:true,renderOrder:5});sign.position.set(0,62,44);sign.userData.billboard=true;root.add(sign);
+  root.userData.placeId='caesarsp';
+  root.userData.aabb={cx:root.position.x,cz:root.position.z,hw:86,hd:82};
+  buildings.push(root);
+  scene.add(root);
+  registerHotelVisuals(root,1.2);
+  registerExteriorEntry(p,root.position.x,root.position.z,172,164);
+}
+
+function buildWynnLandmark(){
+  var p=null;for(var i=0;i<PLACES.length;i++)if(PLACES[i].id==='wynn'){p=PLACES[i];break;}if(!p)return;
+  var q=project(p.lat,p.lng),root=new THREEJS.Group();
+  root.position.set(q.x+3,0,q.z-5);
+  root.rotation.y=Math.PI/2-.05;
+  var facadeMat=new THREEJS.MeshStandardMaterial({color:0x19182b,roughness:.24,metalness:.52,emissive:new THREEJS.Color(0x07080f),emissiveIntensity:.14});
+  var wingMat=new THREEJS.MeshStandardMaterial({color:0x222135,roughness:.28,metalness:.34,emissive:new THREEJS.Color(0x090b12),emissiveIntensity:.10});
+  var whiteMat=new THREEJS.MeshStandardMaterial({color:0xf4f1ea,roughness:.46,metalness:.06});
+  var baseMat=new THREEJS.MeshStandardMaterial({color:0x15294a,roughness:.34,metalness:.12});
+  function block(x,y,z,w,h,d,mat){var m=new THREEJS.Mesh(new THREEJS.BoxGeometry(w,h,d),mat);m.position.set(x,y,z);root.add(m);return m;}
+  // Main dark curved tower silhouette.
+  var curve=new THREEJS.Mesh(new THREEJS.CylinderGeometry(72,72,150,40,1,false,0.08,1.28),facadeMat);
+  curve.rotation.z=Math.PI/2;
+  curve.position.set(0,82,1);
+  root.add(curve);
+  // Left tower wing and a smaller right edge so the silhouette is less monolithic.
+  var wing=new THREEJS.Mesh(new THREEJS.BoxGeometry(30,124,50),wingMat);wing.position.set(-50,70,-4);
+  root.add(wing);
+  var wingCap=new THREEJS.Mesh(new THREEJS.BoxGeometry(31,4.2,52),whiteMat);wingCap.position.set(-50,132,-4);root.add(wingCap);
+  var rightWing=new THREEJS.Mesh(new THREEJS.BoxGeometry(18,116,28),wingMat);rightWing.position.set(61,66,4);root.add(rightWing);
+  var rightCap=new THREEJS.Mesh(new THREEJS.BoxGeometry(19,4,30),whiteMat);rightCap.position.set(61,124,4);root.add(rightCap);
+  // Horizontal white bands that define the facade.
+  for(var bandY=18;bandY<=128;bandY+=9.5){
+    var band=new THREEJS.Mesh(new THREEJS.BoxGeometry(148,1.18,1.2),whiteMat);
+    band.position.set(2,bandY,37.5);root.add(band);
+  }
+  // Subtle vertical corner strips.
+  block(-73,73,9,2,120,2,whiteMat);block(74,74,9,2,122,2,whiteMat);
+  // Darker podium and the low front base seen in the reference photo.
+  block(0,13,-34,144,26,28,baseMat);
+  block(0,4,36,154,7,16,whiteMat);
+  block(-14,1.8,49,128,3.2,12,new THREEJS.MeshStandardMaterial({color:0xd9dadf,roughness:.58,metalness:.04}));
+  block(-78,14,18,24,28,18,wingMat);
+  block(-78,28,22,24,8,12,whiteMat);
+  // Script logo, top-left, with the right amount of visual weight.
+  var sign=signSprite('wynn',0xffffff,{fontSize:66,width:34,height:7,glow:10,depthTest:true,renderOrder:6});sign.position.set(-30,130,33.5);sign.userData.billboard=true;root.add(sign);
+  // Tiny roof masts on the crown.
+  for(var m=0;m<4;m++){block(-18+m*13,144,19,0.8,10,0.8,whiteMat);}
+  root.userData.placeId='wynn';
+  root.userData.aabb={cx:root.position.x,cz:root.position.z,hw:82,hd:74};
+  buildings.push(root);
+  scene.add(root);
+  registerHotelVisuals(root,1.08);
+  registerExteriorEntry(p,root.position.x,root.position.z,160,146);
+}
+
+function buildEncoreLandmark(){
+  var p=null;for(var i=0;i<PLACES.length;i++)if(PLACES[i].id==='encore'){p=PLACES[i];break;}if(!p)return;
+  var q=project(p.lat,p.lng),root=new THREEJS.Group();
+  root.position.set(q.x+1,0,q.z-3);
+  root.rotation.y=Math.PI/2-.08;
+  var goldGlass=new THREEJS.MeshStandardMaterial({color:0xc39c56,roughness:.24,metalness:.88,emissive:new THREEJS.Color(0xffdf9a),emissiveIntensity:.16});
+  var darkGlass=new THREEJS.MeshStandardMaterial({color:0x243246,roughness:.18,metalness:.62,emissive:new THREEJS.Color(0x08111d),emissiveIntensity:.24});
+  var bronze=new THREEJS.MeshStandardMaterial({color:0x85663a,roughness:.42,metalness:.66});
+  var white=new THREEJS.MeshStandardMaterial({color:0xf6efe1,roughness:.5,metalness:.08});
+  function block(x,y,z,w,h,d,mat){var m=new THREEJS.Mesh(new THREEJS.BoxGeometry(w,h,d),mat);m.position.set(x,y,z);root.add(m);return m;}
+  function tower(x,z,w,d,h){
+    var body=new THREEJS.Mesh(new THREEJS.BoxGeometry(w,h,d),goldGlass);body.position.set(x,h/2,z);root.add(body);
+    var arch=new THREEJS.Mesh(new THREEJS.SphereGeometry(Math.max(w,d)*0.46,24,16,0,Math.PI,0,Math.PI/2),goldGlass);arch.position.set(x,h*0.92,z+d*0.06);arch.scale.set(1,0.96,1.1);root.add(arch);
+    var cap=new THREEJS.Mesh(new THREEJS.BoxGeometry(w*1.02,2,d*1.02),bronze);cap.position.set(x,h+1,z);root.add(cap);
+  }
+  // Encore reads as the softer, more intimate half of the resort pair.
+  tower(0,0,42,30,118);
+  tower(-28,4,28,22,88);
+  block(0,64,18,66,8,14,white);
+  block(0,78,20,46,14,10,bronze);
+  var crest=new THREEJS.Mesh(new THREEJS.ConeGeometry(5,14,5),bronze);crest.position.set(0,91,20);root.add(crest);
+  block(0,6,-26,92,14,24,darkGlass);
+  block(0,2,32,96,2.2,12,white);
+  for(var i2=-1;i2<=1;i2+=2){
+    var fin=new THREEJS.Mesh(new THREEJS.BoxGeometry(1,18,1),bronze);fin.position.set(i2*20,10,24);root.add(fin);
+  }
+  var sign=signSprite('ENCORE',0xffc857,{fontSize:54,width:28,height:7,glow:16,depthTest:true,renderOrder:5});sign.position.set(0,55,30);sign.userData.billboard=true;root.add(sign);
+  root.userData.placeId='encore';
+  root.userData.aabb={cx:root.position.x,cz:root.position.z,hw:52,hd:48};
+  buildings.push(root);
+  scene.add(root);
+  registerHotelVisuals(root,1.22);
+  registerExteriorEntry(p,root.position.x,root.position.z,104,96);
+}
+
+function buildHardRockGuitarHotel(){
+  var p=null;for(var i=0;i<PLACES.length;i++)if(PLACES[i].id==='hardrock'){p=PLACES[i];break;}if(!p)return;
+  var q=project(p.lat,p.lng),root=new THREEJS.Group();root.position.set(q.x,0,q.z);root.rotation.y=Math.PI/2-.12;
+  var glass=new THREEJS.MeshStandardMaterial({color:0x263f5e,metalness:.52,roughness:.18,emissive:new THREEJS.Color(0x071b35),emissiveIntensity:.35});
+  var edge=new THREEJS.MeshBasicMaterial({color:0x35e9ff,transparent:true,opacity:.92});
+  var steel=new THREEJS.MeshStandardMaterial({color:0xaab5c6,metalness:.88,roughness:.24});
+  function ellipsoid(x,y,z,sx,sy,sz,mat){var m=new THREEJS.Mesh(new THREEJS.SphereGeometry(1,24,16),mat);m.position.set(x,y,z);m.scale.set(sx,sy,sz);root.add(m);return m;}
+  // Twin lobes and waist form the body of the 700-foot guitar-shaped tower.
+  ellipsoid(-8,24,0,14,22,6,glass);ellipsoid(8,24,0,14,22,6,glass);ellipsoid(0,38,0,12,19,5.5,glass);
+  var neck=new THREEJS.Mesh(new THREEJS.BoxGeometry(11,45,8),glass);neck.position.set(0,67,0);root.add(neck);
+  var headstock=new THREEJS.Mesh(new THREEJS.BoxGeometry(16,15,9),glass);headstock.position.set(2.5,96,0);headstock.rotation.z=-.16;root.add(headstock);
+  // Cyan architectural outline and horizontal hotel-floor bands.
+  for(var f=8;f<=100;f+=5){var band=new THREEJS.Mesh(new THREEJS.BoxGeometry(f<48?25-Math.abs(f-27)*.22:11.6,.18,8.2),edge);band.position.set(0,f,0);root.add(band);}
+  for(var s=-1;s<=1;s++){
+    var string=new THREEJS.Mesh(new THREEJS.BoxGeometry(.16,87,.18),new THREEJS.MeshBasicMaterial({color:s===0?0xff5577:0xe7efff}));string.position.set(s*1.25,58,4.2);root.add(string);
+  }
+  var bridge=new THREEJS.Mesh(new THREEJS.BoxGeometry(9,1.2,1.1),steel);bridge.position.set(0,25,4.5);root.add(bridge);
+  var sound=ellipsoid(0,35,5.3,5.5,5.5,.5,new THREEJS.MeshBasicMaterial({color:0x080b14}));
+  var sign=signSprite('HARD ROCK',0x35e9ff,{fontSize:50,width:25,height:6,glow:16,depthTest:true,renderOrder:4});sign.position.set(0,13,7);sign.userData.billboard=true;root.add(sign);
+  var base=new THREEJS.Mesh(new THREEJS.CylinderGeometry(25,29,3,32),steel);base.position.y=1.5;root.add(base);
+  // Make it a visible landmark and an interactable photo destination.
+  root.userData.aabb={cx:q.x,cz:q.z,hw:18,hd:9};buildings.push(root);scene.add(root);
+  registerExteriorEntry(p,q.x,q.z,46,24);
 }
 
 function buildHighRoller(){
@@ -2249,13 +2596,20 @@ function buildNynyRollercoaster(){
     new THREEJS.Vector3(-28,14,18),
     new THREEJS.Vector3(-46,16,6)
   ];
-  var curve=new THREEJS.CatmullRomCurve3(pts,true,'catmullrom',0.22);
+  // Enlarge the layout and keep every section outside the central hotel tower cluster.
+  // This preserves the loops while preventing low track sections from cutting through walls.
+  pts.forEach(function(pt){
+    pt.x*=1.18;pt.z*=1.18;
+    var radial=Math.hypot(pt.x,pt.z);
+    if(radial<43){var push=43/Math.max(radial,.001);pt.x*=push;pt.z*=push;}
+  });
+  var curve=new THREEJS.CatmullRomCurve3(pts,true,'centripetal');
   nynyCoasterCurve=curve;
 
   var trackMat=new THREEJS.MeshLambertMaterial({color:0x6db8ff, emissive:new THREEJS.Color(0x17385b), emissiveIntensity:0.34});
   var accentMat=new THREEJS.MeshLambertMaterial({color:0xffd24d, emissive:new THREEJS.Color(0x6a4512), emissiveIntensity:0.24});
-  root.add(new THREEJS.Mesh(new THREEJS.TubeGeometry(curve,320,0.78,10,true),trackMat));
-  var outerRail=new THREEJS.Mesh(new THREEJS.TubeGeometry(curve,320,0.36,8,true),accentMat);
+  root.add(new THREEJS.Mesh(new THREEJS.TubeGeometry(curve,720,0.82,12,true),trackMat));
+  var outerRail=new THREEJS.Mesh(new THREEJS.TubeGeometry(curve,720,0.38,10,true),accentMat);
   outerRail.scale.set(1.07,1.07,1.07); root.add(outerRail);
 
   // supports every few points, skipping the highest inversion peaks.
@@ -2397,15 +2751,28 @@ function coasterExitWorldPoint(){
   if(nynyCoasterStationWorld)return {x:nynyCoasterStationWorld.x,z:nynyCoasterStationWorld.z};
   return null;
 }
+function safeCoasterExitPoint(origin){
+  if(!origin)return null;
+  // The boarding position is normally the best exit because the player already proved it walkable.
+  if(coasterRideSavedPos&&!exteriorBlocked(coasterRideSavedPos.x,coasterRideSavedPos.z,2.2))return {x:coasterRideSavedPos.x,z:coasterRideSavedPos.z};
+  // Search concentric rings around the station and accept only a point with body clearance.
+  for(var radius=10;radius<=42;radius+=4){
+    for(var i=0;i<24;i++){
+      var a=i/24*Math.PI*2,x=origin.x+Math.cos(a)*radius,z=origin.z+Math.sin(a)*radius;
+      if(!exteriorBlocked(x,z,2.2))return {x:x,z:z};
+    }
+  }
+  return origin;
+}
 function stopCoasterRide(){
   if(!ridingCoaster)return false;
   ridingCoaster=false;
   if(playerGroup)playerGroup.visible=true;
 
-  var p=coasterExitWorldPoint();
+  var p=safeCoasterExitPoint(coasterExitWorldPoint());
   if(p){
     player3d.x=p.x;
-    player3d.z=p.z+12;
+    player3d.z=p.z;
   }else if(coasterRideSavedPos){
     player3d.x=coasterRideSavedPos.x;
     player3d.z=coasterRideSavedPos.z;
@@ -2496,10 +2863,42 @@ function buildRoad(){
 }
 function addPalm(x,z){
   var g=new THREEJS.Group();g.position.set(x,0,z);
-  var trunk=new THREEJS.Mesh(new THREEJS.CylinderGeometry(0.5,0.8,14,6),new THREEJS.MeshLambertMaterial({color:0x6a5436}));
-  trunk.position.y=7;g.add(trunk);
-  var lv=new THREEJS.Mesh(new THREEJS.SphereGeometry(3.5,7,5),new THREEJS.MeshLambertMaterial({color:0x2f7d4f}));
-  lv.position.y=14;lv.scale.y=0.5;g.add(lv);scene.add(g);
+  var phase=Math.random()*Math.PI*2,height=14+Math.random()*2;
+  var trunkMat=new THREEJS.MeshLambertMaterial({color:0x755437}),ringMat=new THREEJS.MeshLambertMaterial({color:0x4d3828});
+  // Slightly curved, tapered trunk assembled from overlapping articulated sections.
+  var segments=7,segH=height/segments,trunkRoot=new THREEJS.Group();g.add(trunkRoot);
+  for(var i=0;i<segments;i++){
+    var t=i/(segments-1),section=new THREEJS.Mesh(new THREEJS.CylinderGeometry(.48-t*.18,.72-t*.2,segH+.18,9),trunkMat);
+    section.position.set(Math.sin(t*1.7+phase)*t*.55,(i+.5)*segH,Math.cos(t*1.4+phase)*t*.4);section.rotation.z=Math.sin(t*1.7+phase)*.025;trunkRoot.add(section);
+    for(var r=0;r<2;r++){var ring=new THREEJS.Mesh(new THREEJS.TorusGeometry(.57-t*.18,.055,5,9),ringMat);ring.rotation.x=Math.PI/2;ring.position.copy(section.position);ring.position.y+=(r-.5)*segH*.55;trunkRoot.add(ring);}
+  }
+  var crown=new THREEJS.Group();crown.position.set(Math.sin(1.7+phase)*.55,height,Math.cos(1.4+phase)*.4);g.add(crown);
+  var leafMats=[new THREEJS.MeshLambertMaterial({color:0x247247,side:THREEJS.DoubleSide}),new THREEJS.MeshLambertMaterial({color:0x3b9257,side:THREEJS.DoubleSide})];
+  var fronds=[];
+  for(var f=0;f<12;f++){
+    var holder=new THREEJS.Group(),a=f/12*Math.PI*2,len=4.8+(f%3)*.55;
+    holder.rotation.y=-a;holder.rotation.z=.48+(f%2)*.12;holder.userData.baseZ=holder.rotation.z;
+    var stem=new THREEJS.Mesh(new THREEJS.CylinderGeometry(.07,.12,len,6),new THREEJS.MeshLambertMaterial({color:0x517d38}));stem.rotation.z=Math.PI/2;stem.position.x=len/2;holder.add(stem);
+    for(var l=0;l<7;l++){
+      var lx=.65+l*(len-.8)/7,leaf=new THREEJS.Mesh(new THREEJS.ConeGeometry(.42,1.55,5),leafMats[(f+l)%2]);
+      leaf.rotation.z=-Math.PI/2;leaf.scale.z=.18;leaf.position.set(lx,.22*(l%2?1:-1),0);leaf.rotation.x=(l%2?1:-1)*.42;holder.add(leaf);
+    }
+    crown.add(holder);fronds.push(holder);
+  }
+  // Central spear leaves and coconuts add depth to the crown.
+  for(var sp=0;sp<4;sp++){var spear=new THREEJS.Mesh(new THREEJS.ConeGeometry(.38,3.8,6),leafMats[sp%2]);spear.position.set(0,1.45,0);spear.rotation.z=(sp-1.5)*.12;spear.rotation.y=sp*Math.PI/2;crown.add(spear);}
+  var coconutMat=new THREEJS.MeshLambertMaterial({color:0x5b3b22});
+  for(var c=0;c<5;c++){var nut=new THREEJS.Mesh(new THREEJS.SphereGeometry(.34,9,7),coconutMat);var ca=c/5*Math.PI*2;nut.position.set(Math.cos(ca)*.55,-.32,Math.sin(ca)*.55);crown.add(nut);}
+  g.userData.palm={phase:phase,crown:crown,trunk:trunkRoot,fronds:fronds};palms.push(g);scene.add(g);
+}
+function updatePalms(){
+  var time=clock.elapsedTime;
+  for(var i=0;i<palms.length;i++){
+    var palm=palms[i],d=palm.userData.palm,wind=Math.sin(time*.72+d.phase);
+    d.trunk.rotation.z=wind*.018;d.trunk.rotation.x=Math.cos(time*.55+d.phase)*.012;
+    d.crown.rotation.z=wind*.035;d.crown.rotation.x=Math.cos(time*.63+d.phase)*.025;
+    for(var f=0;f<d.fronds.length;f++)d.fronds[f].rotation.z=d.fronds[f].userData.baseZ+Math.sin(time*1.05+d.phase+f*.7)*.045;
+  }
 }
 function addLamp(x,z){
   var g=new THREEJS.Group();g.position.set(x,0,z);
@@ -2509,6 +2908,118 @@ function addLamp(x,z){
   lamp.position.y=11.2;g.add(lamp);
   scene.add(g);
 }
+
+function makeShowgirl(){
+  var colors=[0xff2d95,0x25e0ff,0x9b8cff,0xffb13b],costume=colors[Math.floor(Math.random()*colors.length)];
+  var g=makeHumanoid({gender:'female',skin:Math.random()<.45?0x70452f:Math.random()<.5?0xc98f65:0xf0c7a5,top:costume,bottom:costume,hair:0x24160f,hairStyle:Math.random()<.5?'long-wavy':'ponytail'});
+  var plume=new THREEJS.Group(),featherMat=new THREEJS.MeshLambertMaterial({color:costume,emissive:new THREEJS.Color(costume),emissiveIntensity:.18,side:THREEJS.DoubleSide});
+  for(var i=0;i<9;i++){var feather=new THREEJS.Mesh(new THREEJS.ConeGeometry(.34,4.4,7),featherMat);var a=(i-4)*.23;feather.position.set(Math.sin(a)*2.5,9.5+Math.cos(a)*.5,-.25);feather.rotation.z=-a;feather.scale.z=.28;plume.add(feather);}
+  g.add(plume);
+  var skirt=new THREEJS.Mesh(new THREEJS.ConeGeometry(1.7,2.4,12,true),new THREEJS.MeshLambertMaterial({color:costume,transparent:true,opacity:.9}));skirt.position.y=3.2;g.add(skirt);
+  var sparkle=new THREEJS.PointLight(costume,.38,18);sparkle.position.y=6;g.add(sparkle);
+  return g;
+}
+function buildShowgirls(){
+  if(!window.__road||window.__road.length<2)return;
+  showgirls=[];
+  for(var i=0;i<10;i++){
+    var pair=Math.floor(i/2),member=i%2,pairSpeed=2.5+(pair%3)*.42;
+    var bubble=document.createElement('div');bubble.className='showgirlBubble';document.body.appendChild(bubble);
+    var g=makeShowgirl();g.userData.showgirl={seg:Math.min(window.__road.length-2,Math.floor(pair*(window.__road.length-1)/5)),t:(pair*.37)%1,dir:pair%2?1:-1,speed:pairSpeed,side:pair%2?1:-1,pair:pair,pairOffset:member?1.15:-1.15,speaker:member===0,phase:Math.random()*Math.PI*2,photoTaken:false,bubble:bubble,question:'',questionNext:0};
+    scene.add(g);showgirls.push(g);
+  }
+  updateShowgirls(.016);
+}
+var SHOWGIRL_PHOTO_QUESTIONS=[
+  'Hey conference hero, want a photo with us?',
+  'Need something more exciting than your badge photo?',
+  'Want proof you actually left the Expo hall?',
+  'Photo with the feathers before your next session?',
+  'Should we rescue your conference feed with a photo?',
+  'Want a Vegas photo your coworkers will definitely discuss?',
+  'How about a photo before your social score gets any worse?',
+  'You look lost. Want a photo while you recover?'
+];
+function updateShowgirlBubbles(){
+  if(!cam||!player3d)return;
+  for(var i=0;i<showgirls.length;i++){
+    var g=showgirls[i],d=g.userData.showgirl,b=d.bubble,range=Math.hypot(player3d.x-g.position.x,player3d.z-g.position.z);
+    if(!d.speaker||interiorMode||lectureMode||range>38||d.photoTaken){b.style.display='none';continue;}
+    if(clock.elapsedTime>=d.questionNext){d.question=rnd(SHOWGIRL_PHOTO_QUESTIONS);d.questionNext=clock.elapsedTime+7+Math.random()*7;b.textContent=d.question;}
+    var p=new THREEJS.Vector3(g.position.x,12.5,g.position.z).project(cam);
+    if(p.z<-1||p.z>1||Math.abs(p.x)>1.15||Math.abs(p.y)>1.15){b.style.display='none';continue;}
+    b.style.display='block';b.style.left=((p.x*.5+.5)*innerWidth)+'px';b.style.top=((-p.y*.5+.5)*innerHeight)+'px';
+  }
+}
+function placeShowgirlsNearPlayer(){
+  if(!player3d||!window.__road||!showgirls.length)return;
+  var road=window.__road,bestSeg=0,bestT=0,best=1e9;
+  for(var s=0;s<road.length-1;s++){
+    var a=road[s],b=road[s+1],dx=b.x-a.x,dz=b.z-a.z,l2=dx*dx+dz*dz;
+    var t=l2?Math.max(0,Math.min(1,((player3d.x-a.x)*dx+(player3d.z-a.z)*dz)/l2)):0;
+    var d=Math.hypot(player3d.x-(a.x+dx*t),player3d.z-(a.z+dz*t));if(d<best){best=d;bestSeg=s;bestT=t;}
+  }
+  // Keep one complete pair discoverable at the Venetian; all other pairs remain distributed.
+  for(var i=0;i<Math.min(2,showgirls.length);i++){
+    var sg=showgirls[i].userData.showgirl;
+    sg.seg=Math.max(0,Math.min(road.length-2,bestSeg));sg.t=Math.max(.08,Math.min(.92,bestT+.1));sg.side=1;sg.dir=1;
+  }
+  updateShowgirls(.016);
+}
+function placeCowboysNearPlayer(){
+  if(!cowboys.length||!showgirls.length)return;
+  for(var i=0;i<Math.min(2,cowboys.length);i++){var source=showgirls[(i+1)%showgirls.length].userData.showgirl,d=cowboys[i].userData.cowboy;d.seg=source.seg;d.t=Math.max(.05,Math.min(.95,source.t+.16+i*.08));d.side=i%2?1:-1;d.dir=i%2?-1:1;}
+  updateCowboys(.016);
+}
+function updateShowgirls(dt){
+  var road=window.__road;if(!road)return;
+  for(var i=0;i<showgirls.length;i++){
+    var g=showgirls[i],d=g.userData.showgirl,a=road[d.seg],b=road[d.seg+1],dx=b.x-a.x,dz=b.z-a.z,len=Math.max(1,Math.hypot(dx,dz));
+    d.t+=d.dir*d.speed*dt/len;
+    if(d.t>1){d.t=0;d.seg++;if(d.seg>=road.length-1){d.seg=road.length-2;d.dir=-1;}}
+    if(d.t<0){d.t=1;d.seg--;if(d.seg<0){d.seg=0;d.dir=1;}}
+    a=road[d.seg];b=road[d.seg+1];dx=b.x-a.x;dz=b.z-a.z;len=Math.max(1,Math.hypot(dx,dz));var nx=-dz/len,nz=dx/len,offset=8.8*d.side+d.pairOffset;
+    g.position.set(a.x+(b.x-a.x)*d.t+nx*offset,0,a.z+(b.z-a.z)*d.t+nz*offset);g.rotation.y=Math.atan2((b.x-a.x)*d.dir,(b.z-a.z)*d.dir);
+    var parts=g.userData.parts,sw=Math.sin(clock.elapsedTime*7+d.phase)*.45;parts.legL.rotation.x=sw;parts.legR.rotation.x=-sw;parts.armL.rotation.x=-sw*.65;parts.armR.rotation.x=sw*.65;
+  }
+}
+function nearestShowgirl(){var best=null,dist=1e9;for(var i=0;i<showgirls.length;i++){var d=Math.hypot(player3d.x-showgirls[i].position.x,player3d.z-showgirls[i].position.z);if(d<dist){best=showgirls[i];dist=d;}}return {showgirl:best,dist:dist};}
+function interactShowgirl(g){
+  var d=g.userData.showgirl;
+  openMenu('Vegas showgirl',d.question||'Want a Vegas photo with us?',[ 
+    {n:d.photoTaken?'Photo already taken ✔':'Take a photo 📸',d:d.photoTaken?'She remembers you. Unfortunately.':'Lose 7 social points',off:d.photoTaken,f:function(){for(var pi=0;pi<showgirls.length;pi++)if(showgirls[pi].userData.showgirl.pair===d.pair)showgirls[pi].userData.showgirl.photoTaken=true;st.s=Math.max(0,st.s-7);st.vibes+=2;var lines=['Cute badge. Does it come with permission to photograph strangers?','Wonderful. Another conference attendee collecting humans like swag.','Try tagging me as “local architecture.” Everyone else does.','Nothing says professional networking like an unsolicited tourist photo.'];toast(rnd(lines)+'  -7 social','bad');closeMenu();}},
+    {n:'Politely decline',d:'Keep walking and retain your dignity',f:function(){toast('She nods. “A rare display of situational awareness.”','info');closeMenu();}}
+  ]);
+}
+function makeCowboy(){
+  var skins=[0xf0c7a5,0xc98f65,0x70452f],skin=skins[Math.floor(Math.random()*skins.length)];
+  var g=makeHumanoid({gender:'male',skin:skin,top:skin,bottom:0x263b67,hair:0x302019,hairStyle:Math.random()<.35?'bald':'short'});
+  // Wide-brimmed cowboy hat, belt buckle, neckerchief, and boots.
+  var felt=new THREEJS.MeshLambertMaterial({color:Math.random()<.5?0x201713:0xd2b483});
+  var brim=new THREEJS.Mesh(new THREEJS.CylinderGeometry(1.75,1.75,.18,16),felt);brim.position.y=8.03;g.add(brim);
+  var crown=new THREEJS.Mesh(new THREEJS.CylinderGeometry(.68,.86,1.05,12),felt);crown.position.y=8.56;g.add(crown);
+  var scarf=new THREEJS.Mesh(new THREEJS.TorusGeometry(.52,.11,6,14),new THREEJS.MeshLambertMaterial({color:0xd93434}));scarf.rotation.x=Math.PI/2;scarf.position.y=6.05;g.add(scarf);
+  var buckle=box(.72,.52,.18,0xffd24d);buckle.position.set(0,3.15,.78);g.add(buckle);
+  var parts=g.userData.parts;parts.legL.userData.lower.children.forEach(function(m){if(m.material)m.material.color.setHex(0x24170f);});parts.legR.userData.lower.children.forEach(function(m){if(m.material)m.material.color.setHex(0x24170f);});
+  return g;
+}
+function buildCowboys(){
+  if(!window.__road||window.__road.length<2)return;cowboys=[];
+  for(var i=0;i<8;i++){var g=makeCowboy();g.userData.cowboy={seg:Math.min(window.__road.length-2,Math.floor((i+.5)*(window.__road.length-1)/8)),t:(i*.23)%1,dir:i%2?1:-1,speed:2.1+Math.random()*1.4,side:i%2?1:-1,phase:Math.random()*Math.PI*2,photoTaken:false};scene.add(g);cowboys.push(g);}
+  updateCowboys(.016);
+}
+function updateCowboys(dt){
+  var road=window.__road;if(!road)return;
+  for(var i=0;i<cowboys.length;i++){var g=cowboys[i],d=g.userData.cowboy;g.visible=st.day>=4;if(!g.visible)continue;var a=road[d.seg],b=road[d.seg+1],dx=b.x-a.x,dz=b.z-a.z,len=Math.max(1,Math.hypot(dx,dz));d.t+=d.dir*d.speed*dt/len;
+    if(d.t>1){d.t=0;d.seg++;if(d.seg>=road.length-1){d.seg=road.length-2;d.dir=-1;}}if(d.t<0){d.t=1;d.seg--;if(d.seg<0){d.seg=0;d.dir=1;}}
+    a=road[d.seg];b=road[d.seg+1];dx=b.x-a.x;dz=b.z-a.z;len=Math.max(1,Math.hypot(dx,dz));var nx=-dz/len,nz=dx/len,offset=8.8*d.side;g.position.set(a.x+dx*d.t+nx*offset,0,a.z+dz*d.t+nz*offset);g.rotation.y=Math.atan2(dx*d.dir,dz*d.dir);
+    var parts=g.userData.parts,sw=Math.sin(clock.elapsedTime*6.5+d.phase)*.48;parts.legL.rotation.x=sw;parts.legR.rotation.x=-sw;parts.armL.rotation.x=-sw*.7;parts.armR.rotation.x=sw*.7;}
+}
+function nearestCowboy(){var best=null,dist=1e9;for(var i=0;i<cowboys.length;i++){var d=Math.hypot(player3d.x-cowboys[i].position.x,player3d.z-cowboys[i].position.z);if(d<dist){best=cowboys[i];dist=d;}}return {cowboy:best,dist:dist};}
+function interactCowboy(g){var d=g.userData.cowboy;openMenu('Vegas cowboy','A shirtless cowboy performer tips his hat and waits for you to make this awkward.',[
+  {n:d.photoTaken?'Photo already taken ✔':'Take a photo 📸',d:d.photoTaken?'He has already invoiced your dignity.':'Lose 7 social points',off:d.photoTaken,f:function(){d.photoTaken=true;st.s=Math.max(0,st.s-7);st.vibes+=2;toast(rnd(['“Easy there, cloud wrangler. The hat costs extra.”','“Your badge says architect. This pose says incident report.”','“Tip your performers. Your social score clearly cannot afford another hit.”','“Straight to LinkedIn, huh? Your colleagues will have questions.”'])+'  -7 social','bad');closeMenu();}},
+  {n:'Politely decline',d:'Back away from the content opportunity',f:function(){toast('He tips his hat. “Best decision you made all week, partner.”','info');closeMenu();}}
+]);}
 
 /* ---- traffic ---- */
 function buildCars(){
@@ -2586,6 +3097,14 @@ function exteriorBlocked(x,z,radius){
   }
   return false;
 }
+function nearestClearExteriorPoint(x,z,radius,maxSearch){
+  radius=radius||1.5;maxSearch=maxSearch||100;
+  if(!exteriorBlocked(x,z,radius))return {x:x,z:z};
+  for(var ring=4;ring<=maxSearch;ring+=4){
+    for(var i=0;i<32;i++){var a=i/32*Math.PI*2,tx=x+Math.cos(a)*ring,tz=z+Math.sin(a)*ring;if(!exteriorBlocked(tx,tz,radius))return {x:tx,z:tz};}
+  }
+  return {x:x,z:z};
+}
 function nearestPlaceTo(x,z){
   var best=null,bd=1e9;
   for(var i=0;i<PLACES.length;i++){var q=project(PLACES[i].lat,PLACES[i].lng);var d=Math.hypot(x-q.x,z-q.z);if(d<bd){bd=d;best=PLACES[i];}}
@@ -2607,8 +3126,10 @@ function placeFromOsmTags(tags){
     mandalay:['mandalay bay'],
     mgm:['mgm grand'],
     caesars:['caesars forum'],
+    caesarsp:['caesars palace'],
     venetian:['venetian'],
-    wynn:['wynn','encore'],
+    wynn:['wynn'],
+    encore:['encore'],
     hotel:['budget tel','budgetel','budget suites']
   };
   for(var i=0;i<PLACES.length;i++){
@@ -2835,13 +3356,29 @@ function makeOsmFootprint(el){
     var ldx=Math.abs(cx-lq.x), ldz=Math.abs(cz-lq.z);
     if(ldx<42 && ldz<42) return null;
   }
+  // Replace the obsolete Mirage footprint with the custom Hard Rock guitar hotel.
+  var hardRockRef=null;
+  for(var hi=0;hi<PLACES.length;hi++)if(PLACES[hi].id==='hardrock'){hardRockRef=PLACES[hi];break;}
+  if(hardRockRef){
+    var hrq=project(hardRockRef.lat,hardRockRef.lng);
+    if(Math.abs(cx-hrq.x)<38&&Math.abs(cz-hrq.z)<48)return null;
+  }
+  // The Venetian uses a custom palazzo/campanile/canal complex instead of generic cubes.
+  var venetianRef=null;for(var vi=0;vi<PLACES.length;vi++)if(PLACES[vi].id==='venetian'){venetianRef=PLACES[vi];break;}
+  if(venetianRef){var vq=project(venetianRef.lat,venetianRef.lng),customVenetianX=vq.x+42,customVenetianZ=vq.z-24;if(Math.abs(cx-customVenetianX)<72&&Math.abs(cz-customVenetianZ)<82)return null;}
+  var caesarRef=null;for(var ci=0;ci<PLACES.length;ci++)if(PLACES[ci].id==="caesarsp"){caesarRef=PLACES[ci];break;}
+  if(caesarRef){var cq=project(caesarRef.lat,caesarRef.lng),customCaesarsX=cq.x-10,customCaesarsZ=cq.z-8;if(Math.abs(cx-customCaesarsX)<86&&Math.abs(cz-customCaesarsZ)<82)return null;}
+  var wynnRef=null;for(var wi=0;wi<PLACES.length;wi++)if(PLACES[wi].id==='wynn'){wynnRef=PLACES[wi];break;}
+  if(wynnRef){var wq=project(wynnRef.lat,wynnRef.lng),customWynnX=wq.x+2,customWynnZ=wq.z-4;if(Math.abs(cx-customWynnX)<92&&Math.abs(cz-customWynnZ)<88)return null;if(matchedPlace&&matchedPlace.id==='wynn')return null;}
+  var encoreRef=null;for(var ei=0;ei<PLACES.length;ei++)if(PLACES[ei].id==='encore'){encoreRef=PLACES[ei];break;}
+  if(encoreRef){var eq=project(encoreRef.lat,encoreRef.lng),customEncoreX=eq.x+1,customEncoreZ=eq.z-3;if(Math.abs(cx-customEncoreX)<72&&Math.abs(cz-customEncoreZ)<66)return null;if(matchedPlace&&matchedPlace.id==='encore')return null;}
 
   if(!matchedPlace){
-    // Drop more of the small, low generic clutter so the main Strip landmarks stand out.
-    // Still preserve genuinely tall towers even when their footprints are narrow.
-    if(area<180 && hInfo.meters<34)return null;
-    if(area<420 && hInfo.meters<28)return null;
-    if(area<850 && hInfo.meters<16)return null;
+    // Keep more low-rise retail, parking, restaurants, and service buildings so the
+    // resort corridor feels continuous instead of leaving large empty blocks.
+    if(area<70 && hInfo.meters<22)return null;
+    if(area<180 && hInfo.meters<16)return null;
+    if(area<350 && hInfo.meters<10)return null;
   }else{
     var cfg=hotelMainFootprintConfig[matchedPlace.id];
     var used=hotelMainFootprintUsed[matchedPlace.id]||0;
@@ -2894,6 +3431,9 @@ function makeOsmFootprint(el){
   spts.forEach(function(p){minx=Math.min(minx,p.x);maxx=Math.max(maxx,p.x);minz=Math.min(minz,p.z);maxz=Math.max(maxz,p.z);});
   var bw=Math.max(18,maxx-minx), bd=Math.max(18,maxz-minz);
   var h=clamp(hInfo.meters*BUILDING_HEIGHT_SCALE,3,110);
+  // Lift only the pancake-like low-rise class caused by missing/roof-level OSM heights.
+  // Buildings already taller than this retain their exact existing height.
+  if(h<8)h=10+Math.min(3,Math.sqrt(area)/28);
   if(matchedPlace){
     // Only boost the hotels that still read as too short.
     // Hotels that are already tall should stay as they are.
@@ -2928,6 +3468,32 @@ function makeOsmFootprint(el){
   mesh.userData.osm=true;
 
   var group=new THREEJS.Group();group.position.set(cx,0,cz);group.add(mesh);
+
+  if(matchedPlace){
+    // Give major hotels a grounded podium, recessed glass lobby, entrance canopy,
+    // and illuminated corner blades instead of a single extrusion meeting the pavement.
+    var localCx=(minx+maxx)/2-cx,localCz=(minz+maxz)/2-cz;
+    var podiumMat=new THREEJS.MeshStandardMaterial({color:mixHex(color,0x242633,.42),metalness:.34,roughness:.48});
+    var glassLobbyMat=new THREEJS.MeshStandardMaterial({color:0x182c42,metalness:.25,roughness:.12,transparent:true,opacity:.86,emissive:new THREEJS.Color(accent),emissiveIntensity:.12});
+    var podium=new THREEJS.Mesh(new THREEJS.BoxGeometry(bw*.92,4.8,bd*.92),podiumMat);podium.position.set(localCx,2.4,localCz);group.add(podium);
+    var lobby=new THREEJS.Mesh(new THREEJS.BoxGeometry(Math.min(28,bw*.48),5.4,Math.min(8,bd*.16)),glassLobbyMat);lobby.position.set(localCx,3.1,localCz+bd*.43);group.add(lobby);
+    var canopy=new THREEJS.Mesh(new THREEJS.BoxGeometry(Math.min(34,bw*.58),.65,7),new THREEJS.MeshStandardMaterial({color:0xb8c1d1,metalness:.8,roughness:.22}));canopy.position.set(localCx,6.2,localCz+bd*.48);group.add(canopy);
+    var bladeMat=new THREEJS.MeshBasicMaterial({color:accent,transparent:true,opacity:.72});
+    [[-.44,-.44],[.44,-.44],[-.44,.44],[.44,.44]].forEach(function(pos){
+      var blade=new THREEJS.Mesh(new THREEJS.BoxGeometry(.28,Math.max(12,h-6),.28),bladeMat);
+      blade.position.set(localCx+pos[0]*bw,Math.max(12,h-6)/2+5,localCz+pos[1]*bd);group.add(blade);
+    });
+    if(h>42){
+      var crown=new THREEJS.Mesh(new THREEJS.BoxGeometry(bw*.72,3.2,bd*.72),new THREEJS.MeshStandardMaterial({color:mixHex(accent,0xffffff,.38),metalness:.68,roughness:.26,emissive:new THREEJS.Color(accent),emissiveIntensity:.2}));
+      crown.position.set(localCx,h+1.6,localCz);group.add(crown);
+    }
+    if(matchedPlace.type==='venue'){
+      // Session venues alone get a prominent conference marquee and paired entry pylons.
+      var confSign=signSprite(matchedPlace.id==='venetian'?'RE:INVENT · EXPO':'RE:INVENT · SESSIONS',matchedPlace.sign,{fontSize:32,width:Math.min(34,bw*.62),height:4.5,glow:12,depthTest:true,renderOrder:5});
+      confSign.position.set(localCx,9.5,localCz+bd*.50+1);confSign.userData.billboard=true;group.add(confSign);
+      for(var py=-1;py<=1;py+=2){var pylon=new THREEJS.Mesh(new THREEJS.BoxGeometry(1.2,8,1.2),new THREEJS.MeshStandardMaterial({color:matchedPlace.sign,metalness:.48,roughness:.25,emissive:new THREEJS.Color(matchedPlace.sign),emissiveIntensity:.22}));pylon.position.set(localCx+py*Math.min(15,bw*.3),4,localCz+bd*.5);group.add(pylon);}
+    }
+  }
 
   // neon trim: roof edge, a cornice line under it, and a pavement-level line.
   // All three live in one LineSegments so the draw-call count does not balloon.
@@ -3461,9 +4027,17 @@ function buildWorld(){
   moon.position.set(WORLD.cx+500,360,WORLD.cz-700);scene.add(moon);
 
   buildRoad();
+  buildShowgirls();
+  buildCowboys();
+  buildPoliceStation();
   buildHelicopterFleet();
   buildBellagioFountains();
   buildParisEiffelTower();
+  buildVenetianLandmark();
+  buildCaesarsPalaceLandmark();
+  buildWynnLandmark();
+  buildEncoreLandmark();
+  buildHardRockGuitarHotel();
   buildHighRoller();
   buildSphereLandmark();
   buildExcaliburLandmark();
@@ -3478,7 +4052,10 @@ function buildWorld(){
   var vd=null;for(var d=0;d<doorPoints.length;d++)if(doorPoints[d].place.id==="venetian")vd=doorPoints[d];
   var vpos=project(36.121,-115.170);
   SPAWN.x=vd?vd.x:vpos.x; SPAWN.z=(vd?vd.z:vpos.z)+11;
+  var clearSpawn=nearestClearExteriorPoint(SPAWN.x,SPAWN.z,2.2,120);SPAWN.x=clearSpawn.x;SPAWN.z=clearSpawn.z;
   buildPlayer();
+  placeShowgirlsNearPlayer();
+  placeCowboysNearPlayer();
   heading=Math.PI; camYaw=Math.PI;
 
   window.__resetPlayerToHotel=function(){
@@ -3796,6 +4373,7 @@ function doEnter(){
     }
     return;
   }
+  var nearbyShowgirl=nearestShowgirl();if(!interiorMode&&nearbyShowgirl.showgirl&&nearbyShowgirl.dist<12)return interactShowgirl(nearbyShowgirl.showgirl);
   var nearbyNpc=nearestNpc();if(nearbyNpc.npc&&nearbyNpc.dist<12)return interactWithNpc(nearbyNpc.npc);
   var hr=nearestHighRollerRide();
   if(!interiorMode&&!lectureMode&&hr.ride&&hr.dist<85)return startHighRollerRide();
@@ -3820,6 +4398,7 @@ function tick(dt){
   autoDoorCooldown=Math.max(0,autoDoorCooldown-dt);
   updateBellagioTrespass(dt);
   updateNpcs(dt);
+  if(!interiorMode&&!lectureMode){updateShowgirls(dt);updateCowboys(dt);}
   if(ridingHighRoller){
     var hs=highRollerCabinWorldSample(highRollerRideCabinIndex);
     if(hs){
@@ -3971,8 +4550,13 @@ function tick(dt){
   }
 
   var promptKey=$("prompt").querySelector("b");
+  var promptShowgirl=nearestShowgirl();
   var promptNpc=nearestNpc();
-  if(promptNpc.npc&&promptNpc.dist<12){
+  if(!interiorMode&&promptShowgirl.showgirl&&promptShowgirl.dist<12){
+    $("prompt").style.display="block";
+    promptKey.textContent='[E]';
+    $("promptTxt").textContent='ask the showgirl for a photo';
+  } else if(promptNpc.npc&&promptNpc.dist<12){
     $("prompt").style.display="block";
     promptKey.textContent='[E]';
     $("promptTxt").textContent='talk to '+promptNpc.npc.userData.config.name;
@@ -4039,6 +4623,12 @@ function applyCameraOcclusion(target){
 }
 function nightMix(){var h=(st.min/60)%24;
   if(h>=7&&h<16)return 0.1;if(h>=16&&h<19)return 0.1+(h-16)/3*0.8;return 0.9;}
+function updateToastAnchor(){
+  if(!cam||!player3d)return;
+  var el=$("toasts"),screen=new THREEJS.Vector3(player3d.x,.4,player3d.z).project(cam);
+  if(screen.z<-1||screen.z>1){el.style.visibility='hidden';return;}
+  el.style.visibility='visible';el.style.left=((screen.x*.5+.5)*innerWidth)+'px';el.style.top=((-screen.y*.5+.5)*innerHeight+16)+'px';
+}
 function render(dt){
   if(!renderer)return;
   var nm=nightMix();
@@ -4057,6 +4647,7 @@ function render(dt){
       var fj=g.userData.fountain[f];var hh=4+Math.abs(Math.sin(clock.elapsedTime*2+f))*8;fj.scale.y=hh/8;fj.position.y=hh/2;}
   }
   updateHelicopters(dt);
+  updatePalms();
   updateSphereLandmark(dt);
   if(bellagioFountainRoot&&bellagioFountainJets.length){
     for(var bf=0;bf<bellagioFountainJets.length;bf++){
@@ -4137,10 +4728,16 @@ function render(dt){
   }else{
     clearCameraOcclusion();
   }
+  if(arrestSequenceActive&&arrestSequenceStage==='cell'){
+    cam.position.set(0,6.2,17);cam.lookAt(0,4.2,0);
+    playerGroup.rotation.y=Math.sin(clock.elapsedTime*.8)*.06;
+  }
+  updateToastAnchor();
+  updateShowgirlBubbles();
   renderer.render(scene,cam);
   updateLectureVideoProjection();
   if(overlayRenderer){
-    if(lectureMode){
+    if(lectureMode||(arrestSequenceActive&&arrestSequenceStage==='cell')){
       overlayRenderer.clear();
       overlayRenderer.render(overlayScene,cam);
     }else{
@@ -4226,6 +4823,10 @@ function drawMinimap(){
       var sz=p.type==="venue"?4.5:p.type==="photo"?2.5:3.5;
       g.beginPath();g.arc(pt.x,pt.y,sz,0,Math.PI*2);g.fill();
     }
+    if(policeStationRoot){
+      var pd=lp(policeStationRoot.position.x,policeStationRoot.position.z);
+      if(inside(pd,8)){g.fillStyle="#59c2ff";g.strokeStyle="#07101a";g.lineWidth=1.2;g.fillRect(pd.x-3,pd.y-3,6,6);g.strokeRect(pd.x-3,pd.y-3,6,6);g.font="bold 7px Consolas,monospace";g.textAlign="center";g.fillText("PD",pd.x,pd.y-7);}
+    }
 
     // Active NPCs in the current area.
     for(var ni=0;ni<npcs.length;ni++){
@@ -4239,7 +4840,7 @@ function drawMinimap(){
     var hotelIds={
       mandalay:"MB",luxor:"LX",excalibur:"EX",mgm:"MGM",nyny:"NY",
       parkmgm:"PK",aria:"AR",bellagio:"BG",paris:"PR",planet:"PH",
-      caesarsp:"CP",venetian:"VE",wynn:"WY"
+      caesarsp:"CP",hardrock:"HR",venetian:"VE",wynn:"WY",encore:"EN"
     };
     g.font="bold 8px Consolas,monospace";
     g.textAlign="center";
