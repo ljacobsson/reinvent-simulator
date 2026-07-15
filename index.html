@@ -932,7 +932,7 @@ var player3d, playerGroup, legL, legR, armL, armR, torso, pack, playerFootLift=0
 var buildings=[], exteriorWalkSurfaces=[], exteriorMeshColliders=[], exteriorColliderGrid=Object.create(null), doorPoints=[], exteriorHotelAreas=[], palms=[], cars=[], helicopters=[], showgirls=[], cowboys=[], starField, moon;
 var npcs=[],npcConfigs=[],nextNpcConfig=0;
 var hotelDayMaterials=[];
-var bellagioFountainRoot=null, bellagioFountainJets=[],bellagioFountainMist=[];
+var bellagioFountainRoot=null, bellagioFountainJets=[],bellagioFountainMist=[],bellagioFountainUpdateAccum=0;
 var bellagioFountainWorldCenter=null, bellagioTrespassActive=false, bellagioTrespassDone=false, bellagioPolice=[], bellagioArrestTimer=0;
 var policeStationRoot=null,policeStationRelease=null,arrestSequenceActive=false,arrestSequenceStage='';
 var sphereRoot=null, sphereMesh=null, sphereBase=null, sphereCanvas=null, sphereCtx=null, sphereTexture=null;
@@ -1372,21 +1372,21 @@ function buildBellagioFountains(){
   // Bellagio sits west of Las Vegas Blvd, so the fountains belong on the east / Strip side.
   root.position.set(q.x+72,0,q.z+6);
 
-  var lake=new THREEJS.Mesh(new THREEJS.CircleGeometry(58,72),
+  var lake=new THREEJS.Mesh(new THREEJS.CircleGeometry(58,48),
     new THREEJS.MeshStandardMaterial({color:0x123f61,roughness:.16,metalness:.1,transparent:true,opacity:.94}));
   lake.rotation.x=-Math.PI/2;
   lake.scale.set(1.28,0.78,1);
   lake.position.y=0.16;
   root.add(lake);
 
-  var rim=new THREEJS.Mesh(new THREEJS.RingGeometry(58,63,72),
+  var rim=new THREEJS.Mesh(new THREEJS.RingGeometry(58,63,48),
     new THREEJS.MeshStandardMaterial({color:0xb6aa93,roughness:.78,metalness:.04,side:THREEJS.DoubleSide}));
   rim.rotation.x=-Math.PI/2;
   rim.scale.set(1.28,0.78,1);
   rim.position.y=0.18;
   root.add(rim);
 
-  var glow=new THREEJS.Mesh(new THREEJS.CircleGeometry(56,72),
+  var glow=new THREEJS.Mesh(new THREEJS.CircleGeometry(56,48),
     new THREEJS.MeshBasicMaterial({color:0x69c9ff,transparent:true,opacity:0.08}));
   glow.rotation.x=-Math.PI/2;
   glow.scale.set(1.22,0.74,1);
@@ -1400,23 +1400,24 @@ function buildBellagioFountains(){
     var jetRoot=new THREEJS.Group(),outer,core;jetRoot.position.set(x,.2,z);root.add(jetRoot);
     if(arcX||arcZ){
       var curve=new THREEJS.QuadraticBezierCurve3(new THREEJS.Vector3(0,0,0),new THREEJS.Vector3(arcX*.5,10,arcZ*.5),new THREEJS.Vector3(arcX,0,arcZ));
-      outer=new THREEJS.Mesh(new THREEJS.TubeGeometry(curve,16,.34,6,false),waterOuter);
-      core=new THREEJS.Mesh(new THREEJS.TubeGeometry(curve,16,.12,5,false),waterCore);jetRoot.add(outer,core);
+      outer=new THREEJS.Mesh(new THREEJS.TubeGeometry(curve,8,.34,5,false),waterOuter);
+      core=new THREEJS.Mesh(new THREEJS.TubeGeometry(curve,8,.12,4,false),waterCore);jetRoot.add(outer,core);
     }else{
       outer=new THREEJS.Mesh(new THREEJS.CylinderGeometry(.22,.36,1,7),waterOuter);outer.position.y=.5;
       core=new THREEJS.Mesh(new THREEJS.CylinderGeometry(.08,.13,1,6),waterCore);core.position.y=.5;jetRoot.add(outer,core);
     }
-    var foam=new THREEJS.Mesh(new THREEJS.RingGeometry(.35,1.0,12),new THREEJS.MeshBasicMaterial({color:0xdaf5ff,transparent:true,opacity:.42,side:THREEJS.DoubleSide,depthWrite:false}));
+    var foam=new THREEJS.Mesh(new THREEJS.RingGeometry(.35,1.0,8),new THREEJS.MeshBasicMaterial({color:0xdaf5ff,transparent:true,opacity:.42,side:THREEJS.DoubleSide,depthWrite:false}));
     foam.rotation.x=-Math.PI/2;foam.position.y=.04;jetRoot.add(foam);
-    var lamp=new THREEJS.PointLight(0x9bdcff,.22,18);lamp.position.y=.35;jetRoot.add(lamp);
-    bellagioFountainJets.push({root:jetRoot,outer:outer,core:core,foam:foam,lamp:lamp,phase:phase,maxH:maxH,group:group,arc:!!(arcX||arcZ)});
+    bellagioFountainJets.push({root:jetRoot,outer:outer,core:core,foam:foam,phase:phase,maxH:maxH,group:group,arc:!!(arcX||arcZ)});
   }
-  // Concentric vertical shooters, a strong center line, and inward-curving fans.
-  for(var r=0;r<3;r++){var count=10+r*6,rad=13+r*12;for(var j=0;j<count;j++){var a=j/count*Math.PI*2;addJet(Math.cos(a)*rad*1.22,Math.sin(a)*rad*.72,j/count*Math.PI*2,12+r*5,'ring'+r);}}
-  for(var c=-7;c<=7;c++)addJet(c*7,0,c*.42,28+(7-Math.abs(c))*2,'spine');
-  for(var d=0;d<9;d++){var fx=-34+d*8.5;addJet(fx,-17,d*.48,16,'fan',-fx*.16,12);addJet(fx,17,d*.48+Math.PI,16,'fan',-fx*.16,-12);}
+  // A compact layout keeps the choreography recognizable without dozens of costly transparent layers.
+  for(var r=0;r<2;r++){var count=8+r*4,rad=16+r*15;for(var j=0;j<count;j++){var a=j/count*Math.PI*2;addJet(Math.cos(a)*rad*1.22,Math.sin(a)*rad*.72,j/count*Math.PI*2,13+r*7,'ring'+r);}}
+  for(var c=-5;c<=5;c++)addJet(c*9,0,c*.5,28+(5-Math.abs(c))*2.5,'spine');
+  for(var d=0;d<6;d++){var fx=-32+d*12.8;addJet(fx,-17,d*.62,16,'fan',-fx*.16,12);addJet(fx,17,d*.62+Math.PI,16,'fan',-fx*.16,-12);}
+  // Five shared lights replace one dynamic light per nozzle.
+  for(var li=-2;li<=2;li++){var lakeLight=new THREEJS.PointLight(0x78cfff,.35,42);lakeLight.position.set(li*23,3,0);root.add(lakeLight);}
   // Fine mist clouds catch light during the high finale.
-  for(var mi=0;mi<7;mi++){var mist=new THREEJS.Mesh(new THREEJS.SphereGeometry(5+mi%2*2,10,7),new THREEJS.MeshBasicMaterial({color:0xd8f3ff,transparent:true,opacity:0,depthWrite:false}));mist.scale.set(1.7,.45,1);mist.position.set((mi-3)*13,5+(mi%2)*2,(mi%3-1)*9);root.add(mist);bellagioFountainMist.push({mesh:mist,phase:mi*.7});}
+  for(var mi=0;mi<4;mi++){var mist=new THREEJS.Mesh(new THREEJS.SphereGeometry(6,7,5),new THREEJS.MeshBasicMaterial({color:0xd8f3ff,transparent:true,opacity:0,depthWrite:false}));mist.scale.set(1.9,.42,1);mist.position.set((mi-1.5)*22,6+(mi%2),(mi%2?8:-8));root.add(mist);bellagioFountainMist.push({mesh:mist,phase:mi*.9});}
 
   bellagioFountainRoot=root;
   scene.add(root);
@@ -5294,27 +5295,84 @@ function addCasinoTable(g,x,z,type){
   edge.position.set(INTERIOR_ORIGIN.x+x,1.85,INTERIOR_ORIGIN.z+z);edge.rotation.x=Math.PI/2;edge.scale.y=type==='roulette'?0.78:0.62;g.add(edge);
   addInteriorSign(g,type==='roulette'?'ROULETTE':'BLACKJACK',x,z+5.1,12,type==='roulette'?0xff2d95:0xffbe3d,{axis:'z',face:1,y:3.6,fontSize:18,height:1.9,glow:4});
 }
+function casinoInteriorTheme(place){
+  var themes={
+    venetian:{floor:0x302322,wall:0x5b4433,accent:0xd5ad62,neon:0x77d8ff,bar:'CANAL LOUNGE',motif:'arches'},
+    caesarsp:{floor:0x381c22,wall:0x6d5545,accent:0xe6cf9b,neon:0xffb74d,bar:'BACCHANAL BAR',motif:'columns'},
+    bellagio:{floor:0x18352e,wall:0x43362c,accent:0xe9c873,neon:0x74dcff,bar:'LAGO LOUNGE',motif:'fountain'},
+    paris:{floor:0x232b4a,wall:0x463b48,accent:0xe0bc62,neon:0xff5577,bar:'LE BAR DU SPORT',motif:'arches'},
+    flamingo:{floor:0x3d2035,wall:0x562740,accent:0xff8fbd,neon:0x61e8da,bar:'PINK FLAMINGO BAR',motif:'palms'},
+    linq:{floor:0x183544,wall:0x24384d,accent:0x41dce8,neon:0xff4f98,bar:'3535 LOUNGE',motif:'rings'},
+    harrahs:{floor:0x2f1739,wall:0x462050,accent:0xd889ff,neon:0xffcb58,bar:'CARNAVAL COURT',motif:'rings'},
+    hardrock:{floor:0x171d35,wall:0x252849,accent:0x35e9ff,neon:0xff3b93,bar:'CENTER BAR',motif:'rings'},
+    mgm:{floor:0x183425,wall:0x263d2e,accent:0xd5b85b,neon:0x68ff9d,bar:'WHISKEY DOWN',motif:'columns'},
+    mandalay:{floor:0x173843,wall:0x28505a,accent:0xd6b45d,neon:0x5de8ff,bar:'EYECANDY LOUNGE',motif:'palms'},
+    luxor:{floor:0x171517,wall:0x29252b,accent:0xd8aa45,neon:0x58e8ff,bar:'AURORA',motif:'columns'},
+    excalibur:{floor:0x321b22,wall:0x463038,accent:0xd4b46b,neon:0xff596d,bar:'CASTLE WALK BAR',motif:'arches'},
+    nyny:{floor:0x243047,wall:0x374158,accent:0xd4a95d,neon:0xff425f,bar:'TIMES SQUARE BAR',motif:'arches'},
+    aria:{floor:0x26283a,wall:0x3d4050,accent:0xb9c5d4,neon:0xb880ff,bar:'ALIBI LOUNGE',motif:'rings'},
+    parkmgm:{floor:0x203528,wall:0x34463a,accent:0xd9cbaa,neon:0x83d99b,bar:'JUNIPER LOUNGE',motif:'palms'},
+    planet:{floor:0x31192b,wall:0x44223a,accent:0xe5d7c7,neon:0xff375f,bar:'HEART BAR',motif:'rings'},
+    wynn:{floor:0x3a201d,wall:0x5a3028,accent:0xe5b661,neon:0xff5b72,bar:'PARASOL LOUNGE',motif:'palms'},
+    encore:{floor:0x351c22,wall:0x552734,accent:0xe4b45f,neon:0xff497a,bar:'EASTSIDE LOUNGE',motif:'palms'},
+    cosmo:{floor:0x241c35,wall:0x382a4d,accent:0xd2b4ff,neon:0x5de7ff,bar:'CHANDLIER BAR',motif:'rings'},
+    trump:{floor:0x302719,wall:0x514226,accent:0xe2bf68,neon:0xffd66e,bar:'GOLD LOUNGE',motif:'columns'}
+  };
+  return themes[place.id]||{floor:0x251638,wall:0x21132d,accent:place.sign||0xff9900,neon:0x25e0ff,bar:'CASINO LOUNGE',motif:'rings'};
+}
+function addCasinoStool(g,x,z,color){
+  var stem=new THREEJS.Mesh(new THREEJS.CylinderGeometry(.18,.25,1.5,8),mat(0x7b7082));stem.position.set(INTERIOR_ORIGIN.x+x,.78,INTERIOR_ORIGIN.z+z);g.add(stem);
+  var seat=new THREEJS.Mesh(new THREEJS.CylinderGeometry(.75,.75,.35,12),mat(color));seat.position.set(INTERIOR_ORIGIN.x+x,1.55,INTERIOR_ORIGIN.z+z);g.add(seat);
+}
+function addCasinoCenterpiece(g,theme){
+  if(theme.motif==='fountain'){
+    var basin=new THREEJS.Mesh(new THREEJS.CylinderGeometry(10,11,1,32),mat(0x8d826f));basin.position.set(INTERIOR_ORIGIN.x,0.6,INTERIOR_ORIGIN.z+3);g.add(basin);
+    var water=new THREEJS.Mesh(new THREEJS.CylinderGeometry(9.3,9.3,.35,32),mat(0x247da0,0x30c8ff,.5));water.position.set(INTERIOR_ORIGIN.x,1.15,INTERIOR_ORIGIN.z+3);g.add(water);
+    for(var j=-2;j<=2;j++){var jet=new THREEJS.Mesh(new THREEJS.CylinderGeometry(.12,.2,3.5-Math.abs(j)*.5,8),new THREEJS.MeshBasicMaterial({color:0x8eeaff,transparent:true,opacity:.7}));jet.position.set(INTERIOR_ORIGIN.x+j*2.5,2.5,INTERIOR_ORIGIN.z+3);g.add(jet);}
+  }else{
+    var ring=new THREEJS.Mesh(new THREEJS.TorusGeometry(8,theme.motif==='rings'?.55:.3,10,36),new THREEJS.MeshBasicMaterial({color:theme.neon}));ring.position.set(INTERIOR_ORIGIN.x,12.5,INTERIOR_ORIGIN.z+3);ring.rotation.x=Math.PI/2;g.add(ring);
+    if(theme.motif==='arches')ring.rotation.x=0;
+    if(theme.motif==='columns')for(var c=-1;c<=1;c+=2)addInteriorBox(g,c*8,6,3,1.5,12,1.5,theme.accent,true);
+    if(theme.motif==='palms')for(var p=-1;p<=1;p+=2){addInteriorBox(g,p*8,4,3,1,8,1,0x795332,true);var crown=new THREEJS.Mesh(new THREEJS.SphereGeometry(3.2,12,8),mat(0x387646));crown.scale.y=.35;crown.position.set(INTERIOR_ORIGIN.x+p*8,8.5,INTERIOR_ORIGIN.z+3);g.add(crown);}
+  }
+}
 function buildCasinoFloor(g,place){
-  addInteriorBox(g,0,-0.05,0,150,0.3,110,0x251638,false);
+  var theme=casinoInteriorTheme(place);
+  addInteriorBox(g,0,-0.05,0,150,0.3,110,theme.floor,false);
+  // Layered carpet borders and a bright central promenade make navigation readable.
+  addInteriorBox(g,0,.12,0,18,.08,108,theme.wall,false);
+  addInteriorBox(g,0,.18,0,3,.08,108,theme.accent,false);
+  for(var stripe=-48;stripe<=48;stripe+=16)addInteriorBox(g,stripe,.14,0,.45,.06,108,theme.accent,false);
   // Outer walls are split around actual doorway gaps, so passages are doorways rather than hidden teleport walls.
-  addZWallWithGap(g,-56,-76,76,[[-11,11]],0x130c22);
-  addZWallWithGap(g,56,-76,76,[[-10,10]],0x130c22);
-  addXWallWithGaps(g,-76,-56,56,[],0x130c22);
-  addXWallWithGaps(g,76,-56,56,[[-36,-20],[22,38]],0x130c22);
-  addInteriorSign(g,place.name.toUpperCase(),0,-55,36,place.sign||0xff9900,{axis:'z',face:1,y:8.5,fontSize:19,height:2.1,glow:4});
+  addZWallWithGap(g,-56,-76,76,[[-11,11]],theme.wall);
+  addZWallWithGap(g,56,-76,76,[[-10,10]],theme.wall);
+  addXWallWithGaps(g,-76,-56,56,[],theme.wall);
+  addXWallWithGaps(g,76,-56,56,[[-36,-20],[22,38]],theme.wall);
+  addInteriorSign(g,place.name.toUpperCase(),0,-55,48,theme.accent,{axis:'z',face:1,y:12,fontSize:30,height:3.4,glow:8});
+  addCasinoCenterpiece(g,theme);
+  // Warm pools of light hang over the major gaming zones.
+  [[-44,-24],[44,-24],[-44,18],[44,18],[0,34]].forEach(function(lp){
+    var shade=new THREEJS.Mesh(new THREEJS.CylinderGeometry(3.6,5,.8,16),mat(theme.accent,theme.neon,.5));shade.position.set(INTERIOR_ORIGIN.x+lp[0],14,INTERIOR_ORIGIN.z+lp[1]);g.add(shade);
+    var light=new THREEJS.PointLight(theme.neon,.45,32);light.position.set(INTERIOR_ORIGIN.x+lp[0],12,INTERIOR_ORIGIN.z+lp[1]);g.add(light);
+  });
   // slot machine islands
   for(var row=-2;row<=2;row++)for(var i=-4;i<=4;i++){
     if(Math.abs(i)<=1&&Math.abs(row)<=1)continue;
-    var slot=addInteriorBox(g,i*13,2,row*13,4,4,3,0x322047,false,0xff2d95);
-    var face=new THREEJS.Mesh(new THREEJS.PlaneGeometry(3.2,2.2),new THREEJS.MeshBasicMaterial({color:(i+row)%2?0xff9900:0x25e0ff,side:THREEJS.DoubleSide}));
+    var slot=addInteriorBox(g,i*13,2,row*13,4,4,3,theme.wall,false,theme.neon);
+    addInteriorBox(g,i*13,4.25,row*13,4.4,.5,3.4,theme.accent,false,theme.neon);
+    var face=new THREEJS.Mesh(new THREEJS.PlaneGeometry(3.2,2.2),new THREEJS.MeshBasicMaterial({color:(i+row)%2?theme.accent:theme.neon,side:THREEJS.DoubleSide}));
     face.position.set(INTERIOR_ORIGIN.x+i*13,3,INTERIOR_ORIGIN.z+row*13+1.55);g.add(face);
+    addCasinoStool(g,i*13,row*13+3.2,theme.accent);
   }
   // table games
   [[-23,-6,'blackjack'],[0,-7,'roulette'],[23,-6,'blackjack'],[-18,16,'roulette'],[18,16,'blackjack']].forEach(function(t){addCasinoTable(g,t[0],t[1],t[2]);});
   // bar / coffee station
-  addInteriorBox(g,-54,2.5,35,24,5,8,0x3a244b,true,0xff9900);
-  addInteriorSign(g,'COFFEE',-54,39,18,0xff9900,{axis:'z',face:1,y:5.6,fontSize:16,height:1.8,glow:3});
-  addInteriorDoor(g,'refresh','WATER + ESPRESSO',-54,43,{w:12,color:0x25e0ff,face:1});
+  addInteriorBox(g,-54,2.5,35,30,5,8,theme.wall,true,theme.neon);
+  addInteriorBox(g,-54,5.3,38.5,31,.6,1,theme.accent,false,theme.neon);
+  addInteriorSign(g,theme.bar,-54,39,28,theme.accent,{axis:'z',face:1,y:7.3,fontSize:20,height:2.3,glow:6});
+  addInteriorDoor(g,'refresh','WATER + ESPRESSO',-54,43,{w:12,color:theme.neon,face:1});
+  addInteriorBox(g,55,3,42,25,6,6,theme.wall,true,theme.accent);
+  addInteriorSign(g,'CASHIER • REWARDS',55,45,25,theme.accent,{axis:'z',face:1,y:7,fontSize:18,height:2.1,glow:5});
 }
 function buildConferenceCorridor(g,place){
   // Bigger maze-like lecture corridor. No ceiling: the camera can look down without clipping into it.
@@ -5772,6 +5830,13 @@ function render(dt){
   updatePalms();
   updateSphereLandmark(dt);
   if(bellagioFountainRoot&&bellagioFountainJets.length){
+    var fountainDist=player3d?Math.hypot(player3d.x-bellagioFountainWorldCenter.x,player3d.z-bellagioFountainWorldCenter.z):0;
+    bellagioFountainRoot.visible=!interiorMode&&!lectureMode&&fountainDist<650;
+    bellagioFountainUpdateAccum+=dt;
+    // Update the show at 30 Hz nearby, 10 Hz at distance, and not at all when hidden.
+    var fountainStep=fountainDist<220?1/30:.1;
+    if(bellagioFountainRoot.visible&&bellagioFountainUpdateAccum>=fountainStep){
+    bellagioFountainUpdateAccum=0;
     var showTime=clock.elapsedTime%32,finale=showTime>=24;
     for(var bf=0;bf<bellagioFountainJets.length;bf++){
       var jet=bellagioFountainJets[bf],pulse=0;
@@ -5788,11 +5853,11 @@ function render(dt){
         jet.outer.position.y=jet.core.position.y=hh*.5;
       }
       jet.foam.scale.setScalar(.65+pulse*.75);jet.foam.material.opacity=.16+pulse*.5;
-      jet.lamp.intensity=.08+pulse*(finale?.75:.38);
     }
     for(var bm=0;bm<bellagioFountainMist.length;bm++){
       var mist=bellagioFountainMist[bm],ma=finale?(.08+.08*Math.abs(Math.sin(clock.elapsedTime+mist.phase))):.015;
       mist.mesh.material.opacity=ma;mist.mesh.position.y=5+(finale?Math.sin(clock.elapsedTime*.7+mist.phase)*2:0);
+    }
     }
   }
   updateHighRoller(dt);
