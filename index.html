@@ -377,6 +377,7 @@ var PLACES=[
  {id:"linq",  name:"The High Roller",               lat:36.11750, lng:-115.16830, w:20, d:20, h:170, color:0x2a2440, sign:0xc85cff, type:"photo", shape:"wheel"},
  {id:"hardrock",name:"Hard Rock Las Vegas",         lat:36.12140, lng:-115.17420, w:160,d:120,h:210, color:0x273447, sign:0x35e9ff, type:"photo", shape:"guitar",descText:"Future Hard Rock Hotel & Casino and Guitar Hotel Las Vegas, rising on the former Mirage site for its planned 2027 debut."},
  {id:"venetian",name:"The Venetian",                lat:36.12130, lng:-115.16990, w:210,d:160,h:140, color:0xf2e6cc, sign:0xff2d95, type:"venue", main:true, tracks:["DAT","AIM","ANT"], shape:"venetian"},
+ {id:"trump", name:"Trump International Hotel",     lat:36.12950, lng:-115.17265, w:72, d:58, h:190, color:0xb8943f, sign:0xffd25a, type:"photo", shape:"gold"},
  {id:"sphere",name:"The Sphere",                    lat:36.12110, lng:-115.16200, w:120,d:120,h:110, color:0x1a1030, sign:0xff9a4d, type:"photo", shape:"sphere"},
  {id:"wynn",  name:"Wynn",                          lat:36.12680, lng:-115.16550, w:180,d:140,h:150, color:0x8a6a48, sign:0xc9a227, type:"venue", tracks:["SVS","API","BIZ"], shape:"wynn"},
  {id:"encore",name:"Encore",                        lat:36.12910, lng:-115.16520, w:160,d:125,h:155, color:0x9a7954, sign:0xffc857, type:"venue", tracks:["DOP","STG","AIM"], shape:"wynn"},
@@ -387,8 +388,8 @@ var PLACES=[
    Derived from the bundled OpenStreetMap footprints: a shortest-path fit through the
    open channel between the east-side and west-side building masses, constrained to
    keep >=20 m of real-world clearance from every footprint. Verified to pass on the
-   correct side of all 11 named resorts. If the browser can reach Overpass, this gets
-   replaced at load time by the actual highway geometry (see loadStripFromOsm). */
+   correct side of all 11 named resorts. This bundled line is the authoritative road
+   geometry at runtime, so world loading never depends on an OSM network request. */
 var ROAD=[
  [36.08161,-115.17279],
  [36.09229,-115.17318],
@@ -419,68 +420,6 @@ var ROAD=[
  [36.13041,-115.16506],
  [36.13083,-115.16455]];
 var ROAD_SOURCE='bundled OSM footprint fit';
-
-/* Live OSM pull for Las Vegas Boulevard. Overpass returns the boulevard as many
-   separate ways (and locally as dual carriageways), so rather than stitching ways
-   we bin every node by latitude and average the longitude — the Strip is monotonic
-   north-south, which makes that both correct and robust. Falls back to the polyline
-   above if Overpass is slow, blocked, or offline. */
-var OVERPASS_MIRRORS=[
-  'https://overpass-api.de/api/interpreter',
-  'https://overpass.private.coffee/api/interpreter',
-  'https://overpass.kumi.systems/api/interpreter'
-];
-function stripQuery(){
-  return '[out:json][timeout:25];'+
-    'way["highway"~"^(motorway|trunk|primary|secondary|tertiary|residential|unclassified)$"]'+
-    '["name"~"Las Vegas Boulevard"](36.0800,-115.1900,36.1360,-115.1500);out geom;';
-}
-function centrelineFromNodes(nodes){
-  // bin by latitude (~30 m bins), average longitude inside each bin
-  var BIN=0.00028, bins={};
-  for(var i=0;i<nodes.length;i++){
-    var la=nodes[i][0], ln=nodes[i][1];
-    if(la<36.0810||la>36.1330||ln<-115.1800||ln>-115.1580)continue;
-    var k=Math.round(la/BIN);
-    if(!bins[k])bins[k]=[0,0,0];
-    bins[k][0]+=la;bins[k][1]+=ln;bins[k][2]++;
-  }
-  var keys=Object.keys(bins).map(Number).sort(function(a,b){return a-b;});
-  if(keys.length<20)return null;
-  var pts=keys.map(function(k){var b=bins[k];return [b[0]/b[2], b[1]/b[2]];});
-  // check there are no big latitude gaps (a broken chain)
-  for(var g=1;g<pts.length;g++)if(pts[g][0]-pts[g-1][0]>0.0016)return null;
-  // 5-tap smoothing on longitude, then decimate to ~40 points
-  var lon=pts.map(function(p){return p[1];});
-  for(var pass=0;pass<3;pass++){
-    var out=lon.slice();
-    for(var i2=1;i2<lon.length-1;i2++)out[i2]=(lon[i2-1]+2*lon[i2]+lon[i2+1])/4;
-    lon=out;
-  }
-  var step=Math.max(1,Math.round(pts.length/40)), road=[];
-  for(var i3=0;i3<pts.length;i3+=step)road.push([+pts[i3][0].toFixed(5),+lon[i3].toFixed(5)]);
-  var last=pts.length-1;
-  if(road[road.length-1][0]!==+pts[last][0].toFixed(5))road.push([+pts[last][0].toFixed(5),+lon[last].toFixed(5)]);
-  return road.length>=12?road:null;
-}
-async function loadStripFromOsm(){
-  var q=stripQuery();
-  for(var i=0;i<OVERPASS_MIRRORS.length;i++){
-    try{
-      var ctrl=new AbortController(), t=setTimeout(function(){ctrl.abort();},6000);
-      var r=await fetch(OVERPASS_MIRRORS[i]+'?data='+encodeURIComponent(q),{signal:ctrl.signal});
-      clearTimeout(t);
-      if(!r.ok)continue;
-      var d=await r.json(), nodes=[];
-      (d.elements||[]).forEach(function(el){
-        (el.geometry||[]).forEach(function(g){nodes.push([g.lat,g.lon]);});
-      });
-      var road=centrelineFromNodes(nodes);
-      if(road){ROAD=road;ROAD_SOURCE='live Overpass ('+nodes.length+' nodes)';return true;}
-    }catch(err){ /* try the next mirror */ }
-  }
-  return false;
-}
 
 var TITLES={
  DAT:["DAT301 · Single-table DynamoDB, for real this time","DAT403 · Aurora DSQL internals deep dive","DAT210 · Choosing a database without crying"],
@@ -631,6 +570,23 @@ function openPhoto(p){
     f:function(){st.min+=10;st.vibes+=10;st.s+=8;st.photosToday[p.id]=1;toast("Posted. Three likes already, one from your mom.","good");closeMenu();}}];
   if(p.id==="sphere")A.push({n:"Stare back at the Sphere 👁",d:"5 min · +4 vibes",
     f:function(){st.min+=5;st.vibes+=4;toast("You won the staring contest. Probably.","good");closeMenu();}});
+  if(p.id==="sign"){
+    var spun=st.signLuckDay===st.day;
+    A.push({n:spun?"Vegas luck already tested today ✔":"Spin your Vegas luck 🎰",
+      d:spun?"The sign says come back tomorrow.":"10 min · a genuinely questionable range of outcomes",off:spun,
+      f:function(){
+        st.min+=10;st.signLuckDay=st.day;
+        var roll=Math.floor(Math.random()*5);
+        if(roll===0){st.s+=30;st.vibes+=18;toast("JACKPOT! A tour bus applauds your main-character energy. +30 social, +18 vibes","good");}
+        else if(roll===1){st.vibes+=12;st.hydration+=15;toast("You win a suspiciously warm bottle of water. Somehow: +12 vibes, +15 hydration","good");}
+        else if(roll===2){st.s+=15;st.energy-=8;toast("You photobomb a wedding party and become their favorite guest. +15 social, -8 energy","good");}
+        else if(roll===3){st.vibes-=5;st.s+=5;toast("A pigeon steals your pose. The pigeon gets more likes. +5 social, -5 vibes","info");}
+        else{st.energy+=10;st.hydration-=8;toast("Free neon slushie! It is 90% caffeine and 10% consequences. +10 energy, -8 hydration","good");}
+        closeMenu();
+      }});
+    A.push({n:"Renew vows with cardboard Elvis 💍",d:"15 min · +14 vibes · +10 social · no legal standing",
+      f:function(){st.min+=15;st.vibes+=14;st.s+=10;toast("Elvis declares you married to cloud architecture. Thank you. Thank you very much.","good");closeMenu();}});
+  }
   A.push(refreshAct());
   openMenu(p.name,p.descText||"A recognizable Strip landmark. Good for the step count.",A);
 }
@@ -972,8 +928,8 @@ function checkVitals(){
 <script>
 /* ================= 3D WORLD (Three.js) ================= */
 var THREEJS, renderer, overlayRenderer, scene, overlayScene, cssRenderer, cssScene, cam, clock;
-var player3d, playerGroup, legL, legR, armL, armR, torso, pack;
-var buildings=[], doorPoints=[], exteriorHotelAreas=[], palms=[], cars=[], helicopters=[], showgirls=[], cowboys=[], starField, moon;
+var player3d, playerGroup, legL, legR, armL, armR, torso, pack, playerFootLift=0;
+var buildings=[], exteriorWalkSurfaces=[], exteriorMeshColliders=[], exteriorColliderGrid=Object.create(null), doorPoints=[], exteriorHotelAreas=[], palms=[], cars=[], helicopters=[], showgirls=[], cowboys=[], starField, moon;
 var npcs=[],npcConfigs=[],nextNpcConfig=0;
 var hotelDayMaterials=[];
 var bellagioFountainRoot=null, bellagioFountainJets=[];
@@ -982,6 +938,8 @@ var policeStationRoot=null,policeStationRelease=null,arrestSequenceActive=false,
 var sphereRoot=null, sphereMesh=null, sphereBase=null, sphereCanvas=null, sphereCtx=null, sphereTexture=null;
 var parisEiffelRoot=null;
 var highRollerRoot=null, highRollerCabins=[], highRollerRideTriggerWorld=null, ridingHighRoller=false, highRollerRideCabinIndex=0, highRollerRideSavedPos=null, highRollerWheelSpeed=0.10;
+var monorailRoot=null,monorailCurve=null,monorailTrain=null,monorailStations=[],ridingMonorail=false;
+var monorailFrom=0,monorailTo=0,monorailProgress=0,monorailRideSavedPos=null;
 var nynyCoasterRoot=null, nynyCoasterCurve=null, nynyCoasterCart=null, nynyCoasterCart2=null;
 var nynyCoasterStationWorld=null, nynyCoasterRideTriggerWorld=null, ridingCoaster=false, coasterRideOffset=0, coasterRideSpeed=0.07, coasterRideSavedPos=null;
 var osmRoot=null, osmLoaded=false, osmBuildingCount=0;
@@ -1007,8 +965,7 @@ function project(lat,lng){
 async function bootWorld(){
   THREEJS=window.THREE;
   try{await loadNpcConfigs();}catch(npcErr){console.warn('NPC configs unavailable',npcErr);}
-  try{ $("loadmsg").innerHTML='LOADING LAS VEGAS<br><span style="font-size:11px;color:#a89ec9">pulling Las Vegas Blvd from OpenStreetMap…</span>'; }catch(e0){}
-  try{ await loadStripFromOsm(); }catch(e1){}
+  try{ $("loadmsg").innerHTML='LOADING LAS VEGAS<br><span style="font-size:11px;color:#a89ec9">building the bundled Strip map…</span>'; }catch(e0){}
   try{ buildWorld(); }
   catch(e){ var el=$("err"); el.style.display="flex"; el.textContent="3D build error: "+e.message; console.error(e); return; }
   worldReady=true;
@@ -1132,16 +1089,26 @@ function addFacadeSigns(g,label,hex,W,H,D){
 function addOverheadHotelLabel(g,place,bw,h,bd){
   if(!place||hotelOverheadLabelPlaced[place.id])return false;
   var label=placeFacadeLabel(place);
+  // Mount the label on the footprint face nearest Las Vegas Boulevard. OSM groups
+  // are axis-aligned, so intersect the road-facing ray with their local AABB.
+  var road=nearestOnRoad(g.position.x,g.position.z);
+  var dx=road&&road.d>0?(road.px-g.position.x)/road.d:0;
+  var dz=road&&road.d>0?(road.pz-g.position.z)/road.d:1;
+  var tx=Math.abs(dx)>.001?(bw*.5)/Math.abs(dx):1e9;
+  var tz=Math.abs(dz)>.001?(bd*.5)/Math.abs(dz):1e9;
+  var wallDist=Math.min(tx,tz)+.28;
+  var wallWidth=(tx<tz?bd:bw);
   var sign=signSprite(label,place.sign,{
     fontSize:54,
-    width:clamp(Math.max(bw,bd)*0.92,34,110),
-    height:clamp(Math.max(8,h*0.12),8,15),
+    width:clamp(wallWidth*.78,24,92),
+    height:clamp(h*.12,4.5,11),
     glow:18,
     depthTest:true,
-    renderOrder:5
+    renderOrder:5,
+    frontOnly:true
   });
-  sign.position.set(0,h+Math.max(18,h*0.22),0);
-  sign.userData.billboard=true;
+  sign.position.set(dx*wallDist,clamp(h*.68,9,h-4),dz*wallDist);
+  sign.rotation.y=Math.atan2(dx,dz);
   g.add(sign);
   hotelOverheadLabelPlaced[place.id]=true;
   g.userData.hotelLabelCount=1;
@@ -1581,6 +1548,373 @@ function arrestAtBellagio(){
   toast("Arrested for trespassing in the Bellagio fountains.","bad");updHUD();playArrestSequence();
 }
 
+function buildTrumpHotelLandmark(){
+  var p=null;for(var i=0;i<PLACES.length;i++)if(PLACES[i].id==='trump'){p=PLACES[i];break;}if(!p)return;
+  var q=project(p.lat,p.lng),root=new THREEJS.Group();
+  // The tower is west of the Strip; local +Z faces east toward the boulevard.
+  root.position.set(q.x,0,q.z);root.rotation.y=Math.PI-.02;
+  var goldGlass=new THREEJS.MeshStandardMaterial({color:0xb38c35,roughness:.17,metalness:.82,emissive:new THREEJS.Color(0x493006),emissiveIntensity:.32});
+  var darkGold=new THREEJS.MeshStandardMaterial({color:0x73561f,roughness:.24,metalness:.72,emissive:new THREEJS.Color(0x261a04),emissiveIntensity:.24});
+  var cream=new THREEJS.MeshStandardMaterial({color:0xe5d8bb,roughness:.55,metalness:.1});
+  var bronze=new THREEJS.MeshStandardMaterial({color:0x8b692d,roughness:.3,metalness:.78});
+  var warm=new THREEJS.MeshBasicMaterial({color:0xffd96d,transparent:true,opacity:.74});
+  function block(x,y,z,w,h,d,mat){var m=new THREEJS.Mesh(new THREEJS.BoxGeometry(w,h,d),mat);m.position.set(x,y,z);root.add(m);return m;}
+  // Slender gold curtain-wall shaft with slightly projecting side piers.
+  block(0,66,0,39,132,31,goldGlass);
+  block(-20.2,65,0,2.2,130,33,cream);block(20.2,65,0,2.2,130,33,cream);
+  for(var mull=-5;mull<=5;mull++)block(mull*3.25,65,15.75,.28,124,.25,darkGold);
+  for(var floor=5;floor<129;floor+=3.2)block(0,floor,15.92,37.5,.12,.18,warm);
+  // Tiered mechanical crown at the top.
+  block(0,134,0,41,4,33,bronze);block(0,139,0,34,6,27,goldGlass);block(0,143,0,27,2.5,22,cream);
+  // Split wordmark: T is deliberately tilted 45 degrees, while RUMP stays level.
+  var letterT=signSprite('T',0xffffff,{fontSize:180,width:16,height:16,glow:30,depthTest:true,renderOrder:9,frontOnly:true});
+  letterT.position.set(-22,121,16.15);letterT.rotation.z=Math.PI/4;root.add(letterT);
+  var rump=signSprite('RUMP',0xffffff,{fontSize:140,width:43,height:15,glow:30,depthTest:true,renderOrder:9,frontOnly:true});
+  rump.position.set(10,121,16.15);root.add(rump);
+  // Gold-and-cream porte-cochere and landscaped entry court.
+  block(0,6,24,64,12,26,cream);block(0,13,24,67,2,29,bronze);
+  var canopy=new THREEJS.Mesh(new THREEJS.CylinderGeometry(18,20,1.5,28),bronze);canopy.scale.z=.55;canopy.position.set(0,9,42);root.add(canopy);
+  for(var c=-1;c<=1;c+=2)block(c*12,4.5,42,1,9,1,bronze);
+  var hotelName=signSprite('TRUMP INTERNATIONAL HOTEL',0xffd25a,{fontSize:34,width:46,height:4.5,glow:9,depthTest:true,renderOrder:7,frontOnly:true});
+  hotelName.position.set(0,16,37.2);root.add(hotelName);
+  root.userData.placeId='trump';root.userData.aabb={cx:q.x,cz:q.z,hw:35,hd:47};
+  setFootprintFromLocal(root,[[-32,-19],[32,-19],[36,8],[35,47],[24,52],[-24,52],[-36,44],[-36,8]],1.0);
+  buildings.push(root);scene.add(root);registerHotelVisuals(root,1.22);registerExteriorEntry(p,q.x,q.z,68,92);
+}
+
+function buildParkMgmLandmark(){
+  var p=null;for(var i=0;i<PLACES.length;i++)if(PLACES[i].id==='parkmgm'){p=PLACES[i];break;}if(!p)return;
+  var q=project(36.10472,-115.17595),root=new THREEJS.Group();
+  // Park MGM is west of the boulevard; local +Z faces the Strip.
+  root.position.set(q.x,0,q.z);root.rotation.y=Math.PI/2-.025;
+  var ivory=new THREEJS.MeshStandardMaterial({color:0xd8cfbf,roughness:.66,metalness:.04});
+  var cream=new THREEJS.MeshStandardMaterial({color:0xf0e8d9,roughness:.55,metalness:.06});
+  var plum=new THREEJS.MeshStandardMaterial({color:0x553149,roughness:.34,metalness:.46,emissive:new THREEJS.Color(0x24101d),emissiveIntensity:.25});
+  var darkGlass=new THREEJS.MeshStandardMaterial({color:0x24313c,roughness:.18,metalness:.65,emissive:new THREEJS.Color(0x0b1722),emissiveIntensity:.28});
+  var bronze=new THREEJS.MeshStandardMaterial({color:0x8a6c4b,roughness:.38,metalness:.62});
+  function block(x,y,z,w,h,d,mat,parent){var m=new THREEJS.Mesh(new THREEJS.BoxGeometry(w,h,d),mat);m.position.set(x,y,z);(parent||root).add(m);return m;}
+  function wing(x,z,w,d,h,angle){
+    var g=new THREEJS.Group();g.position.set(x,0,z);g.rotation.y=angle||0;root.add(g);
+    block(0,h/2,0,w,h,d,ivory,g);
+    for(var col=-3;col<=3;col++)block(col*w*.12,h*.5,d/2+.3,w*.065,h*.87,.35,col%2?plum:darkGlass,g);
+    for(var floor=7;floor<h-5;floor+=4.5)block(0,floor,d/2+.46,w*.9,.18,.18,cream,g);
+    block(-w/2-.4,h*.5,0,.8,h*.94,d+1,cream,g);block(w/2+.4,h*.5,0,.8,h*.94,d+1,cream,g);
+    block(0,h+1.3,0,w+1.4,2.6,d+1.4,plum,g);
+  }
+  // Restrained stepped wings reflect the renovated Monte Carlo tower.
+  wing(0,-18,42,28,91,0);wing(-34,-8,34,26,78,-.12);wing(34,-8,34,26,78,.12);
+  block(0,11,29,112,22,62,ivory);block(0,23,29,115,2.4,65,bronze);
+  block(0,7,62,98,14,16,plum);block(0,15,62,102,2,19,cream);
+  for(var bay=-6;bay<=6;bay++)block(bay*7,5,70.2,5,7,.3,darkGlass);
+  var sign=signSprite('PARK MGM',0xf4e8d5,{fontSize:68,width:48,height:7.5,glow:12,depthTest:true,renderOrder:8,frontOnly:true});
+  sign.position.set(0,31,70.4);root.add(sign);
+  var nomad=signSprite('NoMad',0xcda35f,{fontSize:42,width:21,height:4.8,glow:9,depthTest:true,renderOrder:7,frontOnly:true});
+  nomad.position.set(0,80,-3.7);root.add(nomad);
+  root.userData.placeId='parkmgm';root.userData.aabb={cx:q.x,cz:q.z,hw:62,hd:71};
+  setFootprintFromLocal(root,[[-58,-39],[58,-39],[64,-20],[62,71],[48,78],[-48,78],[-64,65],[-64,-20]],1.0);
+  buildings.push(root);scene.add(root);registerHotelVisuals(root,1.16);registerExteriorEntry(p,q.x,q.z,118,140);
+}
+
+function buildAriaLandmark(){
+  var p=null;for(var i=0;i<PLACES.length;i++)if(PLACES[i].id==='aria'){p=PLACES[i];break;}if(!p)return;
+  var q=project(p.lat,p.lng),root=new THREEJS.Group();
+  // ARIA sits west of the Strip; local +Z faces east toward the boulevard.
+  root.position.set(q.x-8,0,q.z);root.rotation.y=Math.PI/2-.04;
+  var blueGlass=new THREEJS.MeshStandardMaterial({color:0x244a68,roughness:.16,metalness:.72,emissive:new THREEJS.Color(0x0a2942),emissiveIntensity:.34});
+  var silver=new THREEJS.MeshStandardMaterial({color:0x9ca8b1,roughness:.26,metalness:.82});
+  var dark=new THREEJS.MeshStandardMaterial({color:0x17232e,roughness:.18,metalness:.66,emissive:new THREEJS.Color(0x07131f),emissiveIntensity:.25});
+  var warm=new THREEJS.MeshBasicMaterial({color:0xffcf7a,transparent:true,opacity:.72});
+  function block(x,y,z,w,h,d,mat,parent){var m=new THREEJS.Mesh(new THREEJS.BoxGeometry(w,h,d),mat);m.position.set(x,y,z);(parent||root).add(m);return m;}
+  function curvedTower(cx,cz,h,width,depth,curve,segments){
+    for(var s=0;s<segments;s++){
+      var t=(s/(segments-1)-.5)*2,angle=t*curve;
+      var x=cx+t*width*.44,z=cz-Math.abs(t)*depth*.12;
+      var g=new THREEJS.Group();g.position.set(x,0,z);g.rotation.y=angle;root.add(g);
+      var sw=width/segments*1.35;
+      block(0,h/2,0,sw,h,depth,blueGlass,g);
+      for(var floor=6;floor<h-4;floor+=4.2)block(0,floor,depth/2+.24,sw*.94,.14,.2,silver,g);
+      block(0,h+1,0,sw+1,2,depth+1,silver,g);
+    }
+  }
+  // Two sweeping glass crescents create ARIA's characteristic curved skyline.
+  curvedTower(-25,-23,118,76,28,.3,9);
+  curvedTower(30,-12,101,68,27,-.28,8);
+  block(0,11,30,134,22,70,silver);block(0,23,30,137,2.5,73,dark);
+  block(0,8,67,112,16,18,dark);block(0,17,67,116,2.2,21,silver);
+  for(var bay=-7;bay<=7;bay++){block(bay*7,5.5,76.2,5.2,8,.28,blueGlass);block(bay*7,10,78,5.9,.55,4,warm);}
+  var sign=signSprite('ARIA',0xe8f4ff,{fontSize:86,width:37,height:8,glow:15,depthTest:true,renderOrder:8,frontOnly:true});
+  sign.position.set(0,32,76.5);root.add(sign);
+  // Elliptical arrival canopy and shallow reflecting pool.
+  var canopy=new THREEJS.Mesh(new THREEJS.CylinderGeometry(25,27,2,32),silver);canopy.scale.z=.45;canopy.position.set(-29,10,86);root.add(canopy);
+  for(var c=-1;c<=1;c+=2)block(-29+c*17,5,86,1.1,10,1.1,silver);
+  var pool=new THREEJS.Mesh(new THREEJS.CircleGeometry(22,36),new THREEJS.MeshStandardMaterial({color:0x327b9d,roughness:.14,transparent:true,opacity:.88}));
+  pool.rotation.x=-Math.PI/2;pool.scale.z=.42;pool.position.set(29,.12,86);root.add(pool);
+  root.userData.placeId='aria';root.userData.aabb={cx:root.position.x,cz:root.position.z,hw:76,hd:83};
+  setFootprintFromLocal(root,[[-72,-48],[72,-48],[80,-25],[77,76],[61,93],[-60,93],[-79,72],[-80,-25]],1.0);
+  buildings.push(root);scene.add(root);registerHotelVisuals(root,1.18);registerExteriorEntry(p,root.position.x,root.position.z,148,166);
+}
+
+function buildMandalayBayLandmark(){
+  var p=null;for(var i=0;i<PLACES.length;i++)if(PLACES[i].id==='mandalay'){p=PLACES[i];break;}if(!p)return;
+  var q=project(p.lat,p.lng),root=new THREEJS.Group();
+  // Local +Z faces east toward Las Vegas Boulevard from the west side of the Strip.
+  root.position.set(q.x,0,q.z);root.rotation.y=Math.PI/2-.025;
+  var goldGlass=new THREEJS.MeshStandardMaterial({color:0xb88b2f,roughness:.2,metalness:.74,emissive:new THREEJS.Color(0x4b3108),emissiveIntensity:.32});
+  var darkGold=new THREEJS.MeshStandardMaterial({color:0x6f5421,roughness:.24,metalness:.68,emissive:new THREEJS.Color(0x291b05),emissiveIntensity:.28});
+  var cream=new THREEJS.MeshStandardMaterial({color:0xe8d9bd,roughness:.58,metalness:.08});
+  var bronze=new THREEJS.MeshStandardMaterial({color:0x82622d,roughness:.36,metalness:.72});
+  var water=new THREEJS.MeshStandardMaterial({color:0x287c9b,roughness:.16,transparent:true,opacity:.9});
+  var warm=new THREEJS.MeshBasicMaterial({color:0xffd363});
+  function block(x,y,z,w,h,d,mat,parent){var m=new THREEJS.Mesh(new THREEJS.BoxGeometry(w,h,d),mat);m.position.set(x,y,z);(parent||root).add(m);return m;}
+  function wing(x,z,w,d,h,angle){
+    var g=new THREEJS.Group();g.position.set(x,0,z);g.rotation.y=angle||0;root.add(g);
+    block(0,h/2,0,w,h,d,goldGlass,g);
+    for(var floor=7;floor<h-5;floor+=4.1)block(0,floor,d/2+.26,w*.94,.18,.22,warm,g);
+    for(var mull=-4;mull<=4;mull++)block(mull*w*.1,h*.5,d/2+.4,.3,h*.91,.28,darkGold,g);
+    block(-w/2-.4,h*.5,0,.8,h*.95,d+1,cream,g);block(w/2+.4,h*.5,0,.8,h*.95,d+1,cream,g);
+    block(0,h+1.4,0,w+1.6,2.8,d+1.4,bronze,g);
+  }
+  // The iconic three-pronged gold tower.
+  wing(0,-24,48,31,112,0);
+  wing(-41,-11,46,29,98,-.22);
+  wing(41,-11,46,29,98,.22);
+  block(0,13,29,142,26,70,cream);block(0,27,29,145,2.5,73,bronze);
+  block(0,8,67,126,16,18,darkGold);block(0,17,67,130,2.2,21,bronze);
+  for(var bay=-8;bay<=8;bay++){block(bay*7,5.5,76.2,5,8,.28,goldGlass);block(bay*7,10,78,5.8,.65,4,bronze);}
+  var name=signSprite('MANDALAY BAY',0xffd363,{fontSize:70,width:62,height:8,glow:16,depthTest:true,renderOrder:8,frontOnly:true});
+  name.position.set(0,34,76.5);root.add(name);
+  // Small beach lagoon makes the south resort read differently from the casino blocks.
+  var lagoon=new THREEJS.Mesh(new THREEJS.CircleGeometry(28,40),water);lagoon.rotation.x=-Math.PI/2;lagoon.scale.set(1.5,.72,1);lagoon.position.set(0,.12,-76);root.add(lagoon);
+  var sandRing=new THREEJS.Mesh(new THREEJS.RingGeometry(29,35,40),new THREEJS.MeshStandardMaterial({color:0xd7bd86,roughness:.92}));
+  sandRing.rotation.x=-Math.PI/2;sandRing.scale.set(1.5,.72,1);sandRing.position.set(0,.1,-76);root.add(sandRing);exteriorWalkSurfaces.push(sandRing);
+  root.userData.placeId='mandalay';
+  root.userData.aabb={cx:q.x,cz:q.z,hw:78,hd:82};
+  setFootprintFromLocal(root,[[-75,-64],[75,-64],[82,-39],[80,78],[62,91],[-62,91],[-82,74],[-82,-39]],1.0);
+  buildings.push(root);scene.add(root);registerHotelVisuals(root,1.22);
+  registerExteriorEntry(p,q.x,q.z,150,164);
+}
+
+function buildWelcomeSignLandmark(){
+  var p=null;for(var i=0;i<PLACES.length;i++)if(PLACES[i].id==='sign'){p=PLACES[i];break;}if(!p)return;
+  var q=project(p.lat,p.lng),road=nearestOnRoad(q.x,q.z),root=new THREEJS.Group();
+  root.position.set(q.x,0,q.z);
+  if(road)root.rotation.y=Math.atan2(road.tx,road.tz);
+  var poleMat=new THREEJS.MeshStandardMaterial({color:0xb9c2ca,metalness:.88,roughness:.22});
+  var white=new THREEJS.MeshStandardMaterial({color:0xf7f2df,roughness:.5,metalness:.08});
+  var red=new THREEJS.MeshBasicMaterial({color:0xe53a39});
+  function block(x,y,z,w,h,d,mat){var m=new THREEJS.Mesh(new THREEJS.BoxGeometry(w,h,d),mat);m.position.set(x,y,z);root.add(m);return m;}
+  block(-9.5,8,0,.7,16,.7,poleMat);block(9.5,8,0,.7,16,.7,poleMat);
+  // Draw the complete face as one crisp texture so typography and proportions remain
+  // coherent instead of stacking independent floating sprites.
+  var canvas=document.createElement('canvas');canvas.width=1024;canvas.height=640;var ctx=canvas.getContext('2d');
+  ctx.clearRect(0,0,1024,640);
+  function polygon(points,fill,stroke,width){
+    ctx.beginPath();ctx.moveTo(points[0][0],points[0][1]);for(var i=1;i<points.length;i++)ctx.lineTo(points[i][0],points[i][1]);ctx.closePath();
+    ctx.fillStyle=fill;ctx.fill();if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=width||8;ctx.stroke();}
+  }
+  var panel=[[145,205],[275,120],[790,120],[930,265],[810,520],[205,520],[72,285]];
+  polygon(panel,'#f5f1df','#2559a5',14);
+  // Red eight-point roadside star.
+  var starPts=[],sx=165,sy=78;for(var si=0;si<16;si++){var sr=si%2?25:68,sa=-Math.PI/2+si*Math.PI/8;starPts.push([sx+Math.cos(sa)*sr,sy+Math.sin(sa)*sr]);}
+  polygon(starPts,'#ef3737','#ffffff',5);
+  // Seven individual blue discs and yellow WELCOME letters.
+  var letters='WELCOME',startX=337;
+  ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='bold 42px Arial Black, sans-serif';
+  for(var ci=0;ci<7;ci++){var cx=startX+ci*55;ctx.beginPath();ctx.arc(cx,112,25,0,Math.PI*2);ctx.fillStyle='#2867c6';ctx.fill();ctx.strokeStyle='#ffffff';ctx.lineWidth=4;ctx.stroke();ctx.fillStyle='#ffd447';ctx.fillText(letters[ci],cx,114);}
+  ctx.fillStyle='#2662ad';ctx.font='bold 42px Arial, sans-serif';ctx.fillText('TO FABULOUS',512,224);
+  ctx.shadowColor='#ef3b42';ctx.shadowBlur=15;ctx.fillStyle='#ef3b42';ctx.font='bold 83px Arial Black, sans-serif';ctx.fillText('LAS VEGAS',512,330);ctx.shadowBlur=0;
+  ctx.fillStyle='#2867c6';ctx.font='bold 43px Arial, sans-serif';ctx.fillText('NEVADA',512,411);
+  // Warm perimeter bulbs placed evenly along the actual tapered outline.
+  var edges=[];for(var ei=0;ei<panel.length;ei++){var ea=panel[ei],eb=panel[(ei+1)%panel.length],elen=Math.hypot(eb[0]-ea[0],eb[1]-ea[1]),steps=Math.max(2,Math.floor(elen/40));for(var es=0;es<steps;es++)edges.push([ea[0]+(eb[0]-ea[0])*es/steps,ea[1]+(eb[1]-ea[1])*es/steps]);}
+  edges.forEach(function(pt){ctx.beginPath();ctx.arc(pt[0],pt[1],7,0,Math.PI*2);ctx.fillStyle='#ffd447';ctx.shadowColor='#ffb629';ctx.shadowBlur=12;ctx.fill();});ctx.shadowBlur=0;
+  var texture=new THREEJS.CanvasTexture(canvas);texture.minFilter=THREEJS.LinearFilter;texture.magFilter=THREEJS.LinearFilter;
+  var face=new THREEJS.Mesh(new THREEJS.PlaneGeometry(30,18.75),new THREEJS.MeshBasicMaterial({map:texture,transparent:true,depthWrite:false,side:THREEJS.DoubleSide}));
+  face.position.set(0,15.2,.6);root.add(face);
+  // Subtle solid backing gives the sign thickness when approached from an angle.
+  block(0,14.9,0,23.5,10.5,.75,new THREEJS.MeshStandardMaterial({color:0xd8d7d2,roughness:.5,metalness:.18}));
+  face.renderOrder=4;
+  // A restrained paved photo pad with smaller casino dice.
+  var pad=new THREEJS.Mesh(new THREEJS.CircleGeometry(7,32),new THREEJS.MeshStandardMaterial({color:0x6f637b,roughness:.76,metalness:.08}));pad.rotation.x=-Math.PI/2;pad.position.set(0,.08,12);root.add(pad);exteriorWalkSurfaces.push(pad);
+  var padRing=new THREEJS.Mesh(new THREEJS.RingGeometry(6.8,7.35,32),new THREEJS.MeshBasicMaterial({color:0xffd447}));padRing.rotation.x=-Math.PI/2;padRing.position.set(0,.11,12);root.add(padRing);
+  for(var die=-1;die<=1;die+=2){var cube=block(die*6.2,1.35,13,2.7,2.7,2.7,white);cube.rotation.y=die*.25;[-.65,0,.65].forEach(function(dot){var pip=new THREEJS.Mesh(new THREEJS.SphereGeometry(.2,7,5),red);pip.position.set(die*6.2+dot,1.35,14.42);root.add(pip);});}
+  // Deliberately flat Elvis photo cutout: white jumpsuit, red scarf, black pompadour.
+  var suit=new THREEJS.MeshStandardMaterial({color:0xf4f0e8,roughness:.58}),black=new THREEJS.MeshLambertMaterial({color:0x16110f}),skin=new THREEJS.MeshLambertMaterial({color:0xd39b72});
+  block(10.5,4.2,10,3.4,7.2,.45,suit);block(10.5,5.9,10.25,2.2,.6,.18,red);
+  block(9.25,1.8,10,1.05,3.6,.5,black);block(11.75,1.8,10,1.05,3.6,.5,black);
+  block(8.5,5,10,1,5,.45,suit).rotation.z=-.38;block(12.5,5,10,1,5,.45,suit).rotation.z=.38;
+  var elvisHead=new THREEJS.Mesh(new THREEJS.SphereGeometry(1.25,12,9),skin);elvisHead.position.set(10.5,8.8,10);root.add(elvisHead);
+  var elvisHair=new THREEJS.Mesh(new THREEJS.SphereGeometry(1.45,12,9),black);elvisHair.scale.set(1,.55,.72);elvisHair.position.set(10.5,9.55,9.9);root.add(elvisHair);
+  root.userData.aabb={cx:q.x,cz:q.z,hw:14,hd:4};buildings.push(root);scene.add(root);
+  registerExteriorEntry(p,q.x,q.z,12,8);
+}
+
+function buildMgmGrandLandmark(){
+  var p=null;for(var i=0;i<PLACES.length;i++)if(PLACES[i].id==='mgm'){p=PLACES[i];break;}if(!p)return;
+  var q=project(p.lat,p.lng),root=new THREEJS.Group();
+  // Local +Z faces west toward Las Vegas Boulevard.
+  root.position.set(q.x,0,q.z);root.rotation.y=-Math.PI/2-.025;
+  var emerald=new THREEJS.MeshStandardMaterial({color:0x176347,roughness:.2,metalness:.66,emissive:new THREEJS.Color(0x092f24),emissiveIntensity:.32});
+  var darkGlass=new THREEJS.MeshStandardMaterial({color:0x102c28,roughness:.16,metalness:.72,emissive:new THREEJS.Color(0x071b18),emissiveIntensity:.3});
+  var stone=new THREEJS.MeshStandardMaterial({color:0xaaa18d,roughness:.62,metalness:.08});
+  var black=new THREEJS.MeshStandardMaterial({color:0x202522,roughness:.42,metalness:.42});
+  var gold=new THREEJS.MeshStandardMaterial({color:0xd5ab38,roughness:.27,metalness:.88,emissive:new THREEJS.Color(0x5b3c05),emissiveIntensity:.26});
+  var goldGlow=new THREEJS.MeshBasicMaterial({color:0xffc94f});
+  function block(x,y,z,w,h,d,mat,parent){var m=new THREEJS.Mesh(new THREEJS.BoxGeometry(w,h,d),mat);m.position.set(x,y,z);(parent||root).add(m);return m;}
+  function towerWing(x,z,w,d,h,angle){
+    var g=new THREEJS.Group();g.position.set(x,0,z);g.rotation.y=angle||0;root.add(g);
+    block(0,h/2,0,w,h,d,emerald,g);
+    for(var floor=7;floor<h-5;floor+=4.2)block(0,floor,d/2+.28,w*.93,.2,.24,goldGlow,g);
+    for(var mull=-3;mull<=3;mull++)block(mull*w*.12,h*.5,d/2+.43,.32,h*.9,.3,darkGlass,g);
+    block(-w/2-.45,h*.5,0,.9,h*.94,d+1,stone,g);block(w/2+.45,h*.5,0,.9,h*.94,d+1,stone,g);
+    block(0,h+1.5,0,w+1.5,3,d+1.5,gold,g);
+  }
+  // MGM Grand's enormous emerald hotel reads as a central core with splayed wings.
+  towerWing(0,-24,48,34,108,0);
+  towerWing(-42,-12,48,31,91,-.2);
+  towerWing(42,-12,48,31,91,.2);
+  towerWing(0,-58,43,29,82,0);
+  block(0,13,31,142,26,74,stone);block(0,27,31,145,2.6,77,gold);
+  block(0,9,68,126,18,18,black);block(0,19,68,130,2.2,21,gold);
+  // Recessed green-glass lobby and rhythmic gold entrance canopy.
+  for(var bay=-8;bay<=8;bay++){
+    block(bay*7,6,77.2,5.1,9,.3,darkGlass);
+    block(bay*7,11.2,79,5.9,.65,4,gold);
+  }
+  var hotelSign=signSprite('MGM GRAND',0xffd15a,{fontSize:76,width:58,height:8,glow:17,depthTest:true,renderOrder:8,frontOnly:true});
+  hotelSign.position.set(0,35,77.3);root.add(hotelSign);
+  var sessions=signSprite('RE:INVENT · SESSIONS',0x4dff9d,{fontSize:34,width:40,height:4.5,glow:11,depthTest:true,renderOrder:7,frontOnly:true});
+  sessions.position.set(0,16,79.4);root.add(sessions);
+  // Gold lion on a dark pedestal in the Strip plaza.
+  var lionBase=new THREEJS.Mesh(new THREEJS.CylinderGeometry(12,14,4,24),black);lionBase.position.set(-43,2,88);root.add(lionBase);
+  var lionBody=new THREEJS.Mesh(new THREEJS.SphereGeometry(1,18,12),gold);lionBody.scale.set(7,4.4,3.3);lionBody.position.set(-43,8,88);root.add(lionBody);
+  var lionHead=new THREEJS.Mesh(new THREEJS.SphereGeometry(3.7,16,12),gold);lionHead.position.set(-36.8,11,88);root.add(lionHead);
+  var mane=new THREEJS.Mesh(new THREEJS.TorusGeometry(4.2,1.15,10,20),gold);mane.position.set(-38.5,10.7,88);mane.rotation.y=Math.PI/2;root.add(mane);
+  for(var leg=-1;leg<=1;leg+=2){block(-45+leg*3,5.2,86,1.5,6,1.5,gold);block(-45+leg*3,5.2,90,1.5,6,1.5,gold);}
+  var tail=new THREEJS.Mesh(new THREEJS.TorusGeometry(4,.45,7,18,Math.PI*1.35),gold);tail.position.set(-49,9,88);tail.rotation.y=Math.PI/2;root.add(tail);
+  // Crown sign remains attached to the front face of the central tower.
+  var crownSign=signSprite('MGM',0xffd15a,{fontSize:72,width:24,height:7,glow:15,depthTest:true,renderOrder:7,frontOnly:true});
+  crownSign.position.set(0,94,-6.7);root.add(crownSign);
+  root.userData.placeId='mgm';
+  root.userData.aabb={cx:root.position.x,cz:root.position.z,hw:79,hd:86};
+  setFootprintFromLocal(root,[[-75,-75],[75,-75],[82,-45],[80,78],[62,94],[-62,94],[-82,76],[-82,-45]],1.0);
+  buildings.push(root);scene.add(root);registerHotelVisuals(root,1.2);
+  registerExteriorEntry(p,root.position.x,root.position.z,150,170);
+}
+
+function buildPlanetHollywoodLandmark(){
+  var p=null;for(var i=0;i<PLACES.length;i++)if(PLACES[i].id==='planet'){p=PLACES[i];break;}if(!p)return;
+  var q=project(p.lat,p.lng),root=new THREEJS.Group();
+  // Local +Z is the west-facing Strip facade.
+  // Pull the complex slightly east so the broad Miracle Mile frontage clears
+  // the authoritative Las Vegas Boulevard road corridor.
+  root.position.set(q.x+24,0,q.z);root.rotation.y=-Math.PI/2-.035;
+  var sandstone=new THREEJS.MeshStandardMaterial({color:0xcbb89d,roughness:.64,metalness:.06});
+  var cream=new THREEJS.MeshStandardMaterial({color:0xeee4d2,roughness:.54,metalness:.08});
+  var blueGlass=new THREEJS.MeshStandardMaterial({color:0x274966,roughness:.18,metalness:.64,emissive:new THREEJS.Color(0x0d2944),emissiveIntensity:.3});
+  var darkGlass=new THREEJS.MeshStandardMaterial({color:0x192736,roughness:.15,metalness:.7,emissive:new THREEJS.Color(0x071321),emissiveIntensity:.34});
+  var steel=new THREEJS.MeshStandardMaterial({color:0x777b82,roughness:.3,metalness:.78});
+  var red=new THREEJS.MeshBasicMaterial({color:0xe12b35});
+  function block(x,y,z,w,h,d,mat){var m=new THREEJS.Mesh(new THREEJS.BoxGeometry(w,h,d),mat);m.position.set(x,y,z);root.add(m);return m;}
+  function towerSection(x,z,w,d,h,angle){
+    var g=new THREEJS.Group();g.position.set(x,0,z);g.rotation.y=angle||0;root.add(g);
+    function part(px,py,pz,pw,ph,pd,mat){var m=new THREEJS.Mesh(new THREEJS.BoxGeometry(pw,ph,pd),mat);m.position.set(px,py,pz);g.add(m);return m;}
+    part(0,h/2,0,w,h,d,sandstone);
+    // Alternating deep-blue vertical window stacks create the resort's striped face.
+    for(var col=-3;col<=3;col++)part(col*w*.125,h*.5,d/2+.25,w*.065,h*.9,.35,col%2?darkGlass:blueGlass);
+    for(var floor=8;floor<h-5;floor+=5)part(0,floor,d/2+.43,w*.9,.18,.18,cream);
+    part(-w/2-.45,h*.5,0,.9,h*.95,d+1,cream);part(w/2+.45,h*.5,0,.9,h*.95,d+1,cream);
+    part(0,h+1.4,0,w+1.8,2.8,d+1.5,steel);
+    return g;
+  }
+  // Three angled slabs form Planet Hollywood's broad, subtly curved tower silhouette.
+  towerSection(0,-22,42,28,108,0);
+  towerSection(-35,-12,36,27,82,-.16);
+  towerSection(35,-12,36,27,82,.16);
+  block(0,12,21,112,24,52,sandstone);block(0,25,21,115,2.4,54,cream);
+  // Miracle Mile wraps the base with a dark contemporary Strip frontage.
+  block(0,7,48,120,14,20,darkGlass);
+  block(0,15,48,122,2.2,22,steel);
+  for(var bay=-8;bay<=8;bay++){
+    block(bay*6.5,5,58.2,4.8,7,.25,blueGlass);
+    block(bay*6.5,9,59.3,5.6,.65,3, bay%2?red:steel);
+  }
+  var mallSign=signSprite('MIRACLE MILE SHOPS',0xffd15c,{fontSize:34,width:42,height:4.5,glow:10,depthTest:true,renderOrder:6,frontOnly:true});
+  mallSign.position.set(-27,13.5,59.4);root.add(mallSign);
+  var liveSign=signSprite('PH LIVE',0x4fbbff,{fontSize:38,width:20,height:4.5,glow:12,depthTest:true,renderOrder:6,frontOnly:true});
+  liveSign.position.set(35,13.5,59.4);root.add(liveSign);
+  // Large circular ph medallion and attached hotel wordmark.
+  var disc=new THREEJS.Mesh(new THREEJS.CircleGeometry(10,40),red);disc.position.set(0,34,60.3);root.add(disc);
+  var ph=signSprite('ph',0xffffff,{fontSize:110,width:15,height:10,glow:9,depthTest:true,renderOrder:8,frontOnly:true});
+  ph.position.set(0,34,60.5);root.add(ph);
+  var hotelSign=signSprite('PLANET HOLLYWOOD',0xffe4bb,{fontSize:60,width:52,height:6.5,glow:14,depthTest:true,renderOrder:7,frontOnly:true});
+  hotelSign.position.set(0,22,60.5);root.add(hotelSign);
+  // Rooftop crown and red accent fins keep the skyline recognizable at night.
+  block(0,112,-22,31,5,21,steel);
+  for(var fin=-1;fin<=1;fin+=2)block(fin*13,119,-22,1.2,14,1.2,red);
+  root.userData.placeId='planet';
+  root.userData.aabb={cx:root.position.x,cz:root.position.z,hw:65,hd:61};
+  setFootprintFromLocal(root,[[-61,-43],[61,-43],[66,-27],[66,61],[55,66],[-55,66],[-66,53],[-66,-27]],1.0);
+  buildings.push(root);scene.add(root);registerHotelVisuals(root,1.18);
+}
+
+function buildParisLandmark(){
+  var p=null;for(var i=0;i<PLACES.length;i++)if(PLACES[i].id==='paris'){p=PLACES[i];break;}if(!p)return;
+  var q=project(p.lat,p.lng),root=new THREEJS.Group();
+  // Local +Z faces west toward Las Vegas Boulevard.
+  root.position.set(q.x+25,0,q.z+2);root.rotation.y=-Math.PI/2-.025;
+  var limestone=new THREEJS.MeshStandardMaterial({color:0xe7d8bd,roughness:.67,metalness:.04});
+  var trim=new THREEJS.MeshStandardMaterial({color:0xf7ecda,roughness:.52,metalness:.06});
+  var blueRoof=new THREEJS.MeshStandardMaterial({color:0x314968,roughness:.35,metalness:.58,emissive:new THREEJS.Color(0x111d30),emissiveIntensity:.18});
+  var glass=new THREEJS.MeshStandardMaterial({color:0x244969,metalness:.48,roughness:.2,emissive:new THREEJS.Color(0x102b48),emissiveIntensity:.28});
+  var gold=new THREEJS.MeshStandardMaterial({color:0xcfa945,metalness:.84,roughness:.28});
+  function block(x,y,z,w,h,d,mat){var m=new THREEJS.Mesh(new THREEJS.BoxGeometry(w,h,d),mat);m.position.set(x,y,z);root.add(m);return m;}
+  function frenchWing(x,z,w,d,h){
+    block(x,h/2,z,w,h,d,limestone);
+    for(var floor=8;floor<h-8;floor+=6)for(var col=-Math.floor(w/7)/2;col<=Math.floor(w/7)/2;col++){
+      var win=block(x+col*7,floor,z+d/2+.22,3.2,3.8,.25,glass);
+      var sill=block(x+col*7,floor-2.15,z+d/2+.35,4,.35,.38,trim);
+    }
+    for(var pil=-2;pil<=2;pil++)block(x+pil*w*.19,h*.5,z+d/2+.42,.65,h*.88,.45,trim);
+    block(x,h+1,z,w+1.8,2,d+1.8,trim);
+    var roof=new THREEJS.Mesh(new THREEJS.CylinderGeometry(Math.max(w,d)*.37,Math.max(w,d)*.49,11,4),blueRoof);
+    roof.position.set(x,h+6.5,z);roof.scale.set(w/Math.max(w,d),1,d/Math.max(w,d));roof.rotation.y=Math.PI/4;root.add(roof);
+    // Dormer windows break up the broad blue mansard roof.
+    for(var dorm=-2;dorm<=2;dorm++)block(x+dorm*w*.17,h+7,z+d*.43,3,4,.5,glass);
+  }
+  // Broad symmetrical hotel composition behind the Eiffel Tower.
+  frenchWing(-38,-18,42,31,78);
+  frenchWing(4,-25,48,34,96);
+  frenchWing(47,-17,38,29,72);
+  block(3,13,20,118,26,50,limestone);block(3,27,20,120,2.4,52,trim);
+  // Classical Strip frontage with arches and a blue roofline.
+  for(var a=-7;a<=7;a++){
+    var column=new THREEJS.Mesh(new THREEJS.CylinderGeometry(.75,.9,11,10),trim);column.position.set(a*7.2,5.5,47);root.add(column);
+    var arch=new THREEJS.Mesh(new THREEJS.TorusGeometry(2.7,.32,7,16,Math.PI),trim);arch.position.set(a*7.2,10.7,47.3);root.add(arch);
+  }
+  block(3,13,47,112,2,5,blueRoof);
+  var parisSign=signSprite('PARIS',0xffcf61,{fontSize:82,width:45,height:9,glow:18,depthTest:true,renderOrder:7,frontOnly:true});
+  parisSign.position.set(4,32,47.8);root.add(parisSign);
+  // Compact Arc de Triomphe replica at the south end of the frontage.
+  var ax=-48,az=61;
+  block(ax,10,az,24,20,8,limestone);
+  var opening=new THREEJS.Mesh(new THREEJS.TorusGeometry(5.2,2.2,8,18,Math.PI),trim);opening.position.set(ax,8,az+4.2);root.add(opening);
+  block(ax,20.5,az,27,3,10,trim);
+  for(var relief=-1;relief<=1;relief+=2)block(ax+relief*8,9,az+4.3,2.8,12,.35,gold);
+  // The blue Paris balloon sign sits beside the Strip.
+  var balloonMat=new THREEJS.MeshStandardMaterial({color:0x235bad,metalness:.3,roughness:.28,emissive:new THREEJS.Color(0x123b8e),emissiveIntensity:.38});
+  var balloon=new THREEJS.Mesh(new THREEJS.SphereGeometry(11,24,18),balloonMat);balloon.scale.y=1.18;balloon.position.set(48,25,58);root.add(balloon);
+  for(var band=0;band<8;band++){
+    var stripe=new THREEJS.Mesh(new THREEJS.TorusGeometry(11.05,.28,6,32),band%2?gold:trim);stripe.position.set(48,20+band*1.5,58);stripe.rotation.x=Math.PI/2;root.add(stripe);
+  }
+  block(48,8,58,3,14,3,gold);
+  var balloonSign=signSprite('PARIS',0xffcf61,{fontSize:46,width:18,height:4.5,glow:12,depthTest:true,renderOrder:7,frontOnly:true});
+  balloonSign.position.set(48,26,69.2);root.add(balloonSign);
+  root.userData.placeId='paris';
+  root.userData.aabb={cx:root.position.x,cz:root.position.z,hw:72,hd:62};
+  setFootprintFromLocal(root,[[-63,-43],[62,-43],[68,-24],[68,50],[58,68],[-60,68],[-70,46]],1.0);
+  buildings.push(root);scene.add(root);registerHotelVisuals(root,1.18);
+}
+
 function buildParisEiffelTower(){
   var p=null;
   for(var i=0;i<PLACES.length;i++) if(PLACES[i].id==="paris"){ p=PLACES[i]; break; }
@@ -1762,7 +2096,7 @@ function buildVenetianLandmark(){
     for(var pil=-2;pil<=2;pil++){var pilar=block(x+pil*w*.18,h*.49,z+d/2+.35,.42,h*.92,.45,trim);}
     var crown1=block(x,h+3,z,w+2,6,d+2,trim),crown2=block(x,h+7,z,w*.78,3,d*.82,roof);
     var pediment=new THREEJS.Mesh(new THREEJS.ConeGeometry(w*.24,8,4),roof);pediment.position.set(x,h+12,z);pediment.rotation.y=Math.PI/4;root.add(pediment);
-    var towerSign=signSprite(label,0xffd27a,{fontSize:34,width:w*.72,height:4.8,glow:10,depthTest:true,renderOrder:4});towerSign.position.set(x,h-8,z+d/2+1);towerSign.userData.billboard=true;root.add(towerSign);
+    var towerSign=signSprite(label,0xffd27a,{fontSize:34,width:w*.72,height:4.8,glow:10,depthTest:true,renderOrder:4,frontOnly:true});towerSign.position.set(x,h-8,z+d/2+1);root.add(towerSign);
   }
   hotelTower(-24,-34,38,27,100,'VENETIAN');
   hotelTower(28,-39,42,30,112,'PALAZZO');
@@ -1778,8 +2112,24 @@ function buildVenetianLandmark(){
   // Blue canal, stone promenade, and a small arched Rialto-inspired bridge.
   var canal=block(0,.12,49,78,.22,13,new THREEJS.MeshBasicMaterial({color:0x1c7496,transparent:true,opacity:.9}));
   for(var bs=-1;bs<=1;bs+=2){var bridge=new THREEJS.Mesh(new THREEJS.TorusGeometry(9,1.1,8,28,Math.PI),trim);bridge.position.set(bs*22,1.1,49);bridge.rotation.x=Math.PI/2;root.add(bridge);}
-  var sign=signSprite('THE VENETIAN',0xff2d95,{fontSize:55,width:58,height:8,glow:18,depthTest:true,renderOrder:5});sign.position.set(0,39,40);sign.userData.billboard=true;root.add(sign);
-  root.userData.placeId='venetian';root.userData.aabb={cx:venetianX,cz:venetianZ,hw:58,hd:60};buildings.push(root);scene.add(root);registerHotelVisuals(root,1.16);registerExteriorEntry(p,venetianX,venetianZ,116,120);
+  var sign=signSprite('THE VENETIAN',0xff2d95,{fontSize:55,width:58,height:8,glow:18,depthTest:true,renderOrder:5,frontOnly:true});sign.position.set(0,39,40);root.add(sign);
+  root.userData.placeId='venetian';
+  var venetianFootprint=[[-72,-34],[-72,2],[-58,24],[-36,40],[-4,44],[28,42],[52,30],[64,8],[60,-18],[46,-34],[10,-40],[-22,-38]];
+  setFootprintFromLocal(root,venetianFootprint,1.0);
+  // Keep the entire custom resort footprint clear of the authoritative bundled road.
+  var roadAtVenetian=nearestOnRoad(root.position.x,root.position.z);
+  var awayX=root.position.x-roadAtVenetian.px,awayZ=root.position.z-roadAtVenetian.pz,awayLen=Math.hypot(awayX,awayZ)||1;
+  awayX/=awayLen;awayZ/=awayLen;
+  for(var shove=0;shove<48;shove++){
+    var overlapsRoad=false,poly=root.userData.footprint;
+    for(var vr=0;vr<poly.length;vr++)if(nearestOnRoad(poly[vr].x,poly[vr].z).d<ROAD_HALF+3){overlapsRoad=true;break;}
+    if(!overlapsRoad){var roadPts=roadPolyline();for(var rp=0;rp<roadPts.length;rp++)if(pointInFootprint(roadPts[rp].x,roadPts[rp].z,poly)){overlapsRoad=true;break;}}
+    if(!overlapsRoad)break;
+    root.position.x+=awayX*4;root.position.z+=awayZ*4;setFootprintFromLocal(root,venetianFootprint,1.0);
+  }
+  venetianX=root.position.x;venetianZ=root.position.z;
+  root.userData.aabb={cx:venetianX,cz:venetianZ,hw:82,hd:80};
+  buildings.push(root);scene.add(root);registerHotelVisuals(root,1.16);registerExteriorEntry(p,venetianX,venetianZ,116,120);
 }
 
 function buildCaesarsPalaceLandmark(){
@@ -1839,13 +2189,74 @@ function buildCaesarsPalaceLandmark(){
     var statue=new THREEJS.Mesh(new THREEJS.SphereGeometry(2.5,16,12),new THREEJS.MeshStandardMaterial({color:0xcdb08b,roughness:.38,metalness:.12}));statue.position.set(s*42,6,48);root.add(statue);
     var plinth=new THREEJS.Mesh(new THREEJS.BoxGeometry(5,8,5),rose);plinth.position.set(s*42,4,48);root.add(plinth);
   }
-  var sign=signSprite('CAESARS PALACE',0xffd54d,{fontSize:56,width:66,height:8,glow:18,depthTest:true,renderOrder:5});sign.position.set(0,62,44);sign.userData.billboard=true;root.add(sign);
+  var sign=signSprite('CAESARS PALACE',0xffd54d,{fontSize:56,width:66,height:8,glow:18,depthTest:true,renderOrder:5,frontOnly:true});sign.position.set(0,62,44);root.add(sign);
   root.userData.placeId='caesarsp';
-  root.userData.aabb={cx:root.position.x,cz:root.position.z,hw:86,hd:82};
+  root.userData.aabb={cx:root.position.x,cz:root.position.z,hw:104,hd:102};
+  setFootprintFromLocal(root,[
+    [-92,-50],[-96,12],[-80,40],[-42,64],[42,64],[80,40],[96,10],[92,-34],[68,-50],[-68,-50]
+  ],1.0);
   buildings.push(root);
   scene.add(root);
   registerHotelVisuals(root,1.2);
   registerExteriorEntry(p,root.position.x,root.position.z,172,164);
+}
+
+function buildCaesarsForumLandmark(){
+  var p=null;for(var i=0;i<PLACES.length;i++)if(PLACES[i].id==='caesars'){p=PLACES[i];break;}if(!p)return;
+  var q=project(p.lat,p.lng),root=new THREEJS.Group();
+  // The real venue reads as a low, modern conference center with a broad open plaza.
+  root.position.set(q.x+4,0,q.z-8);
+  root.rotation.y=-Math.PI/2-.04;
+  var glassDark=new THREEJS.MeshStandardMaterial({color:0x1f3348,roughness:.18,metalness:.5,emissive:new THREEJS.Color(0x08111f),emissiveIntensity:.16});
+  var glassLite=new THREEJS.MeshStandardMaterial({color:0x496989,roughness:.16,metalness:.42,emissive:new THREEJS.Color(0x10243b),emissiveIntensity:.12});
+  var stone=new THREEJS.MeshStandardMaterial({color:0xe9e4da,roughness:.56,metalness:.05});
+  var trim=new THREEJS.MeshStandardMaterial({color:0xb8c2cf,roughness:.24,metalness:.76});
+  var bronze=new THREEJS.MeshStandardMaterial({color:0x7f6542,roughness:.36,metalness:.52});
+  var plazaMat=new THREEJS.MeshStandardMaterial({color:0xd6cdbd,roughness:.92,metalness:.02});
+  function block(x,y,z,w,h,d,mat){var m=new THREEJS.Mesh(new THREEJS.BoxGeometry(w,h,d),mat);m.position.set(x,y,z);root.add(m);return m;}
+  function panelWall(x,y,z,w,h,d){
+    var wall=block(x,y,z,w,h,d,glassDark);
+    for(var i=0;i<9;i++){
+      var band=new THREEJS.Mesh(new THREEJS.BoxGeometry(w*0.98,.7,.7),glassLite);
+      band.position.set(x,y-h/2+6+i*(h-12)/8,z+d/2+.08);root.add(band);
+    }
+    return wall;
+  }
+  // West-facing glass wall and the white logo wall from the venue photos.
+  panelWall(-56,24,18,74,48,9);
+  block(4,24,18,78,48,11,stone);
+  block(47,24,18,22,48,11,stone);
+  block(4,52,18,54,6,12,trim);
+  block(4,7,26,132,14,22,stone);
+  // Main entrance massing and a second conference wing.
+  block(-10,19,-22,52,38,34,glassLite);
+  block(42,16,-18,34,32,30,stone);
+  block(68,20,-14,18,40,24,trim);
+  block(-56,11,-14,22,22,24,bronze);
+  // Large open forum plaza with a few palms, since the real site is defined by that outdoor space.
+  block(0,1.2,60,164,2.2,92,plazaMat);
+  block(-18,1.5,40,94,2.4,16,new THREEJS.MeshStandardMaterial({color:0xc8bda9,roughness:.9,metalness:.02}));
+  for(var i=0;i<5;i++){
+    var px=-58+i*29;
+    var palmBase=new THREEJS.Mesh(new THREEJS.CylinderGeometry(1.1,1.5,14,8),new THREEJS.MeshStandardMaterial({color:0x8b6a3e,roughness:.72,metalness:.05}));
+    palmBase.position.set(px,7,44);root.add(palmBase);
+    var palmTop=new THREEJS.Mesh(new THREEJS.ConeGeometry(6,9,5),new THREEJS.MeshStandardMaterial({color:0x3a7b56,roughness:.72,metalness:.02}));
+    palmTop.position.set(px,15,44);palmTop.rotation.y=Math.PI/5;root.add(palmTop);
+  }
+  // A subtle bridge / lobby threshold to hint at the connection back toward The Linq promenade.
+  block(0,6,-34,96,12,10,stone);
+  block(0,13,-42,68,4,8,trim);
+  // Vertical branding wall on the front, matching the real venue's logo-heavy facade.
+  var emblem=signSprite('CAESARS FORUM',0x1f2538,{fontSize:56,width:56,height:8,glow:10,depthTest:true,renderOrder:6,frontOnly:true});emblem.position.set(2,43,21.2);root.add(emblem);
+  var sub=signSprite('CONVENTION CENTER',0x5d6a80,{fontSize:20,width:22,height:3,glow:4,depthTest:true,renderOrder:6,frontOnly:true});sub.position.set(2,33,21.2);root.add(sub);
+  var signPost=block(-74,20,10,4,40,4,trim);var signCap=block(-74,42,10,14,6,4,stone);
+  var signFace=signSprite('FORUM PLAZA',0xffffff,{fontSize:26,width:18,height:3.6,glow:8,depthTest:true,renderOrder:6});signFace.position.set(-74,29,14);signFace.userData.billboard=true;root.add(signFace);
+  root.userData.placeId='caesars';
+  root.userData.aabb={cx:root.position.x,cz:root.position.z,hw:86,hd:64};
+  buildings.push(root);
+  scene.add(root);
+  registerHotelVisuals(root,1.12);
+  registerExteriorEntry(p,root.position.x,root.position.z,172,132);
 }
 
 function buildWynnLandmark(){
@@ -1883,11 +2294,12 @@ function buildWynnLandmark(){
   block(-78,14,18,24,28,18,wingMat);
   block(-78,28,22,24,8,12,whiteMat);
   // Script logo, top-left, with the right amount of visual weight.
-  var sign=signSprite('wynn',0xffffff,{fontSize:66,width:34,height:7,glow:10,depthTest:true,renderOrder:6});sign.position.set(-30,130,33.5);sign.userData.billboard=true;root.add(sign);
+  var sign=signSprite('wynn',0xffffff,{fontSize:66,width:34,height:7,glow:10,depthTest:true,renderOrder:6,frontOnly:true});sign.position.set(-30,130,33.5);root.add(sign);
   // Tiny roof masts on the crown.
   for(var m=0;m<4;m++){block(-18+m*13,144,19,0.8,10,0.8,whiteMat);}
   root.userData.placeId='wynn';
-  root.userData.aabb={cx:root.position.x,cz:root.position.z,hw:82,hd:74};
+  root.userData.aabb={cx:root.position.x,cz:root.position.z,hw:84,hd:72};
+  setFootprintFromLocal(root,[[-76,-30],[-74,16],[-58,34],[28,36],[72,24],[74,-16],[54,-34],[-24,-36]],1.0);
   buildings.push(root);
   scene.add(root);
   registerHotelVisuals(root,1.08);
@@ -1920,13 +2332,67 @@ function buildEncoreLandmark(){
   for(var i2=-1;i2<=1;i2+=2){
     var fin=new THREEJS.Mesh(new THREEJS.BoxGeometry(1,18,1),bronze);fin.position.set(i2*20,10,24);root.add(fin);
   }
-  var sign=signSprite('ENCORE',0xffc857,{fontSize:54,width:28,height:7,glow:16,depthTest:true,renderOrder:5});sign.position.set(0,55,30);sign.userData.billboard=true;root.add(sign);
+  var sign=signSprite('ENCORE',0xffc857,{fontSize:54,width:28,height:7,glow:16,depthTest:true,renderOrder:5,frontOnly:true});sign.position.set(0,55,30);root.add(sign);
   root.userData.placeId='encore';
-  root.userData.aabb={cx:root.position.x,cz:root.position.z,hw:52,hd:48};
+  root.userData.aabb={cx:root.position.x,cz:root.position.z,hw:54,hd:50};
+  setFootprintFromLocal(root,[[-48,-24],[-46,10],[-30,28],[24,28],[48,8],[46,-22],[12,-30],[-20,-28]],1.0);
   buildings.push(root);
   scene.add(root);
   registerHotelVisuals(root,1.22);
   registerExteriorEntry(p,root.position.x,root.position.z,104,96);
+}
+
+function buildHarrahsLandmark(){
+  // Harrah's is not a conference venue, but its paired purple towers and long
+  // cream casino frontage are an important part of the east-Strip skyline.
+  var q=project(36.11932,-115.17112),root=new THREEJS.Group();
+  root.position.set(q.x,0,q.z);root.rotation.y=Math.PI/2-.035;
+  var purpleGlass=new THREEJS.MeshStandardMaterial({color:0x382d61,metalness:.58,roughness:.2,emissive:new THREEJS.Color(0x17102c),emissiveIntensity:.28});
+  var blueGlass=new THREEJS.MeshStandardMaterial({color:0x263c62,metalness:.62,roughness:.18,emissive:new THREEJS.Color(0x0b1933),emissiveIntensity:.3});
+  var cream=new THREEJS.MeshStandardMaterial({color:0xe8ddca,roughness:.58,metalness:.08});
+  var sand=new THREEJS.MeshStandardMaterial({color:0xc7aa82,roughness:.7,metalness:.03});
+  var dark=new THREEJS.MeshStandardMaterial({color:0x261f2b,roughness:.45,metalness:.34});
+  var red=new THREEJS.MeshBasicMaterial({color:0xd92132});
+  var warmWindow=new THREEJS.MeshBasicMaterial({color:0xffd894,transparent:true,opacity:.66});
+  function block(x,y,z,w,h,d,mat){var m=new THREEJS.Mesh(new THREEJS.BoxGeometry(w,h,d),mat);m.position.set(x,y,z);root.add(m);return m;}
+  function tower(x,z,w,d,h,mat,stepSide){
+    block(x,h/2,z,w,h,d,mat);
+    // Pale structural ribs and narrow window stacks create the real striped facade.
+    for(var rib=-2;rib<=2;rib++)block(x+rib*w*.205,h*.5,z+d/2+.2,.7,h*.94,.38,cream);
+    for(var floor=8;floor<h-5;floor+=4.2){
+      block(x,floor,z+d/2+.42,w*.9,.16,.18,warmWindow);
+      block(x,floor,z-d/2-.42,w*.9,.16,.18,warmWindow);
+    }
+    block(x-w/2-.25,h*.5,z,.42,h*.96,d*.96,cream);block(x+w/2+.25,h*.5,z,.42,h*.96,d*.96,cream);
+    // Asymmetric stepped cap, visible in Harrah's two offset hotel towers.
+    block(x,h+1.5,z,w+1.4,3,d+1.2,cream);
+    block(x+stepSide*w*.12,h+4.2,z,w*.76,3,d*.82,mat);
+    block(x+stepSide*w*.24,h+7,z,w*.42,2.6,d*.66,cream);
+  }
+  tower(-18,-13,35,24,96,purpleGlass,-1);
+  tower(20,-20,31,23,76,blueGlass,1);
+  // Low casino/showroom complex and porte-cochere facing Las Vegas Boulevard.
+  block(0,8,19,86,16,38,sand);block(0,17,19,88,2.3,40,cream);
+  block(-27,20,20,28,7,28,dark);block(26,20,19,30,7,30,dark);
+  block(0,5,41,62,10,8,dark);block(0,10.6,41,68,1.2,10,cream);
+  for(var bay=-5;bay<=5;bay++){
+    block(bay*5.5,5.2,45.15,3.7,5.8,.25,blueGlass);
+    var awning=block(bay*5.5,8.5,46.3,4.4,.65,3.2,red);awning.rotation.x=-.08;
+  }
+  // Round red medallion and the white/red script are the Strip-facing focal point.
+  var medallion=new THREEJS.Mesh(new THREEJS.CircleGeometry(8.2,32),red);medallion.position.set(0,19.5,39.25);root.add(medallion);
+  var sign=signSprite("HARRAH'S",0xe22235,{fontSize:72,width:43,height:8,glow:15,depthTest:true,renderOrder:6,frontOnly:true});
+  sign.position.set(0,20,40);root.add(sign);
+  var crownSign=signSprite("HARRAH'S",0xe22235,{fontSize:48,width:24,height:5,glow:12,depthTest:true,renderOrder:6,frontOnly:true});
+  crownSign.position.set(-18,83,-.7);root.add(crownSign);
+  // Gold entrance bulbs and roofline lighting retain the warm casino character at night.
+  for(var bulb=-8;bulb<=8;bulb++){
+    var lamp=new THREEJS.Mesh(new THREEJS.SphereGeometry(.34,7,5),new THREEJS.MeshBasicMaterial({color:0xffcf62}));
+    lamp.position.set(bulb*4,11.5,46.1);root.add(lamp);
+  }
+  root.userData.aabb={cx:q.x,cz:q.z,hw:48,hd:43};
+  setFootprintFromLocal(root,[[-44,-34],[-32,-40],[36,-38],[46,-18],[45,39],[34,47],[-38,47],[-47,32]],1.0);
+  buildings.push(root);scene.add(root);registerHotelVisuals(root,1.18);
 }
 
 function buildHardRockGuitarHotel(){
@@ -1947,11 +2413,145 @@ function buildHardRockGuitarHotel(){
   }
   var bridge=new THREEJS.Mesh(new THREEJS.BoxGeometry(9,1.2,1.1),steel);bridge.position.set(0,25,4.5);root.add(bridge);
   var sound=ellipsoid(0,35,5.3,5.5,5.5,.5,new THREEJS.MeshBasicMaterial({color:0x080b14}));
-  var sign=signSprite('HARD ROCK',0x35e9ff,{fontSize:50,width:25,height:6,glow:16,depthTest:true,renderOrder:4});sign.position.set(0,13,7);sign.userData.billboard=true;root.add(sign);
+  var sign=signSprite('HARD ROCK',0x35e9ff,{fontSize:50,width:25,height:6,glow:16,depthTest:true,renderOrder:4,frontOnly:true});sign.position.set(0,13,7);root.add(sign);
   var base=new THREEJS.Mesh(new THREEJS.CylinderGeometry(25,29,3,32),steel);base.position.y=1.5;root.add(base);
   // Make it a visible landmark and an interactable photo destination.
   root.userData.aabb={cx:q.x,cz:q.z,hw:18,hd:9};buildings.push(root);scene.add(root);
   registerExteriorEntry(p,q.x,q.z,46,24);
+}
+
+function buildFlamingoLandmark(){
+  var q=project(36.11635,-115.17135),root=new THREEJS.Group();
+  root.position.set(q.x,0,q.z);root.rotation.y=-Math.PI/2-.025;
+  var pinkGlass=new THREEJS.MeshStandardMaterial({color:0xb83f72,metalness:.54,roughness:.22,emissive:new THREEJS.Color(0x43112b),emissiveIntensity:.3});
+  var roseGlass=new THREEJS.MeshStandardMaterial({color:0x7e315d,metalness:.6,roughness:.19,emissive:new THREEJS.Color(0x2d1028),emissiveIntensity:.28});
+  var white=new THREEJS.MeshStandardMaterial({color:0xf2eee9,roughness:.55,metalness:.08});
+  var sand=new THREEJS.MeshStandardMaterial({color:0xcdb896,roughness:.72,metalness:.03});
+  var dark=new THREEJS.MeshStandardMaterial({color:0x302631,roughness:.43,metalness:.32});
+  var neonPink=new THREEJS.MeshBasicMaterial({color:0xff4f9a});
+  var aqua=new THREEJS.MeshStandardMaterial({color:0x2b8190,roughness:.18,metalness:.08,transparent:true,opacity:.9});
+  function block(x,y,z,w,h,d,mat){var m=new THREEJS.Mesh(new THREEJS.BoxGeometry(w,h,d),mat);m.position.set(x,y,z);root.add(m);return m;}
+  function tower(x,z,w,d,h,mat){
+    block(x,h/2,z,w,h,d,mat);
+    // White vertical mullions and pale end caps define Flamingo's pink tower faces.
+    for(var rib=-3;rib<=3;rib++)block(x+rib*w*.135,h*.5,z+d/2+.25,.55,h*.91,.36,white);
+    for(var floor=7;floor<h-4;floor+=4.1){
+      block(x,floor,z+d/2+.43,w*.91,.18,.2,neonPink);
+      block(x,floor,z-d/2-.43,w*.91,.18,.2,neonPink);
+    }
+    block(x-w/2-.35,h*.5,z,.7,h*.96,d+1.2,white);block(x+w/2+.35,h*.5,z,.7,h*.96,d+1.2,white);
+    block(x,h+1.5,z,w+1.6,3,d+1.5,white);block(x,h+4,z,w*.78,2.2,d*.82,dark);
+  }
+  // Staggered wings reproduce the resort's broad, irregular skyline.
+  tower(-26,-5,36,27,89,pinkGlass);
+  tower(18,-13,38,29,82,roseGlass);
+  tower(38,-40,25,24,68,pinkGlass);
+  block(-2,9,22,96,18,44,sand);block(-2,19,22,98,2.4,46,white);
+  block(-31,24,22,31,9,30,dark);block(29,24,20,34,9,32,dark);
+  // Strip porte-cochere with a rhythmic row of pink-lit bays.
+  block(0,5,47,70,10,9,dark);block(0,10.6,47,76,1.3,11,white);
+  for(var bay=-6;bay<=6;bay++){
+    block(bay*5.2,5,51.3,3.5,6,.28,roseGlass);
+    block(bay*5.2,8.6,52.4,4.1,.55,3,neonPink);
+  }
+  // Giant vertical blade and marquee are the unmistakable Strip-side identifiers.
+  block(-35,40,38,8,62,3.2,dark);
+  var vertical=signSprite('FLAMINGO',0xff4f9a,{fontSize:48,width:48,height:6,glow:18,depthTest:true,renderOrder:7});
+  vertical.position.set(-35,43,40);vertical.rotation.z=Math.PI/2;root.add(vertical);
+  var marquee=signSprite('FLAMINGO',0xff4f9a,{fontSize:76,width:49,height:8,glow:20,depthTest:true,renderOrder:7,frontOnly:true});
+  marquee.position.set(4,20,52.7);root.add(marquee);
+  // Wildlife Habitat: winding water, palms and a flock of simple pink flamingos.
+  var pond=new THREEJS.Mesh(new THREEJS.CircleGeometry(24,36),aqua);pond.rotation.x=-Math.PI/2;pond.scale.set(1.35,.7,1);pond.position.set(-2,.13,-56);root.add(pond);
+  var island=new THREEJS.Mesh(new THREEJS.CircleGeometry(8,24),new THREEJS.MeshStandardMaterial({color:0x68804a,roughness:.9}));
+  island.rotation.x=-Math.PI/2;island.position.set(-5,.2,-57);root.add(island);
+  var path=new THREEJS.Mesh(new THREEJS.RingGeometry(27,32,40),new THREEJS.MeshStandardMaterial({color:0xd5c8ad,roughness:.88}));
+  path.rotation.x=-Math.PI/2;path.scale.set(1.28,.72,1);path.position.set(-2,.1,-56);root.add(path);exteriorWalkSurfaces.push(path);
+  function flamingo(x,z,turn){
+    var bird=new THREEJS.Group(),birdMat=new THREEJS.MeshLambertMaterial({color:0xff739f});
+    var body=new THREEJS.Mesh(new THREEJS.SphereGeometry(1,12,8),birdMat);body.scale.set(1.25,.75,.65);body.position.y=2.4;bird.add(body);
+    var neck=new THREEJS.Mesh(new THREEJS.TorusGeometry(1.15,.16,6,14,Math.PI*1.15),birdMat);neck.position.set(.75,3.25,0);neck.rotation.z=.25;bird.add(neck);
+    var head=new THREEJS.Mesh(new THREEJS.SphereGeometry(.34,9,7),birdMat);head.position.set(1.55,4.15,0);bird.add(head);
+    var leg=new THREEJS.Mesh(new THREEJS.CylinderGeometry(.055,.055,2.4,5),birdMat);leg.position.set(0,1.05,0);bird.add(leg);
+    bird.position.set(x,.2,z);bird.rotation.y=turn;root.add(bird);
+  }
+  [[-16,-51,.4],[-9,-63,-.6],[7,-58,1.2],[14,-48,2.3],[-1,-47,-1.4],[4,-68,.8]].forEach(function(f){flamingo(f[0],f[1],f[2]);});
+  for(var pi=-1;pi<=1;pi+=2){
+    var trunk=new THREEJS.Mesh(new THREEJS.CylinderGeometry(.55,.85,9,8),new THREEJS.MeshLambertMaterial({color:0x715235}));trunk.position.set(pi*22,4.5,-58);root.add(trunk);
+    for(var fr=0;fr<7;fr++){var leaf=new THREEJS.Mesh(new THREEJS.ConeGeometry(1.3,8,5),new THREEJS.MeshLambertMaterial({color:0x32704a}));leaf.position.set(pi*22,9,-58);leaf.rotation.z=Math.PI/2;leaf.rotation.y=fr/7*Math.PI*2;root.add(leaf);}
+  }
+  var habitatSign=signSprite('WILDLIFE HABITAT',0xff78a5,{fontSize:38,width:34,height:5,glow:10,depthTest:true,renderOrder:6});
+  habitatSign.position.set(0,8,-82);habitatSign.userData.billboard=true;root.add(habitatSign);
+  // Collision covers the actual hotel/casino mass, leaving the habitat path walkable.
+  root.userData.aabb={cx:q.x,cz:q.z,hw:55,hd:46};
+  setFootprintFromLocal(root,[[-53,-36],[50,-36],[55,-25],[52,50],[38,56],[-42,56],[-55,40]],1.0);
+  buildings.push(root);scene.add(root);registerHotelVisuals(root,1.2);
+}
+
+function buildLinqLandmarkAndPromenade(){
+  var front=project(36.11808,-115.17228),wheelPlace=null;
+  for(var i=0;i<PLACES.length;i++)if(PLACES[i].id==='linq'){wheelPlace=PLACES[i];break;}
+  if(!wheelPlace)return;
+  var wheel=project(wheelPlace.lat,wheelPlace.lng);
+  wheel.x+=8;wheel.z+=4;
+  var dx=wheel.x-front.x,dz=wheel.z-front.z,length=Math.hypot(dx,dz);
+  var root=new THREEJS.Group();root.position.set(front.x,0,front.z);root.rotation.y=Math.atan2(dx,dz);
+  var white=new THREEJS.MeshStandardMaterial({color:0xf1f2ee,roughness:.58,metalness:.08});
+  var blue=new THREEJS.MeshStandardMaterial({color:0x2f789a,roughness:.24,metalness:.56,emissive:new THREEJS.Color(0x12354c),emissiveIntensity:.22});
+  var charcoal=new THREEJS.MeshStandardMaterial({color:0x252a32,roughness:.42,metalness:.38});
+  var promenade=new THREEJS.MeshStandardMaterial({color:0xb7a899,roughness:.82,metalness:.02});
+  var teal=new THREEJS.MeshBasicMaterial({color:0x36d6db});
+  var magenta=new THREEJS.MeshBasicMaterial({color:0xe84291});
+  var warm=new THREEJS.MeshBasicMaterial({color:0xffcb68});
+  function block(x,y,z,w,h,d,mat){var m=new THREEJS.Mesh(new THREEJS.BoxGeometry(w,h,d),mat);m.position.set(x,y,z);root.add(m);return m;}
+  function hotelTower(x,z,w,d,h){
+    block(x,h/2,z,w,h,d,white);
+    // The LINQ's renovated towers read as white slabs with strong turquoise window bands.
+    for(var floor=7;floor<h-4;floor+=4.4){
+      block(x,floor,z+d/2+.24,w*.9,.9,.24,blue);
+      block(x,floor,z-d/2-.24,w*.9,.9,.24,blue);
+    }
+    for(var rib=-2;rib<=2;rib++)block(x+rib*w*.2,h*.51,z+d/2+.42,.5,h*.88,.3,white);
+    block(x,h+1.2,z,w+1.4,2.4,d+1.2,charcoal);
+  }
+  // Offset hotel wings frame the Strip entrance without closing the promenade.
+  hotelTower(-31,25,34,34,73);
+  hotelTower(31,32,34,38,88);
+  block(-31,7,52,39,14,25,charcoal);block(31,7,55,39,14,28,charcoal);
+  var hotelSign=signSprite('THE LINQ',0x36d6db,{fontSize:62,width:39,height:7,glow:16,depthTest:true,renderOrder:6,frontOnly:true});
+  hotelSign.position.set(31,67,12.8);root.add(hotelSign);
+  // A continuous pedestrian floor leads all the way to the wheel's loading plaza.
+  var walk=new THREEJS.Mesh(new THREEJS.PlaneGeometry(24,Math.max(20,length-12)),promenade);
+  walk.rotation.x=-Math.PI/2;walk.position.set(0,.08,length/2+2);root.add(walk);exteriorWalkSurfaces.push(walk);
+  for(var z=48,shop=0;z<length-34;z+=24,shop++){
+    for(var side=-1;side<=1;side+=2){
+      var depth=18+(shop%2)*3,store=block(side*18,6,z,14,12,depth,shop%3===0?charcoal:white);
+      // Glass shopfronts face the pedestrian lane, under colorful individual awnings.
+      block(side*10.85,4.5,z,0.28,7.5,10.5,blue);
+      var awning=block(side*10.35,8.5,z,.7,1.0,12,shop%2?magenta:teal);
+      var labels=['HASH HOUSE','YARD HOUSE','IN-N-OUT','BROOKLYN BOWL','ICEBAR','HONOLULU COOKIE'];
+      var label=signSprite(labels[shop%labels.length],shop%2?0xe84291:0x36d6db,{fontSize:32,width:12,height:3,glow:8,depthTest:true,renderOrder:5});
+      label.position.set(side*10.15,10,z);label.rotation.y=side<0?Math.PI/2:-Math.PI/2;root.add(label);
+    }
+  }
+  // Repeating festoon lights make the canyon-like outdoor mall legible after dark.
+  for(var lz=43;lz<length-25;lz+=18){
+    for(var side2=-1;side2<=1;side2+=2)block(side2*9.8,5.5,lz,.32,11,.32,charcoal);
+    var cable=new THREEJS.Mesh(new THREEJS.BoxGeometry(20,.12,.12),charcoal);cable.position.set(0,10.6,lz);root.add(cable);
+    for(var bulb=-4;bulb<=4;bulb++){var b=new THREEJS.Mesh(new THREEJS.SphereGeometry(.3,7,5),warm);b.position.set(bulb*2.2,10.35-Math.abs(bulb)*.16,lz);root.add(b);}
+  }
+  // Tall gateway on the Strip and the smaller wheel-plaza gateway at the far end.
+  function gateway(z,label,w){
+    block(-w/2,8,z,1.4,16,1.4,charcoal);block(w/2,8,z,1.4,16,1.4,charcoal);block(0,15.2,z,w,1.5,1.4,charcoal);
+    var s=signSprite(label,0x36d6db,{fontSize:48,width:w*.76,height:5,glow:14,depthTest:true,renderOrder:7});s.position.set(0,15.4,z+.8);s.userData.billboard=true;root.add(s);
+  }
+  gateway(13,'THE LINQ PROMENADE',29);
+  gateway(length-23,'HIGH ROLLER',25);
+  var plaza=new THREEJS.Mesh(new THREEJS.CircleGeometry(27,40),new THREEJS.MeshStandardMaterial({color:0x596273,roughness:.7}));
+  plaza.rotation.x=-Math.PI/2;plaza.position.set(0,.1,length-2);root.add(plaza);exteriorWalkSurfaces.push(plaza);
+  // Directional pavement stripe visually carries the player from the Strip to the wheel.
+  var stripe=new THREEJS.Mesh(new THREEJS.PlaneGeometry(1.1,Math.max(12,length-35)),new THREEJS.MeshBasicMaterial({color:0x36d6db,transparent:true,opacity:.72}));
+  stripe.rotation.x=-Math.PI/2;stripe.position.set(0,.13,length/2+10);root.add(stripe);
+  scene.add(root);registerHotelVisuals(root,1.14);
 }
 
 function buildHighRoller(){
@@ -2143,6 +2743,285 @@ function stopHighRollerRide(){
   return true;
 }
 
+
+
+/* ---- Las Vegas Monorail: the seven real passenger stations ---- */
+function buildMonorail(){
+  var defs=[
+    ['MGM Grand Station',36.10255,-115.16742],
+    ['Horseshoe/Paris Las Vegas Station',36.11342,-115.16810],
+    ['Flamingo/Caesars Palace Station',36.11682,-115.16833],
+    ["Harrah's/The LINQ Station",36.11938,-115.16845],
+    ['Boingo Station at Las Vegas Convention Center',36.13152,-115.15442],
+    ['Westgate Las Vegas Station',36.13662,-115.15286],
+    ['SAHARA Las Vegas Station',36.14228,-115.15692]
+  ];
+  monorailRoot=new THREEJS.Group();scene.add(monorailRoot);monorailStations=[];
+
+  // Anchor Harrah's station to its actual OSM parking structure.
+  var harrahsParking=null;
+  if(osmRoot)for(var hc=0;hc<osmRoot.children.length;hc++){
+    var candidate=osmRoot.children[hc],osmName=candidate.userData&&candidate.userData.osmName||'';
+    if(osmName.indexOf('harrah s self parking')>=0){harrahsParking=candidate;break;}
+  }
+  var firstNominal=project(defs[0][1],defs[0][2]);
+  var monorailSide=roadSide(firstNominal.x,firstNominal.z);
+  scene.updateMatrixWorld(true);
+  // Route against visible geometry in the guideway/train height band. Logical hotel
+  // footprints are intentionally broader than their meshes and produced huge detours.
+  var monorailObstacleBoxes=[];
+  for(var mob=0;mob<buildings.length;mob++)buildings[mob].traverse(function(obj){
+    if(!obj.isMesh||!obj.visible||!obj.geometry)return;
+    var mat=obj.material;if(Array.isArray(mat))mat=mat[0];
+    if(mat&&mat.transparent&&mat.opacity<.98)return;
+    if(obj.geometry.type==='PlaneGeometry')return;
+    var box=new THREEJS.Box3().setFromObject(obj);
+    if(box.isEmpty()||box.max.y<14.5||box.min.y>23.5)return;
+    if(box.max.x-box.min.x>.12&&box.max.z-box.min.z>.12)monorailObstacleBoxes.push(box);
+  });
+  function monorailBlocked(x,z,radius){
+    radius=radius||4;
+    for(var mbi=0;mbi<monorailObstacleBoxes.length;mbi++){
+      var box=monorailObstacleBoxes[mbi];
+      if(x>=box.min.x-radius&&x<=box.max.x+radius&&z>=box.min.z-radius&&z<=box.max.z+radius)return true;
+    }
+    return false;
+  }
+  function clearMonorailPoint(q,radius){
+    radius=radius||6;
+    if(roadSide(q.x,q.z)===monorailSide&&!monorailBlocked(q.x,q.z,radius))return {x:q.x,z:q.z};
+    var road=nearestOnRoad(q.x,q.z),nx=-road.tz*monorailSide,nz=road.tx*monorailSide;
+    for(var dist=Math.max(ROAD_HALF+18,road.d);dist<=360;dist+=4){
+      var tx=road.px+nx*dist,tz=road.pz+nz*dist;
+      if(!monorailBlocked(tx,tz,radius))return {x:tx,z:tz};
+    }
+    return nearestClearExteriorPoint(q.x,q.z,radius,360);
+  }
+
+  var anchors=[];
+  for(var i=0;i<defs.length;i++){
+    var q=project(defs[i][1],defs[i][2]);
+    if(i===3&&harrahsParking&&harrahsParking.userData.aabb){
+      var ha=harrahsParking.userData.aabb;
+      q={x:ha.cx+ha.hw+24,z:ha.cz};
+    }
+    anchors.push({x:q.x,z:q.z});
+    monorailStations.push({name:defs[i][0],lat:defs[i][1],lng:defs[i][2],x:q.x,z:q.z,t:0});
+  }
+
+  // Plan each station-to-station leg on a local grid around the rendered buildings.
+  // This lets the Convention Center branch bend east without dragging every station
+  // into one absurdly distant parallel corridor.
+  function segmentClear(a,b){
+    var steps=Math.max(1,Math.ceil(Math.hypot(b.x-a.x,b.z-a.z)/2));
+    for(var si=0;si<=steps;si++){
+      var t=si/steps;
+      if(monorailBlocked(a.x+(b.x-a.x)*t,a.z+(b.z-a.z)*t,11))return false;
+    }
+    return true;
+  }
+  function planMonorailLeg(start,end){
+    if(segmentClear(start,end))return [start,end];
+    var cell=12,margin=600,minX=Math.min(start.x,end.x)-margin,maxX=Math.max(start.x,end.x)+margin;
+    var minZ=Math.min(start.z,end.z)-margin,maxZ=Math.max(start.z,end.z)+margin;
+    var cols=Math.ceil((maxX-minX)/cell)+1,rows=Math.ceil((maxZ-minZ)/cell)+1;
+    function key(ix,iz){return iz*cols+ix;}
+    function point(ix,iz){return {x:minX+ix*cell,z:minZ+iz*cell};}
+    function blocked(ix,iz){var p=point(ix,iz);return monorailBlocked(p.x,p.z,12);}
+    function nearestFree(p){
+      var ix=Math.max(0,Math.min(cols-1,Math.round((p.x-minX)/cell))),iz=Math.max(0,Math.min(rows-1,Math.round((p.z-minZ)/cell)));
+      for(var ring=0;ring<70;ring++)for(var dx=-ring;dx<=ring;dx++)for(var dz=-ring;dz<=ring;dz++){
+        if(Math.max(Math.abs(dx),Math.abs(dz))!==ring)continue;
+        var tx=ix+dx,tz=iz+dz;if(tx>=0&&tx<cols&&tz>=0&&tz<rows&&!blocked(tx,tz))return {ix:tx,iz:tz};
+      }
+      return {ix:ix,iz:iz};
+    }
+    var begin=nearestFree(start),goal=nearestFree(end),goalKey=key(goal.ix,goal.iz);
+    var heap=[],gScore=Object.create(null),came=Object.create(null),closed=Object.create(null);
+    function heapPush(n){heap.push(n);var i=heap.length-1;while(i>0){var p=(i-1)>>1;if(heap[p].f<=n.f)break;heap[i]=heap[p];i=p;}heap[i]=n;}
+    function heapPop(){var top=heap[0],last=heap.pop();if(heap.length){var i=0;while(true){var l=i*2+1,r=l+1;if(l>=heap.length)break;var c=r<heap.length&&heap[r].f<heap[l].f?r:l;if(heap[c].f>=last.f)break;heap[i]=heap[c];i=c;}heap[i]=last;}return top;}
+    var beginKey=key(begin.ix,begin.iz);gScore[beginKey]=0;
+    heapPush({ix:begin.ix,iz:begin.iz,k:beginKey,f:Math.hypot(goal.ix-begin.ix,goal.iz-begin.iz)});
+    var dirs=[[-1,0],[1,0],[0,-1],[0,1],[-1,-1],[-1,1],[1,-1],[1,1]],found=false;
+    while(heap.length){
+      var cur=heapPop();if(closed[cur.k])continue;closed[cur.k]=1;
+      if(cur.k===goalKey){found=true;break;}
+      for(var di=0;di<dirs.length;di++){
+        var dd=dirs[di],nx=cur.ix+dd[0],nz=cur.iz+dd[1];
+        if(nx<0||nx>=cols||nz<0||nz>=rows||blocked(nx,nz))continue;
+        if(dd[0]&&dd[1]&&(blocked(cur.ix+dd[0],cur.iz)||blocked(cur.ix,cur.iz+dd[1])))continue;
+        var nk=key(nx,nz),ng=gScore[cur.k]+(dd[0]&&dd[1]?1.414:1);
+        if(gScore[nk]===undefined||ng<gScore[nk]){
+          gScore[nk]=ng;came[nk]=cur.k;
+          heapPush({ix:nx,iz:nz,k:nk,f:ng+Math.hypot(goal.ix-nx,goal.iz-nz)});
+        }
+      }
+    }
+    if(!found)return [start,end];
+    var cells=[],walk=goalKey;
+    while(walk!==undefined){var wz=Math.floor(walk/cols),wx=walk-wz*cols;cells.push(point(wx,wz));if(walk===beginKey)break;walk=came[walk];}
+    cells.reverse();
+    var raw=[start].concat(cells).concat([end]),simple=[raw[0]],at=0;
+    while(at<raw.length-1){
+      var far=raw.length-1;
+      while(far>at+1&&!segmentClear(raw[at],raw[far]))far--;
+      simple.push(raw[far]);at=far;
+    }
+    return simple;
+  }
+
+  function makeRouteCurve(points){
+    var curve=new THREEJS.CurvePath();
+    for(var pi=0;pi<points.length-1;pi++)curve.add(new THREEJS.LineCurve3(points[pi],points[pi+1]));
+    return curve;
+  }
+  function countBlocked(curve){
+    var count=0;
+    for(var ci=0;ci<=1400;ci++){
+      var sample=curve.getPoint(ci/1400);
+      if(monorailBlocked(sample.x,sample.z,4.2))count++;
+    }
+    return count;
+  }
+
+  // Re-clear station anchors against actual building meshes before planning.
+  for(var ai=0;ai<anchors.length;ai++)anchors[ai]=clearMonorailPoint(anchors[ai],20);
+  var route=[],stationRouteIndex=[];
+  for(var leg=0;leg<anchors.length-1;leg++){
+    stationRouteIndex[leg]=route.length;
+    var planned=planMonorailLeg(anchors[leg],anchors[leg+1]);
+    if(route.length)planned.shift();
+    for(var lp=0;lp<planned.length;lp++)route.push(new THREEJS.Vector3(planned[lp].x,16,planned[lp].z));
+  }
+  stationRouteIndex[anchors.length-1]=route.length-1;
+  monorailCurve=makeRouteCurve(route);
+  var blockedSamples=countBlocked(monorailCurve),chosenCorridorDistance=0;
+  var cumulative=[0],totalLength=0;
+  for(var rp=0;rp<route.length-1;rp++){totalLength+=route[rp].distanceTo(route[rp+1]);cumulative.push(totalLength);}
+  for(var st=0;st<monorailStations.length;st++){
+    var stationPoint=route[stationRouteIndex[st]];
+    monorailStations[st].x=stationPoint.x;monorailStations[st].z=stationPoint.z;
+    monorailStations[st].t=cumulative[stationRouteIndex[st]]/totalLength;
+  }
+
+  window.__monorailBlockedSamples=blockedSamples;
+  if(blockedSamples)console.error('Monorail clearance failed with '+blockedSamples+' blocked samples');
+  else console.info('Monorail route verified with 0 building intersections; Harrah station '+(harrahsParking?'aligned with OSM parking':'using corrected coordinates')+(chosenCorridorDistance?' · corridor '+chosenCorridorDistance.toFixed(0):''));
+  var beamMat=new THREEJS.MeshLambertMaterial({color:0xb9c4cf,emissive:new THREEJS.Color(0x28333e),emissiveIntensity:.12});
+  monorailRoot.add(new THREEJS.Mesh(new THREEJS.TubeGeometry(monorailCurve,720,1.05,8,false),beamMat));
+  for(var sp=0;sp<45;sp++){
+    var pp=monorailCurve.getPoint(sp/44),h=pp.y;
+    if(exteriorBlocked(pp.x,pp.z,1.2))continue;
+    var pier=new THREEJS.Mesh(new THREEJS.CylinderGeometry(.55,.85,h,6),beamMat);pier.position.set(pp.x,h/2,pp.z);monorailRoot.add(pier);
+  }
+  var stationMat=new THREEJS.MeshLambertMaterial({color:0x35455b,emissive:new THREEJS.Color(0x101923),emissiveIntensity:.18});
+  var passMat=new THREEJS.MeshBasicMaterial({color:0xff9900});
+  for(var si=0;si<monorailStations.length;si++){
+    var stn=monorailStations[si],track=monorailCurve.getTangent(stn.t).normalize();
+    // Local X runs along the guideway; local +Z points toward the street entrance.
+    var stationYaw=Math.atan2(-track.z,track.x),g=new THREEJS.Group();
+    g.position.set(stn.x,0,stn.z);g.rotation.y=stationYaw;stn.yaw=stationYaw;
+    var deck=new THREEJS.Mesh(new THREEJS.BoxGeometry(34,1.4,12),stationMat);deck.position.y=14.5;g.add(deck);
+    var roof=new THREEJS.Mesh(new THREEJS.BoxGeometry(36,1,14),stationMat);roof.position.y=23;g.add(roof);
+    for(var post=-1;post<=1;post+=2){var col=new THREEJS.Mesh(new THREEJS.BoxGeometry(.8,9,.8),beamMat);col.position.set(post*14,18.5,-5);g.add(col);}
+    // Thirteen actual steps replace the old solid wedge. Each tread has a matching walk height.
+    var stepCount=13,stepDepth=28/stepCount;
+    for(var step=0;step<stepCount;step++){
+      var top=14.05-step*(12.95/(stepCount-1));
+      var tread=new THREEJS.Mesh(new THREEJS.BoxGeometry(8,top,stepDepth+.08),stationMat);
+      tread.position.set(0,top/2,6+stepDepth*(step+.5));g.add(tread);
+    }
+    // Handrails make the route legible and keep the entrance from reading as a giant ramp.
+    for(var railSide=-1;railSide<=1;railSide+=2){
+      var rail=new THREEJS.Mesh(new THREEJS.BoxGeometry(.22,.22,36),beamMat);rail.position.set(railSide*4.15,9.1,18);rail.rotation.x=-.38;g.add(rail);
+    }
+    var gate=new THREEJS.Mesh(new THREEJS.BoxGeometry(10,2.8,.8),passMat);gate.position.set(0,2.1,36);g.add(gate);
+    var scanner=new THREEJS.Mesh(new THREEJS.BoxGeometry(1.6,4,1.6),stationMat);scanner.position.set(6,2,36);g.add(scanner);
+    var light=new THREEJS.PointLight(0xff9900,.8,24);light.position.set(6,4.5,36);g.add(light);
+    var sign=signSprite(stn.name.toUpperCase(),0xff9900,{fontSize:25,width:34,height:4.4,glow:9,depthTest:true,renderOrder:4});
+    sign.position.set(0,10,36);sign.userData.billboard=true;g.add(sign);
+    var free=signSprite('CONFERENCE PASS • FREE',0x6fe7ff,{fontSize:22,width:25,height:3.5,glow:8,depthTest:true,renderOrder:4});
+    free.position.set(0,6.5,36);free.userData.billboard=true;g.add(free);
+    stn.gateX=stn.x+Math.sin(stationYaw)*36;stn.gateZ=stn.z+Math.cos(stationYaw)*36;
+    monorailRoot.add(g);
+  }
+  monorailTrain=new THREEJS.Group();
+  var body=new THREEJS.Mesh(new THREEJS.BoxGeometry(7,5.2,24),new THREEJS.MeshLambertMaterial({color:0xf2f4f6,emissive:new THREEJS.Color(0x303840),emissiveIntensity:.12}));body.position.y=1;monorailTrain.add(body);
+  var stripe=new THREEJS.Mesh(new THREEJS.BoxGeometry(7.15,1.1,22),new THREEJS.MeshLambertMaterial({color:0x146dcc}));stripe.position.y=1.2;monorailTrain.add(stripe);
+  var glass=new THREEJS.Mesh(new THREEJS.BoxGeometry(7.2,1.5,18),new THREEJS.MeshLambertMaterial({color:0x68cfff,transparent:true,opacity:.62}));glass.position.y=2.5;monorailTrain.add(glass);
+  monorailRoot.add(monorailTrain);updateMonorailVisual();
+}
+function monorailSample(t){
+  if(!monorailCurve)return null;var tt=clamp(t,0,1),pos=monorailCurve.getPoint(tt),tan=monorailCurve.getTangent(tt).normalize();
+  return {pos:pos,tan:tan};
+}
+function placeMonorailTrain(t){
+  if(!monorailTrain)return;var s=monorailSample(t);if(!s)return;
+  monorailTrain.position.copy(s.pos);monorailTrain.position.y+=1.9;
+  // Aim from the raised train position, not from the lower guideway point.
+  // Otherwise the 1.9-unit vertical offset becomes a severe downward pitch.
+  var lookTarget=monorailTrain.position.clone().add(s.tan);
+  monorailTrain.lookAt(lookTarget);
+}
+function updateMonorailVisual(){
+  if(!monorailTrain||ridingMonorail)return;
+  var cycle=(clock.elapsedTime*.018)%2,t=cycle<=1?cycle:2-cycle;placeMonorailTrain(t);
+}
+function nearestMonorailStation(){
+  if(interiorMode||lectureMode||!monorailStations.length)return {station:null,index:-1,dist:1e9};
+  var best=null,bi=-1,bd=1e9;
+  for(var i=0;i<monorailStations.length;i++){var s=monorailStations[i],d=Math.hypot(player3d.x-s.gateX,player3d.z-s.gateZ);if(d<bd){bd=d;best=s;bi=i;}}
+  return {station:best,index:bi,dist:bd};
+}
+function exteriorFloorHeight(x,z){
+  if(interiorMode||lectureMode)return 0;
+  var floor=0,stepCount=13,stepDepth=28/stepCount;
+  for(var i=0;i<monorailStations.length;i++){
+    var s=monorailStations[i],wx=x-s.x,wz=z-s.z,c=Math.cos(s.yaw||0),sn=Math.sin(s.yaw||0);
+    // Convert the player into the station's aligned local coordinates.
+    var lx=c*wx-sn*wz,lz=sn*wx+c*wz;
+    if(Math.abs(lx)<=17&&lz>=-6&&lz<=6)floor=Math.max(floor,15.2);
+    if(Math.abs(lx)<=4.4&&lz>6&&lz<34){
+      var step=Math.min(stepCount-1,Math.floor((lz-6)/stepDepth));
+      floor=Math.max(floor,14.05-step*(12.95/(stepCount-1)));
+    }
+  }
+  return floor;
+}
+function openMonorailGate(index){
+  var station=monorailStations[index];if(!station)return false;
+  if(!st.badge){toast('The fare gate stays closed. Pick up your conference badge at the Venetian first.','bad');compass('MONORAIL GATE • CONFERENCE BADGE REQUIRED');return false;}
+  var actions=[];
+  for(var i=0;i<monorailStations.length;i++)if(i!==index)(function(dest){
+    var stops=Math.abs(dest-index),mins=Math.max(2,stops*3);
+    actions.push({n:(dest>index?'⬆ NORTHBOUND · ':'⬇ SOUTHBOUND · ')+monorailStations[dest].name,d:stops+' stop'+(stops===1?'':'s')+' · about '+mins+' min · included with conference pass',f:function(){closeMenu();startMonorailRide(index,dest);}});
+  })(i);
+  openMenu(station.name,'Badge accepted. Your conference pass includes unlimited Las Vegas Monorail rides.',actions);
+  return true;
+}
+function startMonorailRide(from,to){
+  if(ridingMonorail||from===to)return false;
+  monorailFrom=from;monorailTo=to;monorailProgress=monorailStations[from].t;
+  monorailRideSavedPos={x:player3d.x,z:player3d.z,heading:heading,camYaw:camYaw,camPitch:camPitch};
+  ridingMonorail=true;if(playerGroup)playerGroup.visible=false;placeMonorailTrain(monorailProgress);
+  toast('Badge scanned — fare $0. Departing for '+monorailStations[to].name+'.','good');
+  return true;
+}
+function updateMonorailRide(dt){
+  if(!ridingMonorail)return;
+  var target=monorailStations[monorailTo].t,dir=target>monorailProgress?1:-1;
+  monorailProgress+=dir*dt*.040;
+  if((dir>0&&monorailProgress>=target)||(dir<0&&monorailProgress<=target)){monorailProgress=target;placeMonorailTrain(target);stopMonorailRide();return;}
+  placeMonorailTrain(monorailProgress);var s=monorailSample(monorailProgress);if(s){player3d.x=s.pos.x;player3d.z=s.pos.z;heading=Math.atan2(s.tan.x,s.tan.z)+(dir<0?Math.PI:0);}
+}
+function stopMonorailRide(){
+  if(!ridingMonorail)return false;ridingMonorail=false;if(playerGroup)playerGroup.visible=true;
+  var station=monorailStations[monorailTo],safe=nearestClearExteriorPoint(station.gateX,station.gateZ+8,2.2,80);
+  player3d.x=safe.x;player3d.z=safe.z;heading=monorailRideSavedPos?monorailRideSavedPos.heading:heading;camYaw=heading;camPitch=monorailRideSavedPos?monorailRideSavedPos.camPitch:camPitch;
+  playerGroup.position.set(player3d.x,0,player3d.z);playerGroup.rotation.y=heading;
+  st.min+=Math.max(2,Math.abs(monorailTo-monorailFrom)*3);st.steps+=80;
+  toast('Arrived at '+station.name+'. Fare covered by your conference pass.','good');compass(station.name.toUpperCase());return true;
+}
 
 function buildSphereLandmark(){
   var ven=null, wynn=null;
@@ -2391,9 +3270,8 @@ function buildExcaliburLandmark(){
   var arch=new THREEJS.Mesh(new THREEJS.CylinderGeometry(3.8,3.8,10,12,1,false,Math.PI,Math.PI),new THREEJS.MeshLambertMaterial({color:0x4e4250}));
   arch.rotation.z=Math.PI/2; arch.position.set(0,6.2,23.2); root.add(arch);
 
-  var label=signSprite('EXCALIBUR',0xff5c5c,{fontSize:56,width:56,height:8.5,glow:18,depthTest:true,renderOrder:4});
-  label.position.set(0,42,0);
-  label.userData.billboard=true;
+  var label=signSprite('EXCALIBUR',0xff5c5c,{fontSize:56,width:42,height:7,glow:18,depthTest:true,renderOrder:4,frontOnly:true});
+  label.position.set(0,17,23.35);
   root.add(label);
 
   root.userData.placeId=p.id;
@@ -2464,9 +3342,8 @@ function buildLuxorLandmark(){
   beacon.position.set(0,height+1.5,0);
   root.add(beacon);
 
-  var label=signSprite('LUXOR',0xe8d9a0,{fontSize:58,width:46,height:9,glow:18,depthTest:true,renderOrder:4});
-  label.position.set(0,height+28,0);
-  label.userData.billboard=true;
+  var label=signSprite('LUXOR',0xe8d9a0,{fontSize:58,width:38,height:7,glow:18,depthTest:true,renderOrder:4,frontOnly:true});
+  label.position.set(0,height*.34,baseW*.34);
   root.add(label);
 
   root.userData.placeId=p.id;
@@ -2539,9 +3416,8 @@ function buildNynyLandmark(){
   var torchGlow=new THREEJS.PointLight(0xffc04d,0.95,85);
   torchGlow.position.set(sx+7.3,33.3,sz+0.1); root.add(torchGlow);
 
-  var label=signSprite('NEW YORK-NEW YORK',0xffbe3d,{fontSize:52,width:74,height:9,glow:16,depthTest:true,renderOrder:4});
-  label.position.set(0,54,0);
-  label.userData.billboard=true;
+  var label=signSprite('NEW YORK-NEW YORK',0xffbe3d,{fontSize:52,width:48,height:6.5,glow:16,depthTest:true,renderOrder:4,frontOnly:true});
+  label.position.set(0,20,27.2);
   root.add(label);
 
   root.userData.placeId=p.id;
@@ -3084,6 +3960,18 @@ function pointSegmentDistance(x,z,a,b){
   var t=len2?Math.max(0,Math.min(1,((x-a.x)*dx+(z-a.z)*dz)/len2)):0;
   return Math.hypot(x-(a.x+t*dx),z-(a.z+t*dz));
 }
+function setFootprintFromLocal(root,pts,scale){
+  if(!root||!pts||!pts.length)return;
+  scale=scale||1;
+  root.updateMatrixWorld(true);
+  var poly=pts.map(function(p){
+    var v=new THREEJS.Vector3(p[0]*scale,0,p[1]*scale);
+    root.localToWorld(v);
+    return {x:v.x,z:v.z};
+  });
+  poly.push({x:poly[0].x,z:poly[0].z});
+  root.userData.footprint=poly;
+}
 function exteriorBlocked(x,z,radius){
   radius=radius||1.35;
   for(var i=0;i<buildings.length;i++){
@@ -3099,11 +3987,76 @@ function exteriorBlocked(x,z,radius){
 }
 function nearestClearExteriorPoint(x,z,radius,maxSearch){
   radius=radius||1.5;maxSearch=maxSearch||100;
-  if(!exteriorBlocked(x,z,radius))return {x:x,z:z};
+  if(!exteriorBlocked(x,z,radius)&&!exteriorMeshQuery(x,z,radius,0).blocked)return {x:x,z:z};
   for(var ring=4;ring<=maxSearch;ring+=4){
-    for(var i=0;i<32;i++){var a=i/32*Math.PI*2,tx=x+Math.cos(a)*ring,tz=z+Math.sin(a)*ring;if(!exteriorBlocked(tx,tz,radius))return {x:tx,z:tz};}
+    for(var i=0;i<32;i++){
+      var a=i/32*Math.PI*2,tx=x+Math.cos(a)*ring,tz=z+Math.sin(a)*ring;
+      if(!exteriorBlocked(tx,tz,radius)&&!exteriorMeshQuery(tx,tz,radius,0).blocked)return {x:tx,z:tz};
+    }
   }
   return {x:x,z:z};
+}
+
+var EXTERIOR_COLLIDER_CELL=32,EXTERIOR_STEP_HEIGHT=2.5,EXTERIOR_PLAYER_HEIGHT=8.2;
+function exteriorColliderKey(ix,iz){return ix+','+iz;}
+function exteriorDynamicAncestor(obj){
+  for(var n=obj;n;n=n.parent){
+    if(n===playerGroup||n===monorailTrain||n===nynyCoasterCart||n===nynyCoasterCart2)return true;
+    if(showgirls.indexOf(n)>=0||cowboys.indexOf(n)>=0)return true;
+  }
+  return false;
+}
+function exteriorInsideRoot(obj,root){
+  if(!root)return false;
+  for(var n=obj;n;n=n.parent)if(n===root)return true;
+  return false;
+}
+function rebuildExteriorMeshColliders(){
+  exteriorMeshColliders=[];exteriorColliderGrid=Object.create(null);
+  scene.updateMatrixWorld(true);
+  var nextId=1;
+  scene.traverse(function(obj){
+    if(!obj.isMesh||!obj.visible||!obj.geometry||exteriorDynamicAncestor(obj))return;
+    if(exteriorInsideRoot(obj,osmRoot))return; // precise OSM polygons already handle these
+    var mat=obj.material;
+    if(Array.isArray(mat))mat=mat[0];
+    if(mat&&mat.transparent&&mat.opacity<.98)return;
+    if(obj.geometry.type==='PlaneGeometry')return;
+    var box=new THREEJS.Box3().setFromObject(obj);
+    if(box.isEmpty()||!isFinite(box.min.x)||box.max.y<=.04||box.min.y>=EXTERIOR_PLAYER_HEIGHT+EXTERIOR_STEP_HEIGHT)return;
+    var sx=box.max.x-box.min.x,sz=box.max.z-box.min.z;
+    if(sx<.12||sz<.12||sx>1200||sz>1200)return;
+    var collider={id:nextId++,minX:box.min.x,maxX:box.max.x,minZ:box.min.z,maxZ:box.max.z,minY:box.min.y,maxY:box.max.y};
+    exteriorMeshColliders.push(collider);
+    var x0=Math.floor(collider.minX/EXTERIOR_COLLIDER_CELL),x1=Math.floor(collider.maxX/EXTERIOR_COLLIDER_CELL);
+    var z0=Math.floor(collider.minZ/EXTERIOR_COLLIDER_CELL),z1=Math.floor(collider.maxZ/EXTERIOR_COLLIDER_CELL);
+    for(var gx=x0;gx<=x1;gx++)for(var gz=z0;gz<=z1;gz++){
+      var key=exteriorColliderKey(gx,gz);
+      (exteriorColliderGrid[key]||(exteriorColliderGrid[key]=[])).push(collider);
+    }
+  });
+  console.info('Registered '+exteriorMeshColliders.length+' physical exterior meshes');
+}
+function exteriorMeshQuery(x,z,radius,currentFloor){
+  radius=radius===undefined?1.35:radius;currentFloor=currentFloor||0;
+  if(!exteriorMeshColliders.length)return {blocked:false,floor:0};
+  var cellRadius=Math.ceil((radius+1)/EXTERIOR_COLLIDER_CELL),cx=Math.floor(x/EXTERIOR_COLLIDER_CELL),cz=Math.floor(z/EXTERIOR_COLLIDER_CELL);
+  var seen=Object.create(null),floor=0,blocked=false;
+  for(var gx=cx-cellRadius;gx<=cx+cellRadius;gx++)for(var gz=cz-cellRadius;gz<=cz+cellRadius;gz++){
+    var list=exteriorColliderGrid[exteriorColliderKey(gx,gz)]||[];
+    for(var i=0;i<list.length;i++){
+      var c=list[i];if(seen[c.id])continue;seen[c.id]=1;
+      if(x<c.minX-radius||x>c.maxX+radius||z<c.minZ-radius||z>c.maxZ+radius)continue;
+      // A surface no more than knee-high above the current floor is a step, not a wall.
+      if(c.maxY<=currentFloor+EXTERIOR_STEP_HEIGHT+.05){
+        if(x>=c.minX&&x<=c.maxX&&z>=c.minZ&&z<=c.maxZ)floor=Math.max(floor,c.maxY);
+        continue;
+      }
+      // Only geometry occupying the character's vertical body range is an obstacle.
+      if(c.minY<currentFloor+EXTERIOR_PLAYER_HEIGHT&&c.maxY>currentFloor+.12)blocked=true;
+    }
+  }
+  return {blocked:blocked,floor:floor};
 }
 function nearestPlaceTo(x,z){
   var best=null,bd=1e9;
@@ -3127,7 +4080,7 @@ function placeFromOsmTags(tags){
     mgm:['mgm grand'],
     caesars:['caesars forum'],
     caesarsp:['caesars palace'],
-    venetian:['venetian'],
+    venetian:['venetian','palazzo','venetian expo','sands expo','sands convention center'],
     wynn:['wynn'],
     encore:['encore'],
     hotel:['budget tel','budgetel','budget suites']
@@ -3363,9 +4316,64 @@ function makeOsmFootprint(el){
     var hrq=project(hardRockRef.lat,hardRockRef.lng);
     if(Math.abs(cx-hrq.x)<38&&Math.abs(cz-hrq.z)<48)return null;
   }
-  // The Venetian uses a custom palazzo/campanile/canal complex instead of generic cubes.
-  var venetianRef=null;for(var vi=0;vi<PLACES.length;vi++)if(PLACES[vi].id==='venetian'){venetianRef=PLACES[vi];break;}
-  if(venetianRef){var vq=project(venetianRef.lat,venetianRef.lng),customVenetianX=vq.x+42,customVenetianZ=vq.z-24;if(Math.abs(cx-customVenetianX)<72&&Math.abs(cz-customVenetianZ)<82)return null;}
+  // These OSM ways are the Harrah's showroom and two hotel towers. A custom model
+  // supplies their recognizable facade; keep the separately mapped parking garage
+  // because the monorail planner uses it as the Harrah's station anchor.
+  if(el.id===128622185||el.id===111367828||el.id===128632721||el.id===128632722)return null;
+  // Custom LINQ hotel and promenade geometry replaces these overlapping hotel,
+  // casino, retail-roof and promenade footprints. The self-parking garage remains.
+  if(el.id===115771295||el.id===115773426||el.id===115772002||el.id===402543932||
+     el.id===402543935||el.id===402543936||el.id===402543937||el.id===700156951)return null;
+  // Custom Flamingo towers, casino podium and habitat replace these resort pieces.
+  // Keep Flamingo Self Parking and the separate Hilton Grand Vacations tower.
+  if(el.id===116761428||el.id===115766957||el.id===115766962||el.id===115766969||
+     el.id===116761035||el.id===310585854||el.id===115767903||el.id===115767964||
+     el.id===115767967||el.id===115767969||el.id===115767970||el.id===115767971||
+     el.id===115767972||el.id===115768902||el.id===115771199||el.id===402543931||
+     el.id===402543938||el.id===402543939)return null;
+  // Custom Paris hotel, mall, Eiffel Tower, Arc and balloon replace these footprints.
+  // Paris Self Parking remains as its own OSM structure.
+  if(el.id===27831697||el.id===27831699||el.id===33974140||el.id===114697072||
+     el.id===114697073||el.id===114697074||el.id===114722037||el.id===364846544||
+     el.id===472669747||el.id===1424222076||el.id===1424222077||
+     el.id===1424222078||el.id===1424222079)return null;
+  // Custom Planet Hollywood towers, PH Live and Miracle Mile frontage replace
+  // these visible resort footprints. Preserve the rear self-parking structure.
+  if(el.id===115670770||el.id===134921371||el.id===134921373||el.id===134921379||
+     el.id===1255028421||el.id===1606512)return null;
+  // Custom MGM Grand tower and casino shell replace these main-resort footprints.
+  // Arena, conference center, Signature towers and parking remain OSM geometry.
+  if(el.id===116770006||el.id===501625341||el.id===6022477||el.id===115645149||
+     el.id===116765496||el.id===116765497||el.id===116765498)return null;
+  // The custom gold Mandalay Bay tower replaces the main tower and casino shell.
+  // Keep the convention center, arena, W/Four Seasons towers and parking.
+  if(el.id===27858550||el.id===116660358||el.id===118346756||el.id===364846553)return null;
+  // Custom Park MGM tower/casino replaces its two resort shells; parking and tram stay.
+  if(el.id===27831695||el.id===115080290)return null;
+  // Custom ARIA crescents and podium replace the resort shell and tower slabs.
+  // Crystals, Veer, Waldorf, Vdara, tram infrastructure and parking remain.
+  if(el.id===52175576||el.id===134930088||el.id===134930089||el.id===134930090||
+     el.id===134930091||el.id===134930092||el.id===463856739)return null;
+  // Custom Trump gold tower replaces the hotel footprint; its valet garage remains.
+  if(el.id===111380666)return null;
+  // The custom Venetian is pushed away from the road during construction. Use its
+  // final world-space footprint here; the old pre-push coordinates left duplicate
+  // OSM slabs beside and through the resort. Named Venetian/Palazzo/Expo footprints
+  // are always part of the custom complex and must not be rendered a second time.
+  var venetianRoot=null;
+  for(var vi=0;vi<buildings.length;vi++)if(buildings[vi].userData&&buildings[vi].userData.placeId==='venetian'){venetianRoot=buildings[vi];break;}
+  if(matchedPlace&&matchedPlace.id==='venetian')return null;
+  if(venetianRoot&&venetianRoot.userData.footprint){
+    var customVenetianPoly=venetianRoot.userData.footprint,nearCustomVenetian=false;
+    for(var vp=0;vp<pts.length&&!nearCustomVenetian;vp++){
+      if(pointInFootprint(pts[vp].x,pts[vp].z,customVenetianPoly)){nearCustomVenetian=true;break;}
+      for(var ve=0;ve<customVenetianPoly.length-1;ve++)if(pointSegmentDistance(pts[vp].x,pts[vp].z,customVenetianPoly[ve],customVenetianPoly[ve+1])<8){nearCustomVenetian=true;break;}
+    }
+    for(var cv=0;cv<customVenetianPoly.length&&!nearCustomVenetian;cv++)if(pointInFootprint(customVenetianPoly[cv].x,customVenetianPoly[cv].z,pts))nearCustomVenetian=true;
+    if(nearCustomVenetian)return null;
+  }
+  var forumRef=null;for(var fi=0;fi<PLACES.length;fi++)if(PLACES[fi].id==='caesars'){forumRef=PLACES[fi];break;}
+  if(forumRef){var fq=project(forumRef.lat,forumRef.lng),customForumX=fq.x+4,customForumZ=fq.z-8;if(Math.abs(cx-customForumX)<88&&Math.abs(cz-customForumZ)<68)return null;if(matchedPlace&&matchedPlace.id==='caesars')return null;}
   var caesarRef=null;for(var ci=0;ci<PLACES.length;ci++)if(PLACES[ci].id==="caesarsp"){caesarRef=PLACES[ci];break;}
   if(caesarRef){var cq=project(caesarRef.lat,caesarRef.lng),customCaesarsX=cq.x-10,customCaesarsZ=cq.z-8;if(Math.abs(cx-customCaesarsX)<86&&Math.abs(cz-customCaesarsZ)<82)return null;}
   var wynnRef=null;for(var wi=0;wi<PLACES.length;wi++)if(PLACES[wi].id==='wynn'){wynnRef=PLACES[wi];break;}
@@ -3445,6 +4453,7 @@ function makeOsmFootprint(el){
     }
     h=Math.max(h,desiredHotelHeight);
   }
+  // Large low-rise buildings remain solid; their roofs are not exterior floors.
   var seed=Math.abs(((bw*7+bd*11+h*13)|0));
   var color=osmColorFor(tags,near,seed);
   var accent=osmAccentFor(tags,near,seed);
@@ -3513,7 +4522,7 @@ function makeOsmFootprint(el){
   if(h>20)addRoofDetail(group,minx,maxx,minz,maxz,cx,cz,h,accent);
 
   // Collision uses this exact rendered footprint; the AABB is broad-phase only.
-  if(area>120&&area<30000){
+  if(area>120){
     group.userData.aabb={
       cx:(minx+maxx)/2,
       cz:(minz+maxz)/2,
@@ -3522,6 +4531,8 @@ function makeOsmFootprint(el){
     };
     group.userData.footprint=spts.map(function(fp){return {x:fp.x,z:fp.z};});
   }
+  group.userData.osmName=normName([tags.name,tags['name:en'],tags.brand,tags.operator].filter(Boolean).join(' '));
+  group.userData.osmId=el.id;
   group.userData.heightMeters=hInfo.meters;
   group.userData.heightSource=hInfo.source;
   group.userData.hotelLabelCount=0;
@@ -3722,9 +4733,13 @@ function buildPlayer(){
   pack=box(1.6,2,1,0x3a7bd5);pack.position.set(0,4.4,-1);playerGroup.add(pack);
   // lanyard badge
   var badge=box(1.1,1.4,0.2,0xffffff);badge.position.set(0,3.6,0.8);playerGroup.add(badge);
+  // Limb pivots extend below the group origin. Rest the lowest model vertex on floors.
+  playerGroup.updateMatrixWorld(true);
+  var playerBounds=new THREEJS.Box3().setFromObject(playerGroup);
+  playerFootLift=Math.max(0,-playerBounds.min.y)+0.04;
   scene.add(playerGroup);
   player3d={x:SPAWN.x,z:SPAWN.z};
-  playerGroup.position.set(SPAWN.x,0,SPAWN.z);
+  playerGroup.position.set(SPAWN.x,playerFootLift,SPAWN.z);
 }
 function animatePlayer(dt,speed){
   var sw=Math.sin(clock.elapsedTime*10)*Math.min(speed/18,1);
@@ -4032,12 +5047,24 @@ function buildWorld(){
   buildPoliceStation();
   buildHelicopterFleet();
   buildBellagioFountains();
+  buildWelcomeSignLandmark();
+  buildMandalayBayLandmark();
+  buildTrumpHotelLandmark();
+  buildParkMgmLandmark();
+  buildAriaLandmark();
+  buildMgmGrandLandmark();
+  buildPlanetHollywoodLandmark();
+  buildParisLandmark();
   buildParisEiffelTower();
   buildVenetianLandmark();
+  buildCaesarsForumLandmark();
   buildCaesarsPalaceLandmark();
   buildWynnLandmark();
   buildEncoreLandmark();
+  buildHarrahsLandmark();
   buildHardRockGuitarHotel();
+  buildFlamingoLandmark();
+  buildLinqLandmarkAndPromenade();
   buildHighRoller();
   buildSphereLandmark();
   buildExcaliburLandmark();
@@ -4047,11 +5074,23 @@ function buildWorld(){
   // Buildings are now OSM-only. No stylized hotel/casino slabs are generated.
   buildCars();
   loadOsmBuildings();
+  // Build against the complete OSM collision map so track and stations stay clear.
+  buildMonorail();
+  // Turn every remaining opaque ground-level mesh into a physical step or obstacle.
+  rebuildExteriorMeshColliders();
 
-  // spawn near the Venetian entrance (badge pickup HQ)
-  var vd=null;for(var d=0;d<doorPoints.length;d++)if(doorPoints[d].place.id==="venetian")vd=doorPoints[d];
-  var vpos=project(36.121,-115.170);
-  SPAWN.x=vd?vd.x:vpos.x; SPAWN.z=(vd?vd.z:vpos.z)+11;
+  // Start on Las Vegas Boulevard, geographically between the Venetian and
+  // Caesars Palace, rather than at either hotel's entrance.
+  var venetianPlace=null,caesarsPlace=null;
+  for(var spi=0;spi<PLACES.length;spi++){
+    if(PLACES[spi].id==='venetian')venetianPlace=PLACES[spi];
+    if(PLACES[spi].id==='caesarsp')caesarsPlace=PLACES[spi];
+  }
+  var spawnLat=venetianPlace&&caesarsPlace?(venetianPlace.lat+caesarsPlace.lat)/2:36.11875;
+  var spawnLng=venetianPlace&&caesarsPlace?(venetianPlace.lng+caesarsPlace.lng)/2:-115.17235;
+  var spawnHint=project(spawnLat,spawnLng),stripSpawn=nearestOnRoad(spawnHint.x,spawnHint.z);
+  SPAWN.x=stripSpawn?stripSpawn.px:spawnHint.x;
+  SPAWN.z=stripSpawn?stripSpawn.pz:spawnHint.z;
   var clearSpawn=nearestClearExteriorPoint(SPAWN.x,SPAWN.z,2.2,120);SPAWN.x=clearSpawn.x;SPAWN.z=clearSpawn.z;
   buildPlayer();
   placeShowgirlsNearPlayer();
@@ -4098,7 +5137,7 @@ cvEl.addEventListener("pointermove",function(e){if(camDragBase&&e.pointerId===ca
   camYaw=nextYaw;
   // When walking, horizontal mouse movement turns the character as well as the camera.
   // While riding attractions, let the mouse control view only.
-  if(!ridingHighRoller && !ridingCoaster){
+  if(!ridingHighRoller && !ridingCoaster && !ridingMonorail){
     heading=nextYaw;
     if(playerGroup)playerGroup.rotation.y=heading;
   }
@@ -4364,6 +5403,7 @@ function triggerAutoDoor(d){
 function doEnter(){
   if(ridingHighRoller)return stopHighRollerRide();
   if(ridingCoaster)return stopCoasterRide();
+  if(ridingMonorail){toast('Please remain aboard. Next stop: '+monorailStations[monorailTo].name+'.','info');return;}
   if(lectureMode){
     var ln=nearestNpc();if(ln.npc&&ln.dist<12)return interactWithNpc(ln.npc);
     if(lectureExit){
@@ -4375,6 +5415,8 @@ function doEnter(){
   }
   var nearbyShowgirl=nearestShowgirl();if(!interiorMode&&nearbyShowgirl.showgirl&&nearbyShowgirl.dist<12)return interactShowgirl(nearbyShowgirl.showgirl);
   var nearbyNpc=nearestNpc();if(nearbyNpc.npc&&nearbyNpc.dist<12)return interactWithNpc(nearbyNpc.npc);
+  var mr=nearestMonorailStation();
+  if(!interiorMode&&!lectureMode&&mr.station&&mr.dist<24)return openMonorailGate(mr.index);
   var hr=nearestHighRollerRide();
   if(!interiorMode&&!lectureMode&&hr.ride&&hr.dist<85)return startHighRollerRide();
   var cr=nearestCoasterRide();
@@ -4439,6 +5481,15 @@ function tick(dt){
     updHUD();
     return;
   }
+  if(ridingMonorail){
+    updateMonorailRide(dt);
+    st.energy-=dt*0.015;st.hydration-=dt*0.04;st.vibes+=dt*0.025;
+    animatePlayer(dt,0);checkVitals();
+    var promptKeyMono=$("prompt").querySelector("b");
+    $("prompt").style.display="block";promptKeyMono.textContent='[ON BOARD]';
+    $("promptTxt").textContent='next stop: '+monorailStations[monorailTo].name;
+    updHUD();return;
+  }
   // input
   var ix=0,iz=0;
   if(keys["w"]||keys["arrowup"])iz-=1;
@@ -4496,11 +5547,14 @@ function tick(dt){
           if(Math.abs(nx-ca.cx)/cex>Math.abs(nz-ca.cz)/cez)nx=cox;else nz=coz;
         }}
     }else{
-      // Resolve each axis separately so the player slides along the true polygon wall.
+      // Resolve each axis separately so the player slides along polygon walls and
+      // every opaque rendered obstacle. Knee-high geometry is handled as a step.
+      var currentFloor=Math.max(0,playerGroup.position.y-playerFootLift);
       var tryX=player3d.x+dx*speed*dt,tryZ=player3d.z+dz*speed*dt;
-      if(exteriorBlocked(tryX,player3d.z,1.35))tryX=player3d.x;
-      if(exteriorBlocked(tryX,tryZ,1.35))tryZ=player3d.z;
-      if(exteriorBlocked(tryX,tryZ,1.35))tryX=player3d.x;
+      function blockedAt(tx,tz){return exteriorBlocked(tx,tz,1.35)||exteriorMeshQuery(tx,tz,1.35,currentFloor).blocked;}
+      if(blockedAt(tryX,player3d.z))tryX=player3d.x;
+      if(blockedAt(tryX,tryZ))tryZ=player3d.z;
+      if(blockedAt(tryX,tryZ))tryX=player3d.x;
       nx=tryX;nz=tryZ;
     }
     var md=Math.hypot(nx-player3d.x,nz-player3d.z);
@@ -4514,6 +5568,13 @@ function tick(dt){
     }
   }else{st.energy-=dt*0.06;}
   st.hydration-=dt*0.2;st.vibes-=dt*0.02;
+  var resolvedFloor=exteriorFloorHeight(player3d.x,player3d.z);
+  if(!interiorMode&&!lectureMode){
+    var priorFloor=Math.max(0,playerGroup.position.y-playerFootLift);
+    var meshFloor=exteriorMeshQuery(player3d.x,player3d.z,.12,priorFloor).floor;
+    resolvedFloor=Math.max(resolvedFloor,meshFloor);
+  }
+  playerGroup.position.y=resolvedFloor+playerFootLift;
   checkVitals();
   animatePlayer(dt,speed);
 
@@ -4543,6 +5604,7 @@ function tick(dt){
   var n=nearestDoor();
   var highRollerNear=nearestHighRollerRide();
   var coasterNear=nearestCoasterRide();
+  var monorailNear=nearestMonorailStation();
   nearPlace=(n.door&&n.dist<16)?n.door.place:null;
 
   if(n.door && isAutoTransitionDoor(n.door) && n.dist<10 && autoDoorCooldown<=0){
@@ -4560,6 +5622,9 @@ function tick(dt){
     $("prompt").style.display="block";
     promptKey.textContent='[E]';
     $("promptTxt").textContent='talk to '+promptNpc.npc.userData.config.name;
+  } else if(!interiorMode && monorailNear.station && monorailNear.dist<24){
+    $("prompt").style.display="block";promptKey.textContent='[E]';
+    $("promptTxt").textContent=(st.badge?'scan conference pass at ':'badge required at ')+monorailNear.station.name;
   } else if(!interiorMode && highRollerNear.ride && highRollerNear.dist<85){
     $("prompt").style.display="block";
     promptKey.textContent='[E]';
@@ -4625,7 +5690,8 @@ function nightMix(){var h=(st.min/60)%24;
   if(h>=7&&h<16)return 0.1;if(h>=16&&h<19)return 0.1+(h-16)/3*0.8;return 0.9;}
 function updateToastAnchor(){
   if(!cam||!player3d)return;
-  var el=$("toasts"),screen=new THREEJS.Vector3(player3d.x,.4,player3d.z).project(cam);
+  var py=playerGroup?playerGroup.position.y:0;
+  var el=$("toasts"),screen=new THREEJS.Vector3(player3d.x,py+.4,player3d.z).project(cam);
   if(screen.z<-1||screen.z>1){el.style.visibility='hidden';return;}
   el.style.visibility='visible';el.style.left=((screen.x*.5+.5)*innerWidth)+'px';el.style.top=((-screen.y*.5+.5)*innerHeight+16)+'px';
 }
@@ -4660,6 +5726,7 @@ function render(dt){
     bellagioFountainRoot.rotation.y=Math.sin(clock.elapsedTime*0.18)*0.04;
   }
   updateHighRoller(dt);
+  updateMonorailVisual();
   if(nynyCoasterCurve&&nynyCoasterCart){
     var tt=(clock.elapsedTime*coasterRideSpeed)%1;
     placeCoasterCart(nynyCoasterCart,tt);
@@ -4693,6 +5760,13 @@ function render(dt){
         cam.lookAt(look.x,look.y,look.z);
         clearCameraOcclusion();
       }
+    }else if(ridingMonorail&&monorailCurve){
+      var msCam=monorailSample(monorailProgress);
+      if(msCam){
+        var monoEye=msCam.pos.clone().add(new THREEJS.Vector3(0,3.2,0));
+        var monoLook=monoEye.clone().add(msCam.tan.clone().multiplyScalar(monorailTo>monorailFrom?28:-28));
+        cam.position.lerp(monoEye,Math.min(1,dt*12));cam.lookAt(monoLook);clearCameraOcclusion();
+      }
     }else if(ridingCoaster&&nynyCoasterCurve){
       var rideT=((clock.elapsedTime*coasterRideSpeed)+coasterRideOffset)%1;
       var rsCam=coasterWorldSample(rideT);
@@ -4717,9 +5791,10 @@ function render(dt){
       var dist=interiorMode?28:26;
       var cx=player3d.x-Math.sin(camYaw)*dist*Math.cos(ph);
       var cz=player3d.z-Math.cos(camYaw)*dist*Math.cos(ph);
-      var cy=6+Math.sin(ph)*dist;
+      var floorY=playerGroup.position.y;
+      var cy=floorY+6+Math.sin(ph)*dist;
       var desired=new THREEJS.Vector3(cx,cy,cz);
-      var target=new THREEJS.Vector3(player3d.x,interiorMode?5.0:6,player3d.z);
+      var target=new THREEJS.Vector3(player3d.x,floorY+(interiorMode?5.0:6),player3d.z);
       if(interiorMode)desired=safeInteriorCameraPosition(desired,target);
       cam.position.lerp(desired,Math.min(1,dt*8));
       cam.lookAt(target.x,target.y,target.z);
