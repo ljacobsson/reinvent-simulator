@@ -5579,6 +5579,10 @@ function buildWorld(){
 
 /* ================= INPUT ================= */
 addEventListener("keydown",function(e){keys[e.key.toLowerCase()]=true;
+  if(!paused&&!e.repeat&&(e.key==='1'||e.key==='2'||e.key==='3')){
+    var nearbySlot=nearestSlotMachine();
+    if(nearbySlot.slot&&nearbySlot.dist<7){e.preventDefault();spinSlotMachine(nearbySlot.slot,[5,25,100][+e.key-1]);return;}
+  }
   if((e.key==="e"||e.key==="E"||e.key==="Enter")&&!paused)doEnter();
   if(e.key==="[" ){st.min=Math.max(0,st.min-60);toast('Time -1 hour: '+DAYS[st.day]+' '+hhmm(st.min),'info');updHUD();}
   if(e.key==="]" ){st.min+=60;toast('Time +1 hour: '+DAYS[st.day]+' '+hhmm(st.min),'info');updHUD();}
@@ -5774,9 +5778,12 @@ function buildCasinoFloor(g,place){
     if(Math.abs(i)<=1&&Math.abs(row)<=1)continue;
     var slot=addInteriorBox(g,i*13,2,row*13,4,4,3,theme.wall,false,theme.neon);
     addInteriorBox(g,i*13,4.25,row*13,4.4,.5,3.4,theme.accent,false,theme.neon);
-    var face=new THREEJS.Mesh(new THREEJS.PlaneGeometry(3.2,2.2),new THREEJS.MeshBasicMaterial({color:(i+row)%2?theme.accent:theme.neon,side:THREEJS.DoubleSide}));
+    var slotCanvas=document.createElement('canvas');slotCanvas.width=384;slotCanvas.height=256;
+    var slotTexture=new THREEJS.CanvasTexture(slotCanvas);slotTexture.minFilter=THREEJS.LinearFilter;
+    var face=new THREEJS.Mesh(new THREEJS.PlaneGeometry(3.2,2.2),new THREEJS.MeshBasicMaterial({map:slotTexture,color:0xffffff,side:THREEJS.DoubleSide}));
     face.position.set(INTERIOR_ORIGIN.x+i*13,3,INTERIOR_ORIGIN.z+row*13+1.55);g.add(face);
-    interiorSlots.push({x:INTERIOR_ORIGIN.x+i*13,z:INTERIOR_ORIGIN.z+row*13+4.5,screen:face,name:place.name+' Lucky Cloud'});
+    var slotData={x:INTERIOR_ORIGIN.x+i*13,z:INTERIOR_ORIGIN.z+row*13+4.5,screen:face,canvas:slotCanvas,texture:slotTexture,name:place.name+' Lucky Cloud',reels:['7','◆','☁'],spinning:false};
+    interiorSlots.push(slotData);drawSlotScreen(slotData,'PLAY');
     addCasinoStool(g,i*13,row*13+3.2,theme.accent);
   }
   // table games
@@ -5919,22 +5926,42 @@ function nearestSlotMachine(){
   for(var i=0;i<interiorSlots.length;i++){var slot=interiorSlots[i],d=Math.hypot(player3d.x-slot.x,player3d.z-slot.z);if(d<bd){best=slot;bd=d;}}
   return {slot:best,dist:bd};
 }
+function drawSlotScreen(slot,status){
+  var c=slot.canvas,x=c.getContext('2d'),reels=slot.reels||['7','◆','☁'];
+  x.clearRect(0,0,c.width,c.height);
+  var grad=x.createLinearGradient(0,0,0,c.height);grad.addColorStop(0,'#30105c');grad.addColorStop(1,'#090413');x.fillStyle=grad;x.fillRect(0,0,c.width,c.height);
+  x.strokeStyle=status==='WIN'?'#4dff9d':'#ffd33d';x.lineWidth=10;x.strokeRect(6,6,c.width-12,c.height-12);
+  x.fillStyle='#ffd33d';x.font='bold 28px sans-serif';x.textAlign='center';x.fillText('LUCKY CLOUD',c.width/2,42);
+  for(var i=0;i<3;i++){var left=22+i*120;x.fillStyle='#f7f1ff';x.fillRect(left,62,100,116);x.strokeStyle='#6f4d91';x.lineWidth=4;x.strokeRect(left,62,100,116);x.fillStyle=reels[i]==='7'?'#ef275f':'#191027';x.font='bold 66px sans-serif';x.fillText(reels[i],left+50,142);}
+  x.fillStyle=status==='WIN'?'#4dff9d':'#ffffff';x.font='bold 25px sans-serif';x.fillText(status||'PLAY',c.width/2,224);slot.texture.needsUpdate=true;
+}
 function slotActions(slot){
-  return [5,25,100].map(function(wager){return {n:'Spin for $'+wager,d:wager===5?'casual button tapping':wager===25?'conference-expense-account energy':'maximum architectural irresponsibility',off:st.money<wager,f:function(){spinSlotMachine(slot,wager);}};});
+  return [5,25,100].map(function(wager){return {n:'Spin for $'+wager,d:wager===5?'casual button tapping':wager===25?'conference-expense-account energy':'maximum architectural irresponsibility',off:slot.spinning||st.money<wager,f:function(){spinSlotMachine(slot,wager);}};});
 }
 function openSlotMachine(slot,message){
-  openMenu(slot.name,message||('$'+Math.round(st.money)+' available · match symbols to win'),slotActions(slot));
+  openMenu(slot.name,message||('$'+Math.round(st.money)+' available · pairs pay 2× · triples pay 6× · 7 jackpot pays 20×'),slotActions(slot));
 }
 function spinSlotMachine(slot,wager){
-  if(!spendMoney(wager,'this spin'))return;
-  var symbols=['☁','☁','☁','⚡','⚡','◆','◆','7'],reels=[];
-  for(var i=0;i<3;i++)reels.push(symbols[Math.floor(Math.random()*symbols.length)]);
-  var payout=0,label='No match';
-  if(reels[0]===reels[1]&&reels[1]===reels[2]){payout=wager*(reels[0]==='7'?20:8);label=reels[0]==='7'?'JACKPOT!':'Three of a kind!';}
-  else if(reels[0]===reels[1]||reels[1]===reels[2]||reels[0]===reels[2]){payout=wager*2;label='Pair!';}
-  if(payout){st.money+=payout;st.vibes=Math.min(100,st.vibes+(payout>=wager*8?10:3));slot.screen.material.color.setHex(0x4dff9d);sfx('good');}
-  else{st.vibes=Math.max(0,st.vibes-1);slot.screen.material.color.setHex(0xff2d95);sfx('bad');}
-  updHUD();openSlotMachine(slot,reels.join('  |  ')+'  —  '+label+(payout?' You won $'+payout+'.':' Lost $'+wager+'.')+'  Balance: $'+Math.round(st.money));
+  if(slot.spinning||!spendMoney(wager,'this spin'))return;
+  slot.spinning=true;drawSlotScreen(slot,'SPINNING');
+  var symbols=['☁','⚡','◆','♠','★','7'],start=Date.now(),stops=[900,1350,1800],timer=setInterval(function(){
+    var elapsed=Date.now()-start;
+    for(var i=0;i<3;i++)if(elapsed<stops[i])slot.reels[i]=symbols[Math.floor(Math.random()*symbols.length)];
+    drawSlotScreen(slot,'SPINNING');sfx('click');
+    if(elapsed>=stops[2]){clearInterval(timer);finishSlotSpin(slot,wager);}
+  },90);
+}
+function finishSlotSpin(slot,wager){
+  // Explicit outcome bands keep the long-run return near 88%; the casino retains its edge.
+  var roll=Math.random(),symbols=['☁','⚡','◆','♠','★'],payout=0,label='No match';
+  if(roll<.0035){slot.reels=['7','7','7'];payout=wager*20;label='JACKPOT!';}
+  else if(roll<.0485){var triple=rnd(symbols);slot.reels=[triple,triple,triple];payout=wager*6;label='Three of a kind!';}
+  else if(roll<.3185){var pair=rnd(symbols),odd=rnd(symbols.filter(function(s){return s!==pair;})),pos=Math.floor(Math.random()*3);slot.reels=[pair,pair,pair];slot.reels[pos]=odd;payout=wager*2;label='Pair!';}
+  else{do{slot.reels=[rnd(symbols),rnd(symbols),rnd(symbols)];}while(slot.reels[0]===slot.reels[1]||slot.reels[1]===slot.reels[2]||slot.reels[0]===slot.reels[2]);}
+  slot.spinning=false;
+  if(payout){st.money+=payout;st.vibes=Math.min(100,st.vibes+(payout>=wager*6?10:3));sfx('good');drawSlotScreen(slot,'WIN');}
+  else{st.vibes=Math.max(0,st.vibes-1);sfx('bad');drawSlotScreen(slot,'TRY AGAIN');}
+  updHUD();toast(slot.reels.join('  |  ')+' — '+label+(payout?' Won $'+payout+'.':' Lost $'+wager+'.')+' Balance: $'+Math.round(st.money),payout?'good':'bad');
 }
 
 function isAutoTransitionDoor(d){
@@ -5965,7 +5992,10 @@ function doEnter(){
     }
     return;
   }
-  var nearbySlot=nearestSlotMachine();if(nearbySlot.slot&&nearbySlot.dist<7)return openSlotMachine(nearbySlot.slot);
+  var nearbySlot=nearestSlotMachine();if(nearbySlot.slot&&nearbySlot.dist<7){
+    if(matchMedia('(pointer:coarse)').matches)return spinSlotMachine(nearbySlot.slot,25);
+    toast('Choose a wager: [1] $5 · [2] $25 · [3] $100','info');return;
+  }
   var nearbyTickets=nearestTicketStand();if(!interiorMode&&nearbyTickets.dist<18)return openTicketStand();
   var nearbyShowgirl=nearestShowgirl();if(!interiorMode&&nearbyShowgirl.showgirl&&nearbyShowgirl.dist<12)return interactShowgirl(nearbyShowgirl.showgirl);
   var mr=nearestMonorailStation();
@@ -6182,7 +6212,9 @@ function tick(dt){
   var promptTickets=nearestTicketStand();
   var promptSlot=nearestSlotMachine();
   if(promptSlot.slot&&promptSlot.dist<7){
-    $("prompt").style.display="block";promptKey.textContent='[E]';$("promptTxt").textContent='play slot machine · cash $'+Math.round(st.money);
+    $("prompt").style.display="block";
+    if(matchMedia('(pointer:coarse)').matches){promptKey.textContent='[PLAY]';$("promptTxt").textContent='$25 spin · cash $'+Math.round(st.money);}
+    else{promptKey.textContent='[1] $5  [2] $25  [3] $100';$("promptTxt").textContent=(promptSlot.slot.spinning?'reels spinning':'choose wager')+' · cash $'+Math.round(st.money);}
   } else if(!interiorMode&&promptTickets.dist<18){
     $("prompt").style.display="block";promptKey.textContent='[E]';$("promptTxt").textContent='browse show tickets and helicopter tours';
   } else if(!interiorMode&&promptShowgirl.showgirl&&promptShowgirl.dist<12){
