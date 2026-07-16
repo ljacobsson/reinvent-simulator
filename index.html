@@ -5913,6 +5913,29 @@ function nearestDoor(){
     if(d<bd){bd=d;best=dp;}}
   return {door:best,dist:bd};
 }
+function nearestSlotMachine(){
+  if(!interiorMode||lectureMode||!interiorSlots.length)return {slot:null,dist:1e9};
+  var best=null,bd=1e9;
+  for(var i=0;i<interiorSlots.length;i++){var slot=interiorSlots[i],d=Math.hypot(player3d.x-slot.x,player3d.z-slot.z);if(d<bd){best=slot;bd=d;}}
+  return {slot:best,dist:bd};
+}
+function slotActions(slot){
+  return [5,25,100].map(function(wager){return {n:'Spin for $'+wager,d:wager===5?'casual button tapping':wager===25?'conference-expense-account energy':'maximum architectural irresponsibility',off:st.money<wager,f:function(){spinSlotMachine(slot,wager);}};});
+}
+function openSlotMachine(slot,message){
+  openMenu(slot.name,message||('$'+Math.round(st.money)+' available · match symbols to win'),slotActions(slot));
+}
+function spinSlotMachine(slot,wager){
+  if(!spendMoney(wager,'this spin'))return;
+  var symbols=['☁','☁','☁','⚡','⚡','◆','◆','7'],reels=[];
+  for(var i=0;i<3;i++)reels.push(symbols[Math.floor(Math.random()*symbols.length)]);
+  var payout=0,label='No match';
+  if(reels[0]===reels[1]&&reels[1]===reels[2]){payout=wager*(reels[0]==='7'?20:8);label=reels[0]==='7'?'JACKPOT!':'Three of a kind!';}
+  else if(reels[0]===reels[1]||reels[1]===reels[2]||reels[0]===reels[2]){payout=wager*2;label='Pair!';}
+  if(payout){st.money+=payout;st.vibes=Math.min(100,st.vibes+(payout>=wager*8?10:3));slot.screen.material.color.setHex(0x4dff9d);sfx('good');}
+  else{st.vibes=Math.max(0,st.vibes-1);slot.screen.material.color.setHex(0xff2d95);sfx('bad');}
+  updHUD();openSlotMachine(slot,reels.join('  |  ')+'  —  '+label+(payout?' You won $'+payout+'.':' Lost $'+wager+'.')+'  Balance: $'+Math.round(st.money));
+}
 
 function isAutoTransitionDoor(d){
   if(!d)return false;
@@ -5942,6 +5965,7 @@ function doEnter(){
     }
     return;
   }
+  var nearbySlot=nearestSlotMachine();if(nearbySlot.slot&&nearbySlot.dist<7)return openSlotMachine(nearbySlot.slot);
   var nearbyTickets=nearestTicketStand();if(!interiorMode&&nearbyTickets.dist<18)return openTicketStand();
   var nearbyShowgirl=nearestShowgirl();if(!interiorMode&&nearbyShowgirl.showgirl&&nearbyShowgirl.dist<12)return interactShowgirl(nearbyShowgirl.showgirl);
   var mr=nearestMonorailStation();
@@ -6156,7 +6180,10 @@ function tick(dt){
   var promptShowgirl=nearestShowgirl();
   var promptNpc=nearestNpc();
   var promptTickets=nearestTicketStand();
-  if(!interiorMode&&promptTickets.dist<18){
+  var promptSlot=nearestSlotMachine();
+  if(promptSlot.slot&&promptSlot.dist<7){
+    $("prompt").style.display="block";promptKey.textContent='[E]';$("promptTxt").textContent='play slot machine · cash $'+Math.round(st.money);
+  } else if(!interiorMode&&promptTickets.dist<18){
     $("prompt").style.display="block";promptKey.textContent='[E]';$("promptTxt").textContent='browse show tickets and helicopter tours';
   } else if(!interiorMode&&promptShowgirl.showgirl&&promptShowgirl.dist<12){
     $("prompt").style.display="block";
