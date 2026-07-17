@@ -119,6 +119,9 @@
   .act.hot{border-color:var(--pink);box-shadow:0 0 14px #ff2d9533}
   .act.hot .n{color:var(--pink)}
   .act:disabled{opacity:.42;cursor:default}
+  #blackjackUI{z-index:70}.bjFelt{width:min(900px,96vw);min-height:620px;border:12px solid #5c3219;border-radius:46% 46% 18px 18px;background:radial-gradient(ellipse at 50% 20%,#16734d,#075034 72%);box-shadow:inset 0 0 0 5px #d3a54a,0 25px 80px #000;padding:28px;color:#fff;text-align:center}
+  .bjTitle{font:38px var(--disp);letter-spacing:5px;color:#ffd56a;text-shadow:0 3px #542b12}.bjStatus{font:15px var(--mono);min-height:24px;margin:8px;color:#e8ffe9}.bjZone{min-height:145px}.bjLabel{font:13px var(--mono);letter-spacing:2px;color:#bce8cf;margin:9px}.bjHand{display:flex;justify-content:center;gap:10px;min-height:105px;flex-wrap:wrap}.playingCard{width:72px;height:100px;border-radius:8px;background:#fff;color:#15101b;border:2px solid #ddd;box-shadow:0 5px 10px #0008;display:flex;flex-direction:column;justify-content:space-between;padding:6px;font:bold 23px Georgia;text-align:left}.playingCard.red{color:#d51f38}.playingCard.back{background:repeating-linear-gradient(45deg,#1d4e89 0 7px,#fff 7px 9px);border:6px solid #fff}.playingCard i{font-style:normal;text-align:center;font-size:34px}.bjControls{display:flex;gap:9px;justify-content:center;flex-wrap:wrap;margin-top:14px}.bjControls button{border:2px solid #e4be67;border-radius:999px;background:#161020;color:#fff;padding:10px 18px;font:bold 14px var(--mono);cursor:pointer}.bjControls button:hover{background:#3b2452}.bjControls button:disabled{opacity:.35}.bjControls .deal{background:#e4a92e;color:#211000}.bjBalance{font:14px var(--mono);color:#ffd56a;margin-top:12px}
+  #rouletteUI{z-index:70}.rouletteFelt{width:min(920px,96vw);min-height:620px;border:12px solid #5c3219;border-radius:28px;background:radial-gradient(circle at 22% 35%,#147048,#06452d 72%);box-shadow:inset 0 0 0 5px #d3a54a,0 25px 80px #000;padding:25px;text-align:center}.rouletteTitle{font:38px var(--disp);letter-spacing:5px;color:#ffd56a}.rouletteWheel{width:170px;height:170px;margin:10px auto;border-radius:50%;border:16px dashed #eee;background:conic-gradient(#b51e2e 0 10deg,#18131a 10deg 20deg,#b51e2e 20deg 30deg,#18131a 30deg 40deg);box-shadow:inset 0 0 0 13px #c89d42,0 7px 18px #000;display:grid;place-items:center}.rouletteWheel.spinning{animation:rouletteSpin .18s linear infinite}.rouletteBall{width:68px;height:68px;border-radius:50%;background:#08703f;border:5px solid #e5bd63;display:grid;place-items:center;font:bold 30px var(--mono)}@keyframes rouletteSpin{to{transform:rotate(360deg)}}.rouletteGrid{display:grid;grid-template-columns:repeat(12,1fr);gap:5px;max-width:780px;margin:10px auto}.rouletteGrid button,.rouletteOutside button,.rouletteWagers button{min-width:42px;border:2px solid #d8c493;border-radius:6px;padding:8px 5px;color:#fff;background:#17131b;font:bold 13px var(--mono);cursor:pointer}.rouletteGrid button.red,.rouletteOutside button.red{background:#a51f30}.rouletteGrid button.green{background:#08733e;grid-column:span 12}.rouletteGrid button.selected,.rouletteOutside button.selected,.rouletteWagers button.selected{outline:4px solid #25e0ff}.rouletteOutside,.rouletteWagers{display:flex;justify-content:center;gap:7px;flex-wrap:wrap;margin:10px}.rouletteStatus{font:14px var(--mono);color:#e8ffe9;min-height:24px}.rouletteBalance{font:14px var(--mono);color:#ffd56a;margin:9px}
 
   /* theatre */
   #theatre{position:fixed;inset:0;z-index:45;background:#05030c;display:none;flex-direction:column;align-items:center;justify-content:center;padding:12px}
@@ -306,6 +309,23 @@ Never travels without a spare charging cable.</textarea></label>
     <button class="btn ghost" id="vClose">Walk away</button>
   </div>
 </div>
+
+<div class="overlay" id="blackjackUI" style="display:none">
+  <div class="bjFelt">
+    <div class="bjTitle">BLACKJACK</div><div class="bjStatus" id="bjStatus"></div>
+    <div class="bjZone"><div class="bjLabel" id="bjDealerLabel">DEALER</div><div class="bjHand" id="bjDealer"></div></div>
+    <div class="bjZone"><div class="bjLabel" id="bjPlayerLabel">PLAYER</div><div class="bjHand" id="bjPlayer"></div></div>
+    <div class="bjControls" id="bjControls"></div><div class="bjBalance" id="bjBalance"></div>
+  </div>
+</div>
+
+<div class="overlay" id="rouletteUI" style="display:none"><div class="rouletteFelt">
+  <div class="rouletteTitle">ROULETTE</div><div class="rouletteStatus" id="rouletteStatus"></div>
+  <div class="rouletteWheel" id="rouletteWheel"><div class="rouletteBall" id="rouletteResult">?</div></div>
+  <div class="rouletteGrid" id="rouletteGrid"></div><div class="rouletteOutside" id="rouletteOutside"></div>
+  <div class="rouletteWagers" id="rouletteWagers"></div><div class="rouletteBalance" id="rouletteBalance"></div>
+  <div class="bjControls" id="rouletteControls"></div>
+</div></div>
 
 <div id="theatre">
   <div class="frame"><div class="stagelights"></div><div id="tvHost"></div></div>
@@ -988,7 +1008,7 @@ var keys={}, joy={active:false,x:0,y:0,id:null}, camDragBase=null;
 var SCALE=0.48, WORLD={cx:0,cz:0};
 var BUILDING_FOOTPRINT_SCALE=0.80, BUILDING_HEIGHT_SCALE=0.36;
 var nearPlace=null, SPAWN={x:0,z:0};
-var interiorMode=false, interiorRoot=null, interiorPlace=null, interiorDoors=[], interiorColliders=[], interiorSlots=[], expoBooths=[];
+var interiorMode=false, interiorRoot=null, interiorPlace=null, interiorDoors=[], interiorColliders=[], interiorSlots=[], interiorBlackjackTables=[], blackjackGame=null, interiorRouletteTables=[], rouletteGame=null, expoBooths=[], expoSponsorReps=[];
 var lectureMode=false, lectureRoot=null, lectureExit=null, lectureCtx=null, lectureIframe=null, lectureCssObject=null, lectureReturnGuard=null;
 var autoDoorCooldown=0;
 var INTERIOR_ORIGIN={x:5000,z:5000};
@@ -5138,7 +5158,21 @@ function updateNpcs(dt){
     var npc=npcs[i],d=npc.userData;npc.visible=d.area===area;if(!npc.visible)continue;
     d.targetTimer-=dt;
     var roam=d.config.roaming,pause=roam.pauseSeconds;
-    if(d.targetTimer<=0){d.targetTimer=pause.min+Math.random()*(pause.max-pause.min);d.angle+=(Math.random()-.5)*1.8;}
+    if(!d.stationary&&d.targetTimer<=0){d.targetTimer=pause.min+Math.random()*(pause.max-pause.min);d.angle+=(Math.random()-.5)*1.8;}
+    else if(d.stationary&&!d.talking){d.targetTimer=60;d.angle=0;}
+    if(d.stationary){
+      d.angle=0;npc.rotation.y=0;
+      var fixedParts=d.parts,fixedFace=d.face;
+      fixedParts.legL.rotation.set(0,0,0);fixedParts.legR.rotation.set(0,0,0);
+      fixedParts.armL.rotation.set(0,0,.08);fixedParts.armR.rotation.set(0,0,-.08);
+      fixedParts.legL.userData.lower.rotation.set(0,0,0);fixedParts.legR.userData.lower.rotation.set(0,0,0);
+      fixedParts.armL.userData.lower.rotation.set(-.2,0,0);fixedParts.armR.userData.lower.rotation.set(-.2,0,0);
+      fixedFace.eyeL.scale.y=fixedFace.eyeR.scale.y=1;fixedFace.browL.rotation.z=fixedFace.browR.rotation.z=0;
+      fixedFace.mouth.rotation.z=0;fixedFace.mouth.scale.set(1.15,.8,1);fixedFace.mouth.position.y=6.75;
+      var eyeFollow=clamp((player3d.x-npc.position.x)/18,-.14,.14);
+      fixedFace.pupilL.position.x=-.34+eyeFollow;fixedFace.pupilR.position.x=.34+eyeFollow;
+      continue;
+    }
     var speed=roam.walkSpeed, nx=npc.position.x+Math.sin(d.angle)*speed*dt, nz=npc.position.z+Math.cos(d.angle)*speed*dt;
     if(d.talking){d.angle=Math.atan2(player3d.x-npc.position.x,player3d.z-npc.position.z);}
     else if(Math.hypot(nx-d.homeX,nz-d.homeZ)>roam.wanderRadius){d.angle=Math.atan2(d.homeX-npc.position.x,d.homeZ-npc.position.z);}
@@ -5156,12 +5190,12 @@ function updateNpcs(dt){
       }
     }
     npc.rotation.y=d.angle;
-    var sw=Math.sin(clock.elapsedTime*7+i)*.55,parts=d.parts,face=d.face;
+    var sw=d.stationary?0:Math.sin(clock.elapsedTime*7+i)*.55,parts=d.parts,face=d.face;
     parts.legL.rotation.x=sw;parts.legR.rotation.x=-sw;parts.armL.rotation.x=-sw*.75;parts.armR.rotation.x=sw*.75;
     parts.legL.userData.lower.rotation.x=Math.max(0,-sw)*.7;parts.legR.userData.lower.rotation.x=Math.max(0,sw)*.7;
     parts.armL.userData.lower.rotation.x=-.2;parts.armR.userData.lower.rotation.x=-.2;
     var blink=(Math.sin(clock.elapsedTime*.8+d.angle+i)>0.985)?.06:1;face.eyeL.scale.y=face.eyeR.scale.y=blink;
-    var emote=d.config.appearance.emote;
+    var emote=d.stationary?'thoughtful-nod':d.config.appearance.emote;
     var baseBrowL=0,baseBrowR=0,baseMouth=0;
     if(emote==='friendly-wave'){
       // Raise the arm beside the head and wave with the forearm; avoid folding it behind the skull.
@@ -5689,7 +5723,7 @@ wireTimeTravel();
 function clearInterior(){
   clearCameraOcclusion();
   if(interiorRoot){scene.remove(interiorRoot);interiorRoot.traverse(function(o){if(o.geometry)o.geometry.dispose&&o.geometry.dispose();});}
-  interiorRoot=null;interiorDoors=[];interiorColliders=[];interiorSlots=[];expoBooths=[];interiorMode=false;interiorPlace=null;
+  interiorRoot=null;interiorDoors=[];interiorColliders=[];interiorSlots=[];interiorBlackjackTables=[];interiorRouletteTables=[];expoBooths=[];interiorMode=false;interiorPlace=null;
 }
 function mat(color,emis,ei){
   var m=new THREEJS.MeshLambertMaterial({color:color});
@@ -5766,8 +5800,23 @@ function addCasinoTable(g,x,z,type){
   var col=type==='roulette'?0x8a1020:0x12442b;
   var top=new THREEJS.Mesh(new THREEJS.CylinderGeometry(5.8,5.8,1.0,type==='roulette'?24:6),mat(col,0x4dff9d,0.12));
   top.position.set(INTERIOR_ORIGIN.x+x,1.25,INTERIOR_ORIGIN.z+z);top.scale.z=type==='roulette'?0.78:0.62;g.add(top);
+  // Tables are solid pathing obstacles for both the player and indoor NPCs.
+  interiorColliders.push({cx:INTERIOR_ORIGIN.x+x,cz:INTERIOR_ORIGIN.z+z,hw:6.2,hd:type==='roulette'?5.0:4.1});
   var edge=new THREEJS.Mesh(new THREEJS.TorusGeometry(5.9,0.18,6,24),new THREEJS.MeshBasicMaterial({color:type==='roulette'?0xff2d95:0xffbe3d}));
   edge.position.set(INTERIOR_ORIGIN.x+x,1.85,INTERIOR_ORIGIN.z+z);edge.rotation.x=Math.PI/2;edge.scale.y=type==='roulette'?0.78:0.62;g.add(edge);
+  if(type==='blackjack'){
+    // Dealer chip tray, card shoe, betting circles, and printed felt arc.
+    addInteriorBox(g,x,2.15,z-1.5,3.8,.55,1.5,0x17121d,false,0xffbe3d);
+    addInteriorBox(g,x+3.6,2.35,z-1.3,1.2,1.0,2.2,0x101018,false);
+    for(var bp=-2;bp<=2;bp++){var spot=new THREEJS.Mesh(new THREEJS.RingGeometry(.65,.85,20),new THREEJS.MeshBasicMaterial({color:0xffd56a,side:THREEJS.DoubleSide}));spot.rotation.x=-Math.PI/2;spot.position.set(INTERIOR_ORIGIN.x+x+bp*1.65,1.82,INTERIOR_ORIGIN.z+z+1.2);g.add(spot);}
+    interiorBlackjackTables.push({x:INTERIOR_ORIGIN.x+x,z:INTERIOR_ORIGIN.z+z+6,name:(interiorPlace?interiorPlace.name:'Casino')+' Blackjack'});
+  }else{
+    var wheel=new THREEJS.Mesh(new THREEJS.CylinderGeometry(2.2,2.2,.55,37),mat(0x6b371d,0xffbe3d,.25));wheel.position.set(INTERIOR_ORIGIN.x+x-2.2,2.25,INTERIOR_ORIGIN.z+z);g.add(wheel);
+    var hub=new THREEJS.Mesh(new THREEJS.CylinderGeometry(.28,.55,1.8,12),mat(0xd9b24c,0xffbe3d,.35));hub.position.set(INTERIOR_ORIGIN.x+x-2.2,3.1,INTERIOR_ORIGIN.z+z);g.add(hub);
+    for(var rp=0;rp<18;rp++){var pocket=new THREEJS.Mesh(new THREEJS.BoxGeometry(.18,.12,.65),new THREEJS.MeshBasicMaterial({color:rp%2?0x111111:0xc92538}));pocket.position.set(INTERIOR_ORIGIN.x+x-2.2+Math.sin(rp*Math.PI/9)*1.65,2.58,INTERIOR_ORIGIN.z+z+Math.cos(rp*Math.PI/9)*1.65);pocket.rotation.y=rp*Math.PI/9;g.add(pocket);}
+    addInteriorBox(g,x+2.1,2.05,z,3.6,.25,5.2,0x12603d,false,0xffbe3d);
+    interiorRouletteTables.push({x:INTERIOR_ORIGIN.x+x,z:INTERIOR_ORIGIN.z+z+6,name:(interiorPlace?interiorPlace.name:'Casino')+' Roulette'});
+  }
   addInteriorSign(g,type==='roulette'?'ROULETTE':'BLACKJACK',x,z+5.1,12,type==='roulette'?0xff2d95:0xffbe3d,{axis:'z',face:1,y:3.6,fontSize:18,height:1.9,glow:4});
 }
 function casinoInteriorTheme(place){
@@ -5834,7 +5883,7 @@ function buildCasinoFloor(g,place){
   // slot machine islands
   for(var row=-2;row<=2;row++)for(var i=-4;i<=4;i++){
     if(Math.abs(i)<=1&&Math.abs(row)<=1)continue;
-    var slot=addInteriorBox(g,i*13,2,row*13,4,4,3,theme.wall,false,theme.neon);
+    var slot=addInteriorBox(g,i*13,2,row*13,4,4,3,theme.wall,true,theme.neon);
     addInteriorBox(g,i*13,4.25,row*13,4.4,.5,3.4,theme.accent,false,theme.neon);
     var slotCanvas=document.createElement('canvas');slotCanvas.width=384;slotCanvas.height=256;
     var slotTexture=new THREEJS.CanvasTexture(slotCanvas);slotTexture.minFilter=THREEJS.LinearFilter;
@@ -5993,7 +6042,25 @@ function buildExpoHall(g){
     addInteriorSign(g,sponsor.name.toUpperCase(),x,z-3.85,w,sponsor.color,{axis:'z',face:1,y:8.4,fontSize:large?28:23,height:3.1,glow:8,surfaceOffset:1.08});
     var logo=new THREEJS.Mesh(new THREEJS.TorusGeometry(large?3.2:2.5,.45,10,24),new THREEJS.MeshBasicMaterial({color:sponsor.color}));logo.position.set(INTERIOR_ORIGIN.x+x,13,INTERIOR_ORIGIN.z+z-3.85);g.add(logo);
     addInteriorSign(g,sponsor.mark,x,z-3.75,9,0xffffff,{axis:'z',face:1,y:13,fontSize:30,height:2.5,glow:5,surfaceOffset:1.15});
-    expoBooths.push({index:i,x:INTERIOR_ORIGIN.x+x,z:INTERIOR_ORIGIN.z+z+8,sponsor:sponsor});
+    // A different silhouette for every neighboring booth: canopy, towers, arch, orb, fins, or stage halo.
+    var style=i%6;
+    if(style===0){addInteriorBox(g,x,16,z-2,w+5,.7,8,sponsor.color,false,sponsor.color);for(var cp=-1;cp<=1;cp+=2)addInteriorBox(g,x+cp*w*.48,8,z-1,.65,16,.65,sponsor.color,false,sponsor.color);}
+    else if(style===1){addInteriorBox(g,x-w*.44,12,z-3,3.2,24,3.2,sponsor.color,false,sponsor.color);addInteriorBox(g,x+w*.44,9,z-3,3.2,18,3.2,sponsor.color,false,sponsor.color);}
+    else if(style===2){for(var ap=-1;ap<=1;ap+=2)addInteriorBox(g,x+ap*w*.48,9,z-1,1.2,18,3,sponsor.color,false,sponsor.color);addInteriorBox(g,x,18,z-1,w+2,1.2,3,sponsor.color,false,sponsor.color);}
+    else if(style===3){var orb=new THREEJS.Mesh(new THREEJS.IcosahedronGeometry(3.8,1),new THREEJS.MeshBasicMaterial({color:sponsor.color,wireframe:true}));orb.position.set(INTERIOR_ORIGIN.x+x,17,INTERIOR_ORIGIN.z+z);g.add(orb);}
+    else if(style===4){for(var fin=-2;fin<=2;fin++)addInteriorBox(g,x+fin*4,11+Math.abs(fin)*1.5,z-4,.7,18-Math.abs(fin)*2,3,sponsor.color,false,sponsor.color);}
+    else{var halo=new THREEJS.Mesh(new THREEJS.TorusGeometry(large?8:6,.5,10,32),new THREEJS.MeshBasicMaterial({color:sponsor.color}));halo.position.set(INTERIOR_ORIGIN.x+x,11,INTERIOR_ORIGIN.z+z-3);g.add(halo);}
+    var rep=expoSponsorReps[i];
+    if(!rep){
+      var colors=['cyan','violet','charcoal','aws-orange','indigo','cyan'],hairStyles=['bob','side-part','curly-short','ponytail','buzz-cut','braided-bun'];
+      var repCfg={id:'expo-'+i,name:sponsor.name+' representative',title:sponsor.name,
+        appearance:{gender:i%3===0?'female':i%3===1?'male':'neutral',skinTone:['light','medium','deep'][i%3],top:{color:colors[i%colors.length]},bottom:{color:'charcoal'},hair:{color:i%2?'dark-brown':'black',style:hairStyles[i%hairStyles.length]},emote:'thoughtful-nod'},
+        roaming:{walkSpeed:0,wanderRadius:0,pauseSeconds:{min:30,max:60}},
+        interaction:{greeting:sponsor.pitch,dialogue:[sponsor.pitch,'Ask us about the demo running behind the counter.'],cooldownSeconds:30,rewards:{social:2,knowledge:1,vibes:1}},
+        factoids:[sponsor.name+' runs its entire demo environment in the cloud.'],jokes:['Our uptime is higher than the booth rental price.'],links:{}};
+      rep=createNpcAt(repCfg,INTERIOR_ORIGIN.x+x,INTERIOR_ORIGIN.z+z-1,'interior:venetian');rep.userData.stationary=true;rep.userData.angle=0;rep.rotation.y=0;expoSponsorReps[i]=rep;
+    }else{rep.position.set(INTERIOR_ORIGIN.x+x,0,INTERIOR_ORIGIN.z+z-1);rep.userData.area='interior:venetian';}
+    expoBooths.push({index:i,x:INTERIOR_ORIGIN.x+x,z:INTERIOR_ORIGIN.z+z+8,sponsor:sponsor,rep:rep});
   }
   addInteriorBox(g,0,3,-496,62,6,8,0x25183b,true,0xff9900);
   addInteriorSign(g,'SWAG SHIPPING • BAG OVERFLOW',0,-491.9,50,0xff9900,{axis:'z',face:1,y:7,fontSize:24,height:3,glow:8,surfaceOffset:1.08});
@@ -6101,6 +6168,7 @@ function talkToSponsor(booth){
   if(!booth)return;
   var first=!booth.talked;
   if(first){booth.talked=true;st.s+=3;st.min+=3;updHUD();}
+  if(booth.rep)showNpcSpeech(booth.rep,booth.sponsor.pitch,false);
   toast(booth.sponsor.name+': “'+booth.sponsor.pitch+'”'+(first?' +3 social':''),'info');
 }
 function collectSponsorSwag(booth){
@@ -6110,6 +6178,32 @@ function collectSponsorSwag(booth){
   st.boothsDone[key]=1;st.swag.push(booth.sponsor.swag.slice());st.vibes=Math.min(100,st.vibes+4);st.s+=1;st.min+=2;
   toast('Collected '+booth.sponsor.swag[0]+'! Your backpack gets bigger.','good');updHUD();
 }
+function nearestBlackjackTable(){
+  if(!interiorMode||lectureMode)return {table:null,dist:1e9};
+  var best=null,bd=1e9;for(var i=0;i<interiorBlackjackTables.length;i++){var t=interiorBlackjackTables[i],d=Math.hypot(player3d.x-t.x,player3d.z-t.z);if(d<bd){best=t;bd=d;}}
+  return {table:best,dist:bd};
+}
+function bjDeck(){var deck=[],suits=['♠','♥','♦','♣'],ranks=['A','2','3','4','5','6','7','8','9','10','J','Q','K'];for(var d=0;d<4;d++)for(var s=0;s<4;s++)for(var r=0;r<13;r++)deck.push({rank:ranks[r],suit:suits[s]});for(var i=deck.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),q=deck[i];deck[i]=deck[j];deck[j]=q;}return deck;}
+function bjScore(hand){var total=0,aces=0;hand.forEach(function(c){if(c.rank==='A'){total+=11;aces++;}else total+=['J','Q','K'].indexOf(c.rank)>=0?10:+c.rank;});while(total>21&&aces){total-=10;aces--;}return total;}
+function bjCardHtml(c,hidden){if(hidden)return '<div class="playingCard back"></div>';var red=c.suit==='♥'||c.suit==='♦';return '<div class="playingCard'+(red?' red':'')+'"><span>'+c.rank+c.suit+'</span><i>'+c.suit+'</i></div>';}
+function bjButton(label,fn,cls,disabled){var b=document.createElement('button');b.textContent=label;b.className=cls||'';b.disabled=!!disabled;b.onclick=fn;$("bjControls").appendChild(b);}
+function openBlackjack(table){paused=true;blackjackGame={table:table,phase:'bet',deck:[],player:[],dealer:[],wager:0,status:'Place your bet. Dealer stands on 17.'};$("blackjackUI").style.display='flex';renderBlackjack();}
+function closeBlackjack(){$("blackjackUI").style.display='none';blackjackGame=null;paused=false;updHUD();}
+function renderBlackjack(){var g=blackjackGame;if(!g)return;var hide=g.phase==='player';$("bjDealer").innerHTML=g.dealer.map(function(c,i){return bjCardHtml(c,hide&&i===1);}).join('');$("bjPlayer").innerHTML=g.player.map(function(c){return bjCardHtml(c,false);}).join('');$("bjDealerLabel").textContent='DEALER'+(g.dealer.length&&!hide?' · '+bjScore(g.dealer):'');$("bjPlayerLabel").textContent='PLAYER'+(g.player.length?' · '+bjScore(g.player):'');$("bjStatus").textContent=g.status;$("bjBalance").textContent='BALANCE $'+Math.round(st.money)+'  ·  BET $'+g.wager;var box=$("bjControls");box.innerHTML='';if(g.phase==='bet'){[25,50,100].forEach(function(w){bjButton('BET $'+w,function(){bjDeal(w);},'deal',st.money<w);});bjButton('LEAVE TABLE',closeBlackjack);}else if(g.phase==='player'){bjButton('HIT',bjHit);bjButton('STAND',bjStand);bjButton('DOUBLE',bjDouble,'deal',g.player.length!==2||st.money<g.wager);bjButton('FORFEIT',function(){bjFinish('You walk away from the hand.',0);});}else{bjButton('PLAY AGAIN',function(){blackjackGame.phase='bet';blackjackGame.player=[];blackjackGame.dealer=[];blackjackGame.wager=0;blackjackGame.status='Place your bet.';renderBlackjack();},'deal');bjButton('LEAVE TABLE',closeBlackjack);}}
+function bjDeal(wager){if(!spendMoney(wager,'a blackjack bet'))return;var g=blackjackGame;g.deck=bjDeck();g.wager=wager;g.player=[g.deck.pop(),g.deck.pop()];g.dealer=[g.deck.pop(),g.deck.pop()];g.phase='player';g.status='Hit, stand, or double down.';if(bjScore(g.player)===21||bjScore(g.dealer)===21)bjResolve();else renderBlackjack();}
+function bjHit(){var g=blackjackGame;g.player.push(g.deck.pop());if(bjScore(g.player)>21)bjFinish('Bust. Dealer wins.',0);else if(bjScore(g.player)===21)bjStand();else renderBlackjack();}
+function bjDouble(){var g=blackjackGame;if(g.player.length!==2||!spendMoney(g.wager,'double down'))return;g.wager*=2;g.player.push(g.deck.pop());if(bjScore(g.player)>21)bjFinish('Double-down bust.',0);else bjStand();}
+function bjStand(){var g=blackjackGame;while(bjScore(g.dealer)<17)g.dealer.push(g.deck.pop());bjResolve();}
+function bjResolve(){var g=blackjackGame,p=bjScore(g.player),d=bjScore(g.dealer),natural=p===21&&g.player.length===2;if(p>21)bjFinish('Bust. Dealer wins.',0);else if(d>21)bjFinish('Dealer busts — you win!',g.wager*2);else if(p>d)bjFinish(natural?'BLACKJACK! Paid 3 to 2.':'You beat the dealer!',natural?g.wager*2.5:g.wager*2);else if(p===d)bjFinish('Push. Your bet is returned.',g.wager);else bjFinish('Dealer wins '+d+' to '+p+'.',0);}
+function bjFinish(message,payout){var g=blackjackGame;if(payout){st.money+=payout;sfx('good');}else sfx('bad');g.phase='done';g.status=message+(payout?' $'+payout+' returned.':'');updHUD();renderBlackjack();}
+var ROULETTE_REDS=[1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36];
+function nearestRouletteTable(){if(!interiorMode||lectureMode)return {table:null,dist:1e9};var best=null,bd=1e9;for(var i=0;i<interiorRouletteTables.length;i++){var t=interiorRouletteTables[i],d=Math.hypot(player3d.x-t.x,player3d.z-t.z);if(d<bd){best=t;bd=d;}}return {table:best,dist:bd};}
+function rouletteButton(parent,label,click,cls,selected,disabled){var b=document.createElement('button');b.textContent=label;b.className=(cls||'')+(selected?' selected':'');b.disabled=!!disabled;b.onclick=click;parent.appendChild(b);}
+function openRoulette(table){paused=true;rouletteGame={table:table,wager:25,bet:null,spinning:false,result:null,status:'Choose a number or outside bet.'};$("rouletteUI").style.display='flex';renderRoulette();}
+function closeRoulette(){if(rouletteGame&&rouletteGame.spinning)return;$("rouletteUI").style.display='none';rouletteGame=null;paused=false;updHUD();}
+function selectRouletteBet(type,value,label){rouletteGame.bet={type:type,value:value,label:label};rouletteGame.status='Bet selected: '+label+'. Spin when ready.';renderRoulette();}
+function renderRoulette(){var g=rouletteGame;if(!g)return;var grid=$("rouletteGrid"),outside=$("rouletteOutside"),wagers=$("rouletteWagers"),controls=$("rouletteControls");grid.innerHTML=outside.innerHTML=wagers.innerHTML=controls.innerHTML='';for(let n=0;n<=36;n++){var red=ROULETTE_REDS.indexOf(n)>=0,cls=n===0?'green':red?'red':'',sel=g.bet&&g.bet.type==='number'&&g.bet.value===n;rouletteButton(grid,String(n),function(){selectRouletteBet('number',n,String(n));},cls,sel,g.spinning);}['RED','BLACK','ODD','EVEN','1–18','19–36'].forEach(function(label){var type=label.toLowerCase();rouletteButton(outside,label,function(){selectRouletteBet(type,null,label);},label==='RED'?'red':'',g.bet&&g.bet.type===type,g.spinning);});[10,25,100].forEach(function(w){rouletteButton(wagers,'$'+w,function(){g.wager=w;renderRoulette();},'',g.wager===w,g.spinning||st.money<w);});rouletteButton(controls,'SPIN',spinRoulette,'deal',false,g.spinning||!g.bet||st.money<g.wager);rouletteButton(controls,'LEAVE TABLE',closeRoulette,'',false,g.spinning);$("rouletteStatus").textContent=g.status;$("rouletteBalance").textContent='BALANCE $'+Math.round(st.money)+' · WAGER $'+g.wager+(g.bet?' · '+g.bet.label:'');$("rouletteResult").textContent=g.result===null?'?':g.result;$("rouletteWheel").classList.toggle('spinning',g.spinning);}
+function spinRoulette(){var g=rouletteGame;if(!g||g.spinning||!g.bet||!spendMoney(g.wager,'roulette'))return;g.spinning=true;g.result=null;g.status='No more bets…';renderRoulette();setTimeout(function(){if(!rouletteGame)return;var r=Math.floor(Math.random()*37);g.result=r;g.spinning=false;var red=ROULETTE_REDS.indexOf(r)>=0,win=false,mult=0,b=g.bet;if(b.type==='number'){win=r===b.value;mult=36;}else if(r!==0){if(b.type==='red')win=red;else if(b.type==='black')win=!red;else if(b.type==='odd')win=r%2===1;else if(b.type==='even')win=r%2===0;else if(b.type==='1–18')win=r<=18;else if(b.type==='19–36')win=r>=19;mult=2;}var payout=win?g.wager*mult:0;if(payout){st.money+=payout;sfx('good');}else sfx('bad');g.status=r+' '+(r===0?'GREEN':red?'RED':'BLACK')+' — '+(win?'YOU WIN $'+payout:'house wins');updHUD();renderRoulette();},1700);}
 function drawSlotScreen(slot,status){
   var c=slot.canvas,x=c.getContext('2d'),reels=slot.reels||['7','◆','☁'];
   x.clearRect(0,0,c.width,c.height);
@@ -6176,6 +6270,8 @@ function doEnter(){
     }
     return;
   }
+  var nearbyRoulette=nearestRouletteTable();if(nearbyRoulette.table&&nearbyRoulette.dist<9)return openRoulette(nearbyRoulette.table);
+  var nearbyBlackjack=nearestBlackjackTable();if(nearbyBlackjack.table&&nearbyBlackjack.dist<9)return openBlackjack(nearbyBlackjack.table);
   var nearbySlot=nearestSlotMachine();if(nearbySlot.slot&&nearbySlot.dist<7){
     if(matchMedia('(pointer:coarse)').matches)return spinSlotMachine(nearbySlot.slot,25);
     toast('Choose a wager: [1] $5 · [2] $25 · [3] $100','info');return;
@@ -6398,11 +6494,17 @@ function tick(dt){
   var promptNpc=nearestNpc();
   var promptTickets=nearestTicketStand();
   var promptSlot=nearestSlotMachine();
+  var promptBlackjack=nearestBlackjackTable();
+  var promptRoulette=nearestRouletteTable();
   var promptExpo=nearestExpoBooth();
   if(promptExpo.booth&&promptExpo.dist<15){
     var swagTaken=!!st.boothsDone['expo-'+promptExpo.booth.index];
     $("prompt").style.display="block";promptKey.textContent='[T] TALK  [C] SWAG';
     $("promptTxt").textContent=promptExpo.booth.sponsor.name+' · '+(swagTaken?'swag collected':promptExpo.booth.sponsor.swag[0]);
+  } else if(promptRoulette.table&&promptRoulette.dist<9){
+    $("prompt").style.display="block";promptKey.textContent='[E]';$("promptTxt").textContent='Roulette · cash $'+Math.round(st.money);
+  } else if(promptBlackjack.table&&promptBlackjack.dist<9){
+    $("prompt").style.display="block";promptKey.textContent='[E]';$("promptTxt").textContent='Blackjack · cash $'+Math.round(st.money);
   } else if(promptSlot.slot&&promptSlot.dist<7){
     $("prompt").style.display="block";
     if(matchMedia('(pointer:coarse)').matches){promptKey.textContent='[PLAY]';$("promptTxt").textContent='$25 spin · cash $'+Math.round(st.money);}
