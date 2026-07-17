@@ -205,6 +205,28 @@
   #timeTravel button:hover{border-color:var(--cyan);color:var(--cyan)}
   #timeTravel .label{font-family:var(--mono);font-size:10px;color:var(--dim);letter-spacing:1px;padding:0 4px}
   @media (max-width:760px){#timeTravel{top:auto;bottom:8px;left:50%;max-width:96vw;overflow:auto;border-radius:12px}#badge{top:10px}.chip{min-width:110px}}
+  @media (max-width:520px) and (pointer:coarse){
+    #badge{top:8px;left:8px;right:8px;width:auto;padding:5px 10px;height:61px}
+    #badge .conf{font-size:11px;line-height:14px}#badge .day{display:inline-block;font-size:16px;line-height:17px;margin-right:8px}#badge .clock{display:inline-block;font-size:11px;line-height:17px}#badge .role{font-size:7px;line-height:9px;white-space:nowrap;margin-top:0}
+    #vitals{top:75px;left:8px;right:8px;bottom:auto;width:auto;display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
+    #vitals .vital{padding:3px 6px 5px}#vitals .vital .t{font-size:7px;letter-spacing:.35px;margin-bottom:3px}.vbar{height:5px}
+    #stats{top:116px;left:8px;right:8px;display:grid;grid-template-columns:repeat(5,1fr);gap:4px;align-items:stretch}
+    #stats .chip{min-width:0;padding:4px 3px;border-radius:9px;display:flex;flex-direction:column;gap:1px;text-align:center;justify-content:center}
+    #stats .chip .lbl{font-size:7px;letter-spacing:0;white-space:nowrap}#stats .chip b{font-size:11px}
+    #spawnNpcBtn,#designNpcBtn{top:148px;width:calc(50% - 12px);height:30px;padding:4px 7px;font-size:9px;text-align:center;white-space:nowrap}
+    #spawnNpcBtn{left:8px;right:auto}#designNpcBtn{right:8px;left:auto}
+    #joy{width:104px;height:104px;left:14px;bottom:150px}#joy .nub{width:44px;height:44px}
+    #actBtn{width:72px;height:72px;right:14px;bottom:116px;font-size:13px}
+    #camBtn{width:46px;height:46px;right:27px;bottom:202px;font-size:17px}
+    #minimap{width:108px;height:108px;left:14px;bottom:48px}
+    #prompt{bottom:330px;max-width:94vw;padding:8px 13px;font-size:11px;white-space:normal;text-align:center}
+    #toasts{top:51%;max-width:64vw}.toast{font-size:10px;padding:5px 8px}
+    #timeTravel{bottom:4px;left:50%;width:auto;max-width:calc(100vw - 16px);gap:3px;padding:4px 5px;overflow:visible;white-space:nowrap}
+    #timeTravel .label{display:none}#timeTravel button{padding:5px 7px;font-size:9px}
+    #compass{top:164px;max-width:92vw;font-size:10px;padding:5px 9px}
+  }
+  #timeTravel #designNpcBtn{position:static;inset:auto;width:auto;height:auto;padding:5px 9px;border:1px solid #4a3880;border-radius:999px;background:#1c1233;color:#c9c0ff;font:11px var(--mono);white-space:nowrap}
+  @media(max-width:520px){#timeTravel #designNpcBtn{padding:5px 7px;font-size:9px}}
 
   #loadmsg{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:60;
     background:#05030c;color:var(--cyan);font-family:var(--mono);font-size:14px;letter-spacing:2px;text-align:center}
@@ -244,8 +266,6 @@
 <div id="joy"><div class="nub" id="joyNub"></div></div>
 <button id="actBtn">ENTER</button>
 <button id="camBtn">↺</button>
-<button id="spawnNpcBtn">+ SPAWN NPC</button>
-<button id="designNpcBtn">✎ DESIGN NPC</button>
 
 <div id="npcDesigner">
  <div class="designerCard">
@@ -275,7 +295,7 @@ Never travels without a spare charging cable.</textarea></label>
   <button id="ttBack">-1h</button>
   <button id="ttForward">+1h</button>
   <button id="ttMorning">Tue 10:00</button>
-  <button id="ttLectures">Test lecture rooms</button>
+  <button id="designNpcBtn">✎ Design NPC</button>
 </div>
 
 <div class="overlay" id="intro">
@@ -948,12 +968,11 @@ function jumpToLectureTest(){
   paused=false; updHUD();
 }
 function wireTimeTravel(){
-  var b1=$('ttBack'), b2=$('ttForward'), b3=$('ttMorning'), b4=$('ttLectures');
+  var b1=$('ttBack'), b2=$('ttForward'), b3=$('ttMorning');
   if(!b1)return;
   b1.onclick=function(){st.min=Math.max(0,st.min-60);toast('Time -1 hour: '+DAYS[st.day]+' '+hhmm(st.min),'info');updHUD();};
   b2.onclick=function(){st.min+=60;toast('Time +1 hour: '+DAYS[st.day]+' '+hhmm(st.min),'info');updHUD();};
   b3.onclick=function(){setConferenceTestTime();};
-  b4.onclick=function(){jumpToLectureTest();};
 }
 function swagPts(){return st.swag.reduce(function(a,i){return a+i[1];},0);}
 function totalScore(){return Math.round(st.k+st.s*1.2+swagPts()+st.steps*0.01);}
@@ -1041,7 +1060,6 @@ async function loadNpcConfigs(){
   npcConfigs=await Promise.all((index.npcs||[]).map(function(file){
     return fetch('npcs/'+file+cacheBust,{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error(file+' '+r.status);return r.json();});
   }));
-  if(npcConfigs.length)$("spawnNpcBtn").textContent='+ SPAWN NPC · '+npcConfigs.length+' LOOKS';
 }
 
 function npcDesignerConfig(){
@@ -5248,8 +5266,6 @@ function updateNpcs(dt){
   }
 }
 
-$("spawnNpcBtn").addEventListener("click",spawnNpcNearPlayer);
-
 function nearestNpc(){
   var best=null,dist=1e9;
   for(var i=0;i<npcs.length;i++){var npc=npcs[i];if(!npc.visible)continue;var d=Math.hypot(player3d.x-npc.position.x,player3d.z-npc.position.z);if(d<dist){best=npc;dist=d;}}
@@ -5938,7 +5954,7 @@ function buildConferenceCorridor(g,place){
   addXWallWithGaps(g,13,-270,-56,gaps,wall);
   addXWallWithGaps(g,-61,-270,-56,[],0x151026);
   addXWallWithGaps(g,61,-270,-56,[],0x151026);
-  addZWallWithGap(g,-56,-61,61,[[-12,12]],0x151026);
+  // The casino builder already owns the wall at z=-56; duplicating it here causes z-fighting.
   addZWallWithGap(g,-270,-61,61,place.id==='venetian'?[[-9,9]]:[],0x151026);
   // Each side wing has lecture halls on both of its long sides, rather than at its end.
   branchZ.forEach(function(z){
