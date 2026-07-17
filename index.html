@@ -32,7 +32,7 @@
     font-size:14px;min-width:132px;justify-content:space-between}
   .chip b{font-size:16px}
   .chip.k b{color:var(--aws)}.chip.s b{color:var(--pink)}
-  .chip.g b{color:var(--green)}.chip.st b{color:var(--cyan)}
+  .chip.g b{color:var(--green)}.chip.st b,.chip.ses b{color:var(--cyan)}
   .chip .lbl{font-size:10px;color:var(--dim);letter-spacing:1px}
   .chip.bump b{animation:bump .35s ease}
   @keyframes bump{40%{transform:scale(1.45)}}
@@ -106,6 +106,7 @@
   .avatarFields{display:grid;grid-template-columns:1fr 1fr;gap:11px}
   .avatarFields label{display:flex;flex-direction:column;gap:6px;color:#bdb2d8;font:10px var(--mono);letter-spacing:1.3px;text-transform:uppercase}
   .avatarFields select,.avatarFields input[type=color]{width:100%;height:42px;background:#0c0818;color:#fff;border:1px solid #493773;border-radius:8px;padding:7px;font:13px var(--mono)}
+  .avatarFields .hotelChoice{grid-column:1/-1}.avatarFields .hotelChoice select{border-color:var(--orange);box-shadow:0 0 12px rgba(255,153,0,.16)}
   .avatarFields input[type=color]{padding:3px;cursor:pointer}.avatarRandom{margin-top:12px;width:100%;border:1px solid var(--violet);border-radius:8px;background:#20163b;color:#ddd5ff;padding:9px;font:11px var(--mono);letter-spacing:1px;cursor:pointer}
   @media(max-width:720px){#intro{align-items:flex-start}.avatarBuilder{grid-template-columns:1fr}.avatarStage{height:310px}.avatarFields{grid-template-columns:1fr 1fr}#intro .card{padding:18px}}
 
@@ -161,7 +162,8 @@
   .designerGrid{display:grid;grid-template-columns:repeat(3,minmax(150px,1fr));gap:12px}.designerGrid label{display:flex;flex-direction:column;gap:5px;color:#aaa0c7;font:11px var(--mono)}
   .designerGrid input,.designerGrid select,.designerGrid textarea{background:#090713;border:1px solid #3b3158;border-radius:7px;color:#fff;padding:8px;font:12px var(--mono)}
   .designerGrid textarea{min-height:64px;resize:vertical}.designerWide{grid-column:span 3}.designerActions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}.designerActions button{border:1px solid var(--cyan);background:#142033;color:#fff;border-radius:999px;padding:9px 14px;cursor:pointer;font:11px var(--mono)}
-  #designerStatus{margin-top:10px;color:var(--dim);font:11px var(--mono);white-space:pre-wrap}@media(max-width:700px){.designerGrid{grid-template-columns:1fr}.designerWide{grid-column:span 1}}
+  .npcBuilder{display:grid;grid-template-columns:280px 1fr;gap:18px}.npcAvatarStage{height:430px;border:1px solid #493773;border-radius:14px;background:radial-gradient(circle at 50% 35%,#30204f,#090611 70%);overflow:hidden;position:sticky;top:0}.npcAvatarStage canvas{width:100%;height:100%;display:block}.npcAvatarStage img{position:absolute;right:12px;top:12px;width:68px;height:68px;border-radius:50%;object-fit:cover;border:3px solid var(--orange);background:#171021;display:none;box-shadow:0 4px 18px #000}.profileLookup{display:flex;gap:7px}.profileLookup input{flex:1}.profileLookup button{border:1px solid var(--orange);background:#2b1b08;color:#fff;border-radius:7px;padding:8px;cursor:pointer}.designerGrid input[readonly],.designerGrid textarea[readonly]{color:#a99fc4;background:#12101b}
+  #designerStatus{margin-top:10px;color:var(--dim);font:11px var(--mono);white-space:pre-wrap}@media(max-width:700px){.npcBuilder{grid-template-columns:1fr}.npcAvatarStage{height:300px;position:relative}.designerGrid{grid-template-columns:1fr}.designerWide{grid-column:span 1}}
   #arrestScene{position:fixed;inset:0;z-index:120;display:none;overflow:hidden;background:#050711;color:#fff;font-family:var(--mono)}
   #arrestScene .sky{position:absolute;inset:0;background:linear-gradient(#111b35 0 48%,#16131d 48%)}
   #arrestScene .roadlines{position:absolute;left:-20%;right:-20%;top:62%;height:8px;background:repeating-linear-gradient(90deg,#ffd45a 0 70px,transparent 70px 130px);animation:arrestRoad .45s linear infinite}
@@ -210,7 +212,7 @@
     #badge .conf{font-size:11px;line-height:14px}#badge .day{display:inline-block;font-size:16px;line-height:17px;margin-right:8px}#badge .clock{display:inline-block;font-size:11px;line-height:17px}#badge .role{font-size:7px;line-height:9px;white-space:nowrap;margin-top:0}
     #vitals{top:75px;left:8px;right:8px;bottom:auto;width:auto;display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
     #vitals .vital{padding:3px 6px 5px}#vitals .vital .t{font-size:7px;letter-spacing:.35px;margin-bottom:3px}.vbar{height:5px}
-    #stats{top:116px;left:8px;right:8px;display:grid;grid-template-columns:repeat(5,1fr);gap:4px;align-items:stretch}
+    #stats{top:116px;left:8px;right:8px;display:grid;grid-template-columns:repeat(6,1fr);gap:4px;align-items:stretch}
     #stats .chip{min-width:0;padding:4px 3px;border-radius:9px;display:flex;flex-direction:column;gap:1px;text-align:center;justify-content:center}
     #stats .chip .lbl{font-size:7px;letter-spacing:0;white-space:nowrap}#stats .chip b{font-size:11px}
     #spawnNpcBtn,#designNpcBtn{top:148px;width:calc(50% - 12px);height:30px;padding:4px 7px;font-size:9px;text-align:center;white-space:nowrap}
@@ -249,6 +251,7 @@
   <div class="chip k"><span class="lbl">🧠 KNOW</span><b id="cK">0</b></div>
   <div class="chip s"><span class="lbl">🤝 SOCIAL</span><b id="cS">0</b></div>
   <div class="chip g"><span class="lbl">🎁 SWAG</span><b id="cG">0</b></div>
+  <div class="chip ses"><span class="lbl">🎓 SESSIONS</span><b id="cSessions">0</b></div>
   <div class="chip k"><span class="lbl">💵 CASH</span><b id="cMoney">$1,000</b></div>
   <div class="chip st"><span class="lbl">👟 STEPS</span><b id="cSt">0</b></div>
 </div>
@@ -270,21 +273,20 @@
 <div id="npcDesigner">
  <div class="designerCard">
   <h2 style="margin:0 0 5px">Design an NPC</h2><p style="margin:0 0 16px;color:var(--dim);font:12px var(--mono)">Creates a validated config and opens GitHub’s contribution editor for a PR to <b>ljacobsson/reinvent-simulator</b>.</p>
-  <div class="designerGrid">
-   <label>Name<input id="ndName" value="Taylor Cloudsmith"></label><label>Title<input id="ndTitle" value="Cloud Community Builder"></label><label>ID<input id="ndId" value="taylor-cloudsmith"></label>
-   <label>Gender<select id="ndGender"><option>neutral</option><option>female</option><option>male</option></select></label>
-   <label>Skin tone<select id="ndSkin"><option>medium</option><option>light</option><option>deep</option></select></label>
-   <label>Hair style<select id="ndHair"><option>short</option><option>curly-short</option><option>side-part</option><option>braided-bun</option><option>long-straight</option><option>long-wavy</option><option>ponytail</option><option>bob</option><option>mohawk</option><option>buzz-cut</option><option>bald</option></select></label>
-   <label>Hair color<select id="ndHairColor"><option>dark-brown</option><option>black</option><option>auburn</option></select></label><label>Top color<select id="ndTop"><option>aws-orange</option><option>cyan</option><option>violet</option></select></label><label>Bottom color<select id="ndBottom"><option>indigo</option><option>charcoal</option><option>black</option></select></label>
-   <label>Emote<select id="ndEmote"><option>friendly-wave</option><option>animated-talk</option><option>thoughtful-nod</option></select></label><label>Walk speed<input id="ndSpeed" type="number" value="5.5" min="1" max="10" step=".5"></label><label>Wander radius<input id="ndRadius" type="number" value="55" min="10" max="100"></label>
-   <label class="designerWide">Tagline<input id="ndTagline" value="Always has time for a hallway-track conversation."></label>
-   <label class="designerWide">Greeting<input id="ndGreeting" value="Hi! What are you building this week?"></label>
-   <label class="designerWide">Dialogue (one per line)<textarea id="ndDialogue">The best architecture starts with a clear problem.
-Remember to leave time for the hallway track.</textarea></label>
-   <label class="designerWide">Factoids (one per line)<textarea id="ndFacts">Runs a local cloud meetup.
-Never travels without a spare charging cable.</textarea></label>
-   <label class="designerWide">Jokes (one per line)<textarea id="ndJokes">My architecture diagram is eventually consistent.</textarea></label>
-  </div>
+  <div class="npcBuilder"><div class="npcAvatarStage"><canvas id="npcAvatarCanvas"></canvas><img id="ndProfilePhoto" alt="Fetched Builder profile avatar"></div><div class="designerGrid">
+   <label>AWS Builder alias<input id="ndAlias" placeholder="your-builder-alias"></label><label>Name<input id="ndName" placeholder="Your name"></label><label>Title<input id="ndTitle" placeholder="Your role or specialty"></label>
+   <label class="designerWide">Profile image URL<input id="ndAvatar" type="url" placeholder="https://example.com/avatar.jpg"></label>
+   <label>Body type<select id="ndGender"><option value="neutral">Neutral</option><option value="female">Feminine</option><option value="male">Masculine</option></select></label>
+   <label>Hair style<select id="ndHair"><option value="short">Short</option><option value="buzz-cut">Buzz cut</option><option value="curly-short">Curly</option><option value="side-part">Side part</option><option value="bob">Bob</option><option value="long-straight">Long straight</option><option value="long-wavy">Long wavy</option><option value="ponytail">Ponytail</option><option value="braided-bun">Braided bun</option><option value="mohawk">Mohawk</option><option value="bald">Bald</option></select></label>
+   <label>Skin tone<input id="ndSkin" type="color" value="#d9a476"></label><label>Hair color<input id="ndHairColor" type="color" value="#3b2418"></label><label>Top color<input id="ndTop" type="color" value="#25e0ff"></label><label>Pants color<input id="ndBottom" type="color" value="#24304a"></label>
+   <label class="designerWide">Bio<textarea id="ndBio" placeholder="Tell players who you are and what you build"></textarea></label>
+   <label>Blog<input id="ndBlog" type="url" placeholder="https://example.com"></label><label>GitHub<input id="ndGithubUrl" type="url" placeholder="https://github.com/username"></label><label>LinkedIn<input id="ndLinkedIn" type="url" placeholder="https://linkedin.com/in/username"></label>
+   <label>Dev.to<input id="ndDevto" type="url" placeholder="https://dev.to/username"></label><label>Personal / sessions<input id="ndPersonal" type="url" placeholder="https://sessionize.com/username"></label>
+   <label class="designerWide">Greeting<input id="ndGreeting" placeholder="What should you say when a player approaches?"></label>
+   <label class="designerWide">Dialogue (one per line)<textarea id="ndDialogue" placeholder="Write at least one conversation response"></textarea></label>
+   <label class="designerWide">Factoids (one per line)<textarea id="ndFacts" placeholder="Add at least one personal or technical fact"></textarea></label>
+   <label class="designerWide">Jokes (one per line)<textarea id="ndJokes" placeholder="Add at least one joke"></textarea></label>
+  </div></div>
   <div class="designerActions"><button id="ndPreview">SPAWN PREVIEW</button><button id="ndDownload">DOWNLOAD JSON</button><button id="ndGithub">CONTRIBUTE VIA GITHUB ↗</button><button id="ndClose">CLOSE</button></div><div id="designerStatus"></div>
  </div>
 </div>
@@ -314,6 +316,7 @@ Never travels without a spare charging cable.</textarea></label>
           <label>Hair color<input id="avHair" type="color" value="#3b2418"></label>
           <label>Top color<input id="avTop" type="color" value="#ff9900"></label>
           <label>Pants color<input id="avBottom" type="color" value="#24304a"></label>
+          <label class="hotelChoice">Your hotel<select id="hotelSelect"></select></label>
         </div>
         <button class="avatarRandom" id="avatarRandom" type="button">SURPRISE ME</button>
         <div class="keys"><b>WASD / arrows</b> to walk · <b>E</b> enter · <b>T</b> talk</div>
@@ -413,7 +416,7 @@ var HARDCODED_OSM_DATA={"version":0.6,"generator":"Overpass API 0.7.62.11 87bfad
 var DAYS=["SUN","MON","TUE","WED","THU","FRI"];
 var st={day:0,min:15*60,k:0,s:0,money:1000,swag:[],steps:0,stepsToday:0,
   energy:95,hydration:90,vibes:85,coffees:0,badge:false,photosToday:{},dead:0,
-  kAtt:{},boothsDone:{},expoVisited:-1,tvToday:-1};
+  kAtt:{},boothsDone:{},expoVisited:-1,tvToday:-1,hotelId:null,sessions:0};
 var started=false,ended=false,paused=true,worldReady=false;
 
 /* ---- Real Las Vegas Strip coordinates (WGS84). Projected & scaled at build. ---- */
@@ -445,6 +448,14 @@ var PLACES=[
  {id:"hotel", name:"Budget-tel",                    lat:36.11500, lng:-115.15600, w:70, d:50, h:24,  color:0xb89a86, sign:0xff5ce1, type:"hotel", shape:"motel"},
  {id:"replay",name:"re:Play Festival Grounds",      lat:36.13300, lng:-115.16150, w:220,d:160,h:8,   color:0x241c3a, sign:0xff5ce1, type:"replay", shape:"replay"}
 ];
+var HOTEL_STAY_IDS=['mandalay','luxor','excalibur','nyny','mgm','parkmgm','aria','cosmo','bellagio','paris','planet','caesarsp','hardrock','venetian','trump','wynn','encore','circus','strat','hotel'];
+function isStayHotelPlace(p){return !!p&&HOTEL_STAY_IDS.indexOf(p.id)>=0;}
+function populateHotelSelect(){
+  var select=$("hotelSelect");if(!select)return;
+  select.innerHTML='';
+  PLACES.filter(isStayHotelPlace).forEach(function(p){var option=document.createElement('option');option.value=p.id;option.textContent=p.name;option.selected=p.id==='venetian';select.appendChild(option);});
+}
+populateHotelSelect();
 /* ---- Las Vegas Blvd centreline ----
    Derived from the bundled OpenStreetMap footprints: a shortest-path fit through the
    open channel between the east-side and west-side building masses, constrained to
@@ -603,7 +614,7 @@ function compass(txt){var c=$("compass");c.textContent=txt;c.style.opacity=1;cle
 var lastHud={};
 function updHUD(){
   $("hDay").textContent=DAYS[st.day]||"FRI";$("hClock").textContent=hhmm(st.min);
-  var vals={cK:Math.round(st.k),cS:Math.round(st.s),cG:st.swag.length,cMoney:'$'+Math.round(st.money).toLocaleString('en-US'),cSt:Math.round(st.steps)};
+  var vals={cK:Math.round(st.k),cS:Math.round(st.s),cG:st.swag.length,cSessions:st.sessions||0,cMoney:'$'+Math.round(st.money).toLocaleString('en-US'),cSt:Math.round(st.steps)};
   for(var id in vals){var v=id==="cSt"?vals[id].toLocaleString("en-US"):vals[id];
     if(lastHud[id]!==v){$(id).textContent=v;if(lastHud[id]!==undefined)bumpChip(id);lastHud[id]=v;}}
   var bars=[["vE","vEt","vEw",st.energy],["vH","vHt","vHw",st.hydration],["vV","vVt","vVw",st.vibes]];
@@ -674,8 +685,9 @@ function openReplay(p){
   openMenu(p.name,"Las Vegas Festival Grounds — the closing party.",A);
 }
 function openHotel(p){
-  openMenu(p.name,"Your $79/night palace. Sleep, shower, question your choices.",[
-   {n:"Sleep 😴",d:"Ends the day · rest quality depends on bedtime",f:function(){startRecap(false);}},
+  var isHome=st.hotelId===p.id;
+  openMenu(p.name,isHome?"This is your conference-week hotel.":"You are checked in somewhere else.",[
+   {n:"Go to your room 😴",d:isHome?"Choose an alarm and sleep until morning":"Your room is at "+selectedHotelName(),off:!isHome,f:openAlarmMenu},
    {n:"Power nap",d:"60 min · +20 energy",f:function(){st.min+=60;st.energy+=20;toast("Nap acquired. You dreamt in YAML.","good");closeMenu();}},
    {n:"Shower + fresh conference tee",d:"30 min · +12 vibes",f:function(){st.min+=30;st.vibes+=12;toast("You feel 40% more employable.","good");closeMenu();}},
    {n:"TV — keynote reruns",d:"45 min · +12 knowledge (once/day)",f:function(){
@@ -835,7 +847,7 @@ function leaveWalkableLectureTheatre(attended){
     var s=returnCtx.session||{};
     if(returnCtx.isKeynote){st.kAtt[st.day]=1;st.min=Math.max(st.min,returnCtx.knFrom||st.min)+(s.dur||120);st.k+=(s.k||120);st.vibes+=(s.v||0);st.energy-=(s.e||6);}
     else{st.min+=(s.dur||60);st.energy-=4;st.vibes-=2;st.k+=(s.k||55);}
-    returnCtx.attended=true;toast("Session attended. +"+((s&&s.k)||55)+" knowledge.","good");
+    returnCtx.attended=true;st.sessions=(st.sessions||0)+1;toast("Session attended. Week total: "+st.sessions+". +"+((s&&s.k)||55)+" knowledge.","good");
   }
   if(lectureCssObject&&cssScene){cssScene.remove(lectureCssObject);lectureCssObject=null;}
   if(lectureIframe&&lectureIframe.remove){lectureIframe.remove();lectureIframe=null;}
@@ -911,32 +923,36 @@ $("tAttend").onclick=function(){
   else{st.min+=s.dur;st.energy-=4;st.vibes-=2;var g=s.k;
     if(c.overflow){g=Math.round(g*0.55);st.k+=g;toast("Overflow room. +"+g+" knowledge (screens only).","bad");}
     else{st.k+=g;toast("Session complete. +"+g+" knowledge.","good");}}
-  c.attended=true;checkVitals();updHUD();
+  c.attended=true;st.sessions=(st.sessions||0)+1;toast('Week total: '+st.sessions+' session'+(st.sessions===1?'':'s')+' attended.','good');checkVitals();updHUD();
   $("tAttend").textContent="✔ Attended — leave when ready";
 };
 
 /* ================= DAY FLOW / SCORING / VITALS ================= */
 var daySnap=snap();
-function snap(){return {k:st.k,s:st.s,sw:st.swag.length,steps:st.steps};}
+function snap(){return {k:st.k,s:st.s,sw:st.swag.length,steps:st.steps,sessions:st.sessions||0};}
 function line(a,b){return "<div class='rline'><span>"+a+"</span><b>"+b+"</b></div>";}
-function startRecap(forced){
+function startRecap(forced,sleepPlan){
   paused=true;$("venueUI").style.display="none";
-  var d={k:st.k-daySnap.k,s:st.s-daySnap.s,sw:st.swag.length-daySnap.sw,steps:st.stepsToday};
+  var d={k:st.k-daySnap.k,s:st.s-daySnap.s,sw:st.swag.length-daySnap.sw,steps:st.stepsToday,sessions:(st.sessions||0)-(daySnap.sessions||0)};
   $("rTitle").textContent=DAYS[st.day]+" — SURVIVED";
   $("rLines").innerHTML=
     line("🧠 Knowledge gained","+"+Math.round(d.k))+line("🤝 Social gained","+"+Math.round(d.s))+
-    line("🎁 Swag collected","+"+d.sw)+line("👟 Steps today",Math.round(d.steps).toLocaleString("en-US"))+
-    line("⏰ Bedtime",hhmm(st.min)+(forced?" (face-down, fully clothed)":""));
+    line("🎁 Swag collected","+"+d.sw)+line("🎓 Sessions attended","+"+d.sessions)+line("👟 Steps today",Math.round(d.steps).toLocaleString("en-US"))+
+    line("⏰ Bedtime",hhmm(st.min)+(forced?" (face-down, fully clothed)":""))+
+    (sleepPlan?line("⏰ Alarm",hhmm(sleepPlan.alarm)+" · "+(sleepPlan.minutes/60).toFixed(1)+" h sleep"):"");
   $("rQuote").textContent=rnd(RECAP_QUOTES);$("recapUI").style.display="flex";
   $("rNext").onclick=function(){
-    $("recapUI").style.display="none";var bt=st.min;
-    st.day++;st.min=7*60;st.stepsToday=0;st.photosToday={};st.coffees=0;
-    var rest=bt<23*60?95:bt<25*60?80:62;if(forced)rest=52;
+    $("recapUI").style.display="none";
+    var plan=sleepPlan||{alarm:7*60,minutes:Math.max(0,1440+7*60-st.min),wakeDay:st.day+1};
+    st.day=plan.wakeDay;st.min=plan.alarm;st.stepsToday=0;st.photosToday={};st.coffees=0;
+    var hours=plan.minutes/60;
+    var rest=hours>=8?100:hours>=7?92:hours>=6?80:hours>=5?66:hours>=4?50:Math.max(20,Math.round(18+hours*7));
     st.energy=rest;st.hydration=Math.max(st.hydration,70);st.vibes=clamp(st.vibes+15,0,100);
     daySnap=snap();
     if(window.__resetPlayerToHotel)window.__resetPlayerToHotel();
     if(st.day>5){endGame();return;}
-    paused=false;dayBriefing();updHUD();
+    pendingSleep=null;paused=false;dayBriefing();
+    toast(hours<6?'Only '+hours.toFixed(1)+' hours of sleep. Energy starts at '+rest+'.':'You slept '+hours.toFixed(1)+' hours. Energy restored to '+rest+'.',hours<6?'bad':'good');updHUD();
   };
 }
 function dayBriefing(){
@@ -1007,6 +1023,7 @@ var THREEJS, renderer, overlayRenderer, scene, overlayScene, cssRenderer, cssSce
 var player3d, playerGroup, legL, legR, armL, armR, torso, pack, playerFootLift=0;
 var avatarAppearance={gender:'neutral',skin:0xf2c9a0,top:0xff9900,bottom:0x24304a,hair:0x3b2418,hairStyle:'short'};
 var avatarPreviewRenderer=null,avatarPreviewScene=null,avatarPreviewCamera=null,avatarPreviewModel=null,avatarPreviewRunning=false;
+var npcDesignerRenderer=null,npcDesignerScene=null,npcDesignerCamera=null,npcDesignerModel=null;
 var buildings=[], exteriorWalkSurfaces=[], exteriorMeshColliders=[], exteriorColliderGrid=Object.create(null), doorPoints=[], exteriorHotelAreas=[], palms=[], cars=[], helicopters=[], showgirls=[], cowboys=[], starField, moon;
 var ticketStand=null,ticketStandPoint=null,ridingHelicopter=false,helicopterRideProgress=0,helicopterRideCurve=null,helicopterRideCraft=null,helicopterRideSavedPos=null,helicopterRideClearance=[];
 var npcs=[],npcConfigs=[],nextNpcConfig=0,npcSpeechBubble=null,npcSpeechSpeaker=null,npcSpeechUntil=0,npcSpeechNext=0,npcConversation=null,interiorNpcPopulated={};
@@ -1027,7 +1044,7 @@ var keys={}, joy={active:false,x:0,y:0,id:null}, camDragBase=null;
 var SCALE=0.48, WORLD={cx:0,cz:0};
 var BUILDING_FOOTPRINT_SCALE=0.80, BUILDING_HEIGHT_SCALE=0.36;
 var nearPlace=null, SPAWN={x:0,z:0};
-var interiorMode=false, interiorRoot=null, interiorPlace=null, interiorDoors=[], interiorColliders=[], interiorSlots=[], interiorBlackjackTables=[], blackjackGame=null, interiorRouletteTables=[], rouletteGame=null, expoBooths=[], expoSponsorReps=[];
+var interiorMode=false, interiorRoot=null, interiorPlace=null, interiorReturnPosition=null, interiorDoors=[], interiorColliders=[], interiorSlots=[], interiorBlackjackTables=[], blackjackGame=null, interiorRouletteTables=[], rouletteGame=null, expoBooths=[], expoSponsorReps=[];
 var lectureMode=false, lectureRoot=null, lectureExit=null, lectureCtx=null, lectureIframe=null, lectureCssObject=null, lectureReturnGuard=null;
 var autoDoorCooldown=0;
 var INTERIOR_ORIGIN={x:5000,z:5000};
@@ -1065,24 +1082,25 @@ async function loadNpcConfigs(){
 function npcDesignerConfig(){
   function val(id){return $(id).value.trim();}
   function lines(id){return val(id).split(/\n+/).map(function(s){return s.trim();}).filter(Boolean);}
-  var id=val('ndId').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');$('ndId').value=id;
+  var alias=val('ndAlias').toLowerCase(),id=alias.replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,''),name=val('ndName'),greeting=val('ndGreeting'),title=val('ndTitle')||'AWS Builder',authoredFacts=lines('ndFacts'),dialogue=lines('ndDialogue'),jokes=lines('ndJokes'),links={};
+  [['blog','ndBlog'],['github','ndGithubUrl'],['linkedIn','ndLinkedIn'],['devto','ndDevto'],['personal','ndPersonal']].forEach(function(item){var url=val(item[1]);if(url)links[item[0]]=url;});
   var cfg={
-    id:id,name:val('ndName'),title:val('ndTitle'),tagline:val('ndTagline'),photoUrl:'https://images.example.com/npcs/'+id+'.jpg',
-    links:{website:'https://example.com/'+id},
-    appearance:{gender:val('ndGender'),skinTone:val('ndSkin'),hair:{style:val('ndHair'),color:val('ndHairColor')},top:{style:'conference-top',color:val('ndTop')},bottom:{style:'conference-pants',color:val('ndBottom')},accessories:['conference-badge'],emote:val('ndEmote')},
-    factoids:lines('ndFacts'),jokes:lines('ndJokes'),
-    roaming:{spawnAreas:['venetian','expo'],walkSpeed:Number(val('ndSpeed')),pauseSeconds:{min:3,max:9},wanderRadius:Number(val('ndRadius'))},
-    interaction:{greeting:val('ndGreeting'),dialogue:lines('ndDialogue'),rewards:{social:6,knowledge:6,vibes:3},cooldownSeconds:90}
+    id:id,name:name,title:title,tagline:val('ndBio')||title,photoUrl:val('ndAvatar')||'https://example.com/avatar.jpg',
+    links:links,
+    appearance:{gender:val('ndGender'),skinTone:val('ndSkin'),hair:{style:val('ndHair'),color:val('ndHairColor')},top:{style:'conference-top',color:val('ndTop')},bottom:{style:'conference-pants',color:val('ndBottom')},accessories:['conference-badge'],emote:'friendly-wave'},
+    factoids:authoredFacts.length?authoredFacts:[name+' is attending re:Invent in Las Vegas.'],jokes:jokes.length?jokes:['My cloud joke is still scaling up.'],
+    roaming:{spawnAreas:['venetian','expo'],walkSpeed:5.5,pauseSeconds:{min:3,max:9},wanderRadius:55},
+    interaction:{greeting:greeting,dialogue:dialogue.length?dialogue:[greeting],rewards:{social:6,knowledge:6,vibes:3},cooldownSeconds:90}
   };
   var errors=[];
-  if(!cfg.id)errors.push('ID is required.');if(!cfg.name)errors.push('Name is required.');if(!cfg.title)errors.push('Title is required.');
-  if(!cfg.interaction.greeting)errors.push('Greeting is required.');if(!cfg.interaction.dialogue.length)errors.push('Add at least one dialogue line.');if(!cfg.factoids.length)errors.push('Add at least one factoid.');if(!cfg.jokes.length)errors.push('Add at least one joke.');
+  if(!cfg.id)errors.push('Builder alias is required.');if(!cfg.name)errors.push('Name is required.');if(!cfg.interaction.greeting)errors.push('Greeting is required.');
   if(errors.length)throw new Error(errors.join('\n'));
   return cfg;
 }
 function npcDesignerJson(){return JSON.stringify(npcDesignerConfig(),null,2)+'\n';}
 function npcDesignerStatus(message,bad){$('designerStatus').style.color=bad?'#ff8fae':'#8fffc2';$('designerStatus').textContent=message;}
-$('designNpcBtn').onclick=function(){paused=true;$('npcDesigner').style.display='flex';npcDesignerStatus('Ready. Preview locally or contribute the generated JSON through GitHub.',false);};
+$('ndAvatar').addEventListener('input',function(){var photo=$('ndProfilePhoto'),url=this.value.trim();if(url){photo.src=url;photo.style.display='block';}else{photo.removeAttribute('src');photo.style.display='none';}});
+$('designNpcBtn').onclick=function(){paused=true;$('npcDesigner').style.display='flex';initNpcDesignerAvatar();npcDesignerStatus('Builder alias, name, and greeting are required. Everything else is optional.',false);};
 $('ndClose').onclick=function(){$('npcDesigner').style.display='none';paused=false;};
 $('ndPreview').onclick=function(){try{var cfg=npcDesignerConfig();npcConfigs.push(cfg);nextNpcConfig=npcConfigs.length-1;$('npcDesigner').style.display='none';paused=false;spawnNpcNearPlayer();npcDesignerStatus('',false);}catch(e){npcDesignerStatus(e.message,true);}};
 $('ndDownload').onclick=function(){try{var cfg=npcDesignerConfig(),blob=new Blob([JSON.stringify(cfg,null,2)+'\n'],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=cfg.id+'.json';a.click();setTimeout(function(){URL.revokeObjectURL(a.href);},1000);npcDesignerStatus('Downloaded '+cfg.id+'.json',false);}catch(e){npcDesignerStatus(e.message,true);}};
@@ -1351,7 +1369,7 @@ function makeBuilding(p){
 }
 function darken(hex){var r=(hex>>16&255)*0.35,g=(hex>>8&255)*0.35,b=(hex&255)*0.35;return (r<<16|g<<8|b)|0;}
 function isChosenHotelPlace(p){
-  return !!p && (p.type==='venue' || p.type==='hotel');
+  return isStayHotelPlace(p);
 }
 function placeFacadeLabel(p){
   var label=p.name.split(" ")[0].toUpperCase();
@@ -4136,6 +4154,33 @@ function interactShowgirl(g){
     {n:'Politely decline',d:'Keep walking and retain your dignity',f:function(){toast('She nods. “A rare display of situational awareness.”','info');closeMenu();}}
   ]);
 }
+function selectableHotels(){return PLACES.filter(isStayHotelPlace);}
+function selectedHotel(){for(var i=0;i<PLACES.length;i++)if(PLACES[i].id===st.hotelId)return PLACES[i];return null;}
+function selectedHotelName(){var p=selectedHotel();return p?p.name:'no hotel yet';}
+function openHotelCheckIn(){
+  $("vClose").style.display='none';
+  var hotels=selectableHotels().map(function(p){return {n:p.name,d:(p.main?'Closest to registration and the expo':'Playable casino, conference halls, and your room'),f:function(){
+    st.hotelId=p.id;$("vClose").style.display='';toast('Checked in at '+p.name+'. This is now your morning spawn and sleep location.','good');closeMenu();
+  }};});
+  openMenu('HOTEL CHECK-IN','Choose your home for conference week. You can sleep only in this hotel, and every morning begins outside it.',hotels);
+}
+function openAlarmMenu(){
+  var p=selectedHotel();
+  if(!p||!interiorPlace||interiorPlace.id!==p.id){toast('Go to your room at '+selectedHotelName()+' to sleep.','info');return;}
+  var alarms=[6*60,7*60,8*60,9*60];
+  openMenu('SET YOUR ALARM','Bedtime: '+hhmm(st.min)+'. Short sleep means lower energy tomorrow.',alarms.map(function(alarm){
+    var daysAhead=Math.max(1,Math.floor((st.min-alarm)/1440)+1);
+    var sleep=daysAhead*1440+alarm-st.min,hours=sleep/60;
+    return {n:hhmm(alarm),d:hours.toFixed(1)+' hours of sleep',f:function(){beginSleep(alarm);}};
+  }));
+}
+var pendingSleep=null;
+function beginSleep(alarm){
+  var daysAhead=Math.max(1,Math.floor((st.min-alarm)/1440)+1);
+  var sleepMinutes=daysAhead*1440+alarm-st.min;
+  pendingSleep={alarm:alarm,minutes:sleepMinutes,wakeDay:st.day+daysAhead};
+  closeMenu();startRecap(false,pendingSleep);
+}
 function makeCowboy(){
   var skins=[0xf0c7a5,0xc98f65,0x70452f],skin=skins[Math.floor(Math.random()*skins.length)];
   var g=makeHumanoid({gender:'male',skin:skin,top:skin,bottom:0x263b67,hair:0x302019,hairStyle:Math.random()<.35?'bald':'short'});
@@ -5070,6 +5115,24 @@ function initAvatarBuilder(){
   }
   renderAvatarPreview();
 }
+function npcDesignerAppearance(){return {gender:$("ndGender").value,hairStyle:$("ndHair").value,skin:avatarHex($("ndSkin").value),hair:avatarHex($("ndHairColor").value),top:avatarHex($("ndTop").value),bottom:avatarHex($("ndBottom").value)};}
+function rebuildNpcDesignerAvatar(){
+  if(!npcDesignerScene)return;
+  if(npcDesignerModel){npcDesignerScene.remove(npcDesignerModel);npcDesignerModel.traverse(function(o){if(o.geometry)o.geometry.dispose();if(o.material){if(Array.isArray(o.material))o.material.forEach(function(m){m.dispose();});else o.material.dispose();}});}
+  npcDesignerModel=makeHumanoid(npcDesignerAppearance());
+  var previewPack=box(1.6,2,1,0x3a7bd5);previewPack.position.set(0,4.4,-1);npcDesignerModel.add(previewPack);
+  var previewBadge=box(1.1,1.4,.2,0xffffff);previewBadge.position.set(0,3.6,.8);npcDesignerModel.add(previewBadge);
+  npcDesignerModel.position.y=-4;npcDesignerScene.add(npcDesignerModel);
+}
+function initNpcDesignerAvatar(){
+  if(npcDesignerRenderer){rebuildNpcDesignerAvatar();return;}
+  var canvas=$("npcAvatarCanvas"),stage=canvas&&canvas.parentElement;if(!THREEJS||!canvas||!stage)return;
+  npcDesignerRenderer=new THREEJS.WebGLRenderer({canvas:canvas,alpha:true,antialias:true});npcDesignerRenderer.setPixelRatio(Math.min(devicePixelRatio||1,2));
+  npcDesignerScene=new THREEJS.Scene();npcDesignerCamera=new THREEJS.PerspectiveCamera(32,1,.1,100);npcDesignerCamera.position.set(0,0,19);npcDesignerCamera.lookAt(0,0,0);
+  npcDesignerScene.add(new THREEJS.HemisphereLight(0xdcecff,0x30143f,2.1));var key=new THREEJS.DirectionalLight(0xffc77a,2.2);key.position.set(5,8,8);npcDesignerScene.add(key);var rim=new THREEJS.DirectionalLight(0x25e0ff,1.8);rim.position.set(-6,4,-4);npcDesignerScene.add(rim);
+  ['ndGender','ndHair','ndSkin','ndHairColor','ndTop','ndBottom'].forEach(function(id){$(id).addEventListener('input',rebuildNpcDesignerAvatar);$(id).addEventListener('change',rebuildNpcDesignerAvatar);});rebuildNpcDesignerAvatar();
+  (function renderNpcDesigner(){requestAnimationFrame(renderNpcDesigner);if(!npcDesignerRenderer||$('npcDesigner').style.display==='none')return;if(npcDesignerModel)npcDesignerModel.rotation.y+=.008;var w=stage.clientWidth,h=stage.clientHeight;if(w&&h){npcDesignerRenderer.setSize(w,h,false);npcDesignerCamera.aspect=w/h;npcDesignerCamera.updateProjectionMatrix();npcDesignerRenderer.render(npcDesignerScene,npcDesignerCamera);}})();
+}
 function buildPlayer(){
   playerGroup=makeHumanoid(avatarAppearance);
   torso=playerGroup.userData.parts.torso;armL=playerGroup.userData.parts.armL;armR=playerGroup.userData.parts.armR;legL=playerGroup.userData.parts.legL;legR=playerGroup.userData.parts.legR;
@@ -5099,9 +5162,10 @@ function animatePlayer(dt,speed){
 function currentNpcArea(){return lectureMode?'lecture':interiorMode?'interior:'+(interiorPlace?interiorPlace.id:'unknown'):'exterior';}
 function npcColor(value,fallback){
   var colors={'aws-orange':0xff9900,cyan:0x25e0ff,violet:0x9b8cff,indigo:0x3949ab,charcoal:0x303642,black:0x171923,'dark-brown':0x38251b,auburn:0x7a3527};
+  if(/^#[0-9a-f]{6}$/i.test(String(value||'')))return parseInt(value.slice(1),16);
   return colors[value]===undefined?fallback:colors[value];
 }
-function npcSkin(value){return ({light:0xf0c7a5,medium:0xc98f65,deep:0x70452f})[value]||0xd2a078;}
+function npcSkin(value){return npcColor(value,({light:0xf0c7a5,medium:0xc98f65,deep:0x70452f})[value]||0xd2a078);}
 function randomStripNpcPoint(){
   var pts=roadPolyline();
   for(var tries=0;tries<80;tries++){
@@ -5676,8 +5740,13 @@ function buildWorld(){
   heading=Math.PI; camYaw=Math.PI;
 
   window.__resetPlayerToHotel=function(){
-    var hd=null;for(var i=0;i<doorPoints.length;i++)if(doorPoints[i].place.id==="hotel")hd=doorPoints[i];
-    if(hd){player3d.x=hd.x;player3d.z=hd.z+10;playerGroup.position.set(player3d.x,0,player3d.z);}
+    if(interiorMode)clearInterior();
+    var hd=null;for(var i=0;i<doorPoints.length;i++)if(doorPoints[i].place.id===st.hotelId){hd=doorPoints[i];break;}
+    if(hd){
+      var saved=st.hotelEntryPosition&&st.hotelEntryPosition.hotelId===st.hotelId?st.hotelEntryPosition:null;
+      var wake=saved||interiorReturnPosition||{x:hd.x,z:hd.z};
+      player3d.x=wake.x;player3d.z=wake.z;playerGroup.position.set(player3d.x,0,player3d.z);heading=wake.heading==null?Math.PI:wake.heading;camYaw=heading;compass('Morning outside '+hd.place.name+'.');
+    }
   };
   addEventListener("resize",function(){
     renderer.setSize(innerWidth,innerHeight);if(cssRenderer)cssRenderer.setSize(innerWidth,innerHeight);if(overlayRenderer)overlayRenderer.setSize(innerWidth,innerHeight);cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();
@@ -5878,6 +5947,7 @@ function addCasinoCenterpiece(g,theme){
     if(theme.motif==='palms')for(var p=-1;p<=1;p+=2){addInteriorBox(g,p*8,4,3,1,8,1,0x795332,true);var crown=new THREEJS.Mesh(new THREEJS.SphereGeometry(3.2,12,8),mat(0x387646));crown.scale.y=.35;crown.position.set(INTERIOR_ORIGIN.x+p*8,8.5,INTERIOR_ORIGIN.z+3);g.add(crown);}
   }
 }
+function hasLectureCorridors(place){return !!place&&['encore','wynn','venetian','caesars','caesarsp','mgm'].indexOf(place.id)>=0;}
 function buildCasinoFloor(g,place){
   var theme=casinoInteriorTheme(place);
   addInteriorBox(g,0,-0.05,0,150,0.3,110,theme.floor,false);
@@ -5886,9 +5956,9 @@ function buildCasinoFloor(g,place){
   addInteriorBox(g,0,.18,0,3,.08,108,theme.accent,false);
   for(var stripe=-48;stripe<=48;stripe+=16)addInteriorBox(g,stripe,.14,0,.45,.06,108,theme.accent,false);
   // Outer walls are split around actual doorway gaps, so passages are doorways rather than hidden teleport walls.
-  addZWallWithGap(g,-56,-76,76,[[-11,11]],theme.wall);
+  addZWallWithGap(g,-56,-76,76,hasLectureCorridors(place)?[[-11,11]]:[],theme.wall);
   addZWallWithGap(g,56,-76,76,[[-10,10]],theme.wall);
-  addXWallWithGaps(g,-76,-56,56,[],theme.wall);
+  addXWallWithGaps(g,-76,-56,56,st.hotelId===place.id?[[22,38]]:[],theme.wall);
   addXWallWithGaps(g,76,-56,56,[[-36,-20],[22,38]],theme.wall);
   addInteriorSign(g,place.name.toUpperCase(),0,-55,48,theme.accent,{axis:'z',face:1,y:12,fontSize:30,height:3.4,glow:8});
   addCasinoCenterpiece(g,theme);
@@ -6083,28 +6153,34 @@ function buildExpoHall(g){
   addInteriorSign(g,'SWAG SHIPPING • BAG OVERFLOW',0,-491.9,50,0xff9900,{axis:'z',face:1,y:7,fontSize:24,height:3,glow:8,surfaceOffset:1.08});
 }
 function enterInterior(place){
+  if(!interiorMode){
+    interiorReturnPosition={x:player3d.x,z:player3d.z,heading:heading,hotelId:place.id};
+    if(place.id===st.hotelId)st.hotelEntryPosition={x:player3d.x,z:player3d.z,heading:heading,hotelId:place.id};
+  }
   clearInterior();
   interiorMode=true;interiorPlace=place;interiorRoot=new THREEJS.Group();scene.add(interiorRoot);
   buildCasinoFloor(interiorRoot,place);
-  buildConferenceCorridor(interiorRoot,place);
+  if(hasLectureCorridors(place))buildConferenceCorridor(interiorRoot,place);
   if(place.id==='venetian')buildExpoHall(interiorRoot);
   addInteriorDoor(interiorRoot,'exit','EXIT TO THE STRIP',0,55,{w:16,color:0xff5c5c,face:-1,axis:'z'});
-  addInteriorDoor(interiorRoot,'corridor','CONFERENCE HALLS',0,-56,{w:16,color:0x25e0ff,face:-1,axis:'z'});
+  if(hasLectureCorridors(place))addInteriorDoor(interiorRoot,'corridor','CONFERENCE HALLS',0,-56,{w:16,color:0x25e0ff,face:-1,axis:'z'});
   if(place.id==='venetian')addInteriorDoor(interiorRoot,'registration','REGISTRATION',76,-28,{w:14,color:0xff9900,face:-1,axis:'x'});
   if(place.id==='venetian')addInteriorDoor(interiorRoot,'expo','EXPO HALL',0,-270,{w:16,color:0x4dff9d,face:1,axis:'z'});
+  if(st.hotelId===place.id)addInteriorDoor(interiorRoot,'room','YOUR ROOM • SLEEP',-76,30,{w:16,color:0xffd36a,face:1,axis:'x'});
   spawnInteriorNpcPopulation(place);
   player3d.x=INTERIOR_ORIGIN.x;player3d.z=INTERIOR_ORIGIN.z+45;playerGroup.position.set(player3d.x,0,player3d.z);
   heading=Math.PI;camYaw=Math.PI;
-  compass('Inside '+place.name+' — cross the casino, enter Conference Halls, then pick a session door.');
-  toast('You entered '+place.name+'. Slot machines, carpet patterns, and conference arrows everywhere.','info');
+  compass(hasLectureCorridors(place)?'Inside '+place.name+' — cross the casino to reach the Conference Halls.':'Inside '+place.name+' — casino floor and hotel rooms.');
+  toast('You entered '+place.name+'. '+(hasLectureCorridors(place)?'Conference halls are beyond the casino.':'This hotel is not a conference venue.'),'info');
 }
 function leaveInterior(){
   var old=interiorPlace;
+  var returnPosition=interiorReturnPosition;
   var exitDoor=null;
   if(old){for(var i=0;i<doorPoints.length;i++)if(doorPoints[i].place.id===old.id)exitDoor=doorPoints[i];}
   clearInterior();
-  if(exitDoor){player3d.x=exitDoor.x;player3d.z=exitDoor.z+12;playerGroup.position.set(player3d.x,0,player3d.z);}
-  heading=Math.PI;camYaw=Math.PI;
+  if(returnPosition){player3d.x=returnPosition.x;player3d.z=returnPosition.z;playerGroup.position.set(player3d.x,0,player3d.z);heading=returnPosition.heading;camYaw=heading;}
+  else if(exitDoor){player3d.x=exitDoor.x;player3d.z=exitDoor.z+12;playerGroup.position.set(player3d.x,0,player3d.z);heading=Math.PI;camYaw=Math.PI;}
   compass('Back on the Strip.');
 }
 function enterInteriorDoor(d){
@@ -6113,6 +6189,7 @@ function enterInteriorDoor(d){
     {n:'Refill water bottle 💧',d:'5 min · +45 hydration',f:function(){st.min+=5;st.hydration+=45;toast('Refilled. Conference survival +1.','good');closeMenu();}},
     {n:'Espresso cart ☕',d:'10 min · +energy · -5 hydration',f:function(){st.min+=10;var g=[22,15,9,5,3][Math.min(st.coffees,4)];st.energy+=g;st.hydration-=5;st.coffees++;toast('Coffee #'+st.coffees+' today. +'+g+' energy.',g>8?'good':'info');closeMenu();}}
   ]);
+  if(d.kind==='room'){openAlarmMenu();return true;}
   if(d.kind==='registration'){
     if(st.badge){toast('Badge already collected. The lanyard itch is permanent.','info');return false;}
     st.min+=20;st.badge=true;st.swag.push(['Attendee lanyard',12]);st.s+=5;toast('Badge acquired inside the Venetian. Session doors unlocked.','good');return true;
@@ -6150,6 +6227,7 @@ function nearestExteriorHotelArea(){
   var best=null,bd=1e9;
   for(var i=0;i<exteriorHotelAreas.length;i++){
     var a=exteriorHotelAreas[i];
+    if(a.place.type!=='venue'&&a.place.type!=='hotel'&&a.place.id!==st.hotelId)continue;
     var dx=Math.max(Math.abs(player3d.x-a.cx)-a.hw,0);
     var dz=Math.max(Math.abs(player3d.z-a.cz)-a.hd,0);
     var d=Math.hypot(dx,dz);
@@ -6159,6 +6237,15 @@ function nearestExteriorHotelArea(){
 }
 function nearestDoor(){
   if(!interiorMode){
+    // Every chosen hotel has a safe front-door interaction directly on the Strip.
+    // This is especially important at Bellagio, where the physical footprint is
+    // separated from the road by the fountain lake.
+    var home=selectedHotel();
+    if(home){
+      var homeWorld=project(home.lat,home.lng),homeAccess=nearestOnRoad(homeWorld.x,homeWorld.z);
+      var homeDist=Math.hypot(player3d.x-homeAccess.px,player3d.z-homeAccess.pz);
+      if(homeDist<24)return {door:{place:home,x:homeAccess.px,z:homeAccess.pz,kind:'hotelArea'},dist:0};
+    }
     var ar=nearestExteriorHotelArea();
     if(ar.area&&ar.dist<18)return {door:{place:ar.area.place,x:player3d.x,z:player3d.z,kind:'hotelArea'},dist:0,area:ar.area};
   }
@@ -6271,7 +6358,7 @@ function triggerAutoDoor(d){
   autoDoorCooldown=0.7;
   if(interiorMode)return !!enterInteriorDoor(d);
   var p=d.place;
-  if(p.type==='venue'||p.type==='hotel'){enterInterior(p);return true;}
+  if(p.type==='venue'||p.type==='hotel'||p.id===st.hotelId){enterInterior(p);return true;}
   return false;
 }
 function doEnter(){
@@ -6306,7 +6393,7 @@ function doEnter(){
   if(!n.door||n.dist>=16)return;
   if(interiorMode)return enterInteriorDoor(n.door);
   var p=n.door.place;
-  if(p.type==='venue'||p.type==='hotel')return enterInterior(p);
+  if(p.type==='venue'||p.type==='hotel'||p.id===st.hotelId)return enterInterior(p);
   enterPlace(p);
 }
 /* ================= MAIN FRAME ================= */
@@ -6485,7 +6572,6 @@ function tick(dt){
   if(evTimer<=0){evTimer=13+Math.random()*10;
     var pool=ROAM_EVENTS.filter(function(e){return !e.cond||e.cond();});var ev=rnd(pool);ev.f();toast(ev.t,ev.cls);checkVitals();}
 
-  if(st.min>=26*60){toast("02:00. Your body has unilaterally ended the day.","bad");startRecap(true);return;}
   if(st.day===5&&st.min>=12*60){endGame();return;}
 
   // Automatic room swaps while walking through doors.
@@ -6964,6 +7050,7 @@ $("startBtn").onclick=function(){
   // Recreate the playable character from the final builder choices so the live
   // preview and the avatar on the Strip are the exact same model.
   readAvatarBuilder();
+  st.hotelId=$("hotelSelect").value||'venetian';
   if(playerGroup&&playerGroup.parent)playerGroup.parent.remove(playerGroup);
   buildPlayer();avatarPreviewRunning=false;
   sfx("good");$("intro").style.display="none";
@@ -6971,7 +7058,7 @@ $("startBtn").onclick=function(){
   compass("SUNDAY 15:00 — you landed near the Venetian. Press E at its entrance to register.");
   toast("SUNDAY, 15:00. You're outside the Venetian — walk up and press E to register.","info");
   toast("Using bundled Vegas OSM data with a more navigable Strip scale. No Overpass API lookup will run.","info");
-  updHUD();
+  toast('Checked in at '+selectedHotelName()+'. Sleep there and wake there each morning.','good');updHUD();
 };
 updHUD();
 window.__loadThree();
