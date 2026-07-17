@@ -501,6 +501,20 @@ var SWAG=[
  ["Portable charger (actually useful)",24],["Mystery capsule toy",12]];
 var BOOTHS=[["MonitorDog booth",0],["LockChain booth",0],["Kloudberg booth",0],["YAMLware booth",0],
  ["GPU4U booth",0],["Scale-a-Saurus booth",0],["AWS Village",1]];
+var EXPO_SPONSORS=[
+ {name:'NimbusNest',mark:'NN',color:0x25e0ff,swag:['Cloud-shaped power bank',24],pitch:'Your workloads deserve a softer place to land.'},
+ {name:'SaaSQUATCH',mark:'SQ',color:0x9b8cff,swag:['SaaSQUATCH plushie',28],pitch:'Rarely seen. Always multi-tenant.'},
+ {name:'VectorVault',mark:'VV',color:0xff2d95,swag:['Encrypted neon notebook',16],pitch:'Embeddings in. Answers out. Secrets stay put.'},
+ {name:'QueueBerry',mark:'QB',color:0xff9900,swag:['QueueBerry bucket hat',20],pitch:'Sweet, durable messaging without the seeds.'},
+ {name:'CloudCaddy',mark:'CC',color:0x4dff9d,swag:['Miniature server-rack caddy',18],pitch:'We carry the operational burden so you do not.'},
+ {name:'PatchPilot',mark:'PP',color:0x44aaff,swag:['Aviator patch set',14],pitch:'Automated patching with considerably fewer emergency landings.'},
+ {name:'FinOps Fox',mark:'FX',color:0xff6b35,swag:['Fox-ear cost-optimizer beanie',25],pitch:'We hunt waste hiding in your cloud bill.'},
+ {name:'Schema Llama',mark:'SL',color:0xe36bff,swag:['Schema Llama socks',17],pitch:'Data contracts with less drama and more llama.'},
+ {name:'ZeroTrusty',mark:'ZT',color:0x35d0ba,swag:['Privacy-screen sunglasses',19],pitch:'Never trust. Always verify. Occasionally hydrate.'},
+ {name:'Latency Labs',mark:'LL',color:0xffd33d,swag:['Sub-millisecond stopwatch',22],pitch:'Your p99 called. We made it faster.'},
+ {name:'Kube Canoe',mark:'KC',color:0x3f7cff,swag:['Container-shaped water bottle',21],pitch:'Paddle safely through your Kubernetes clusters.'},
+ {name:'PromptForge',mark:'PF',color:0xff4d7d,swag:['Prompt engineer enamel pin',15],pitch:'Production-grade prompts, hammered into shape.'}
+];
 var PARTY_HOSTS=["an observability vendor","a database startup","a security unicorn","a CI/CD company",
  "a Kubernetes platform","three fintechs sharing a rooftop","a GPU cloud with money to burn"];
 var ROAM_EVENTS=[
@@ -792,14 +806,15 @@ function leaveWalkableLectureTheatre(attended){
   enterInterior(place);
 
   var door=returnCtx&&returnCtx.session&&returnCtx.session.returnDoor;
+  var returnPosition=returnCtx&&returnCtx.session&&returnCtx.session.returnPosition;
   if(door){
-    var px=door.x, pz=door.z, h=heading;
-    if((door.opts&&door.opts.axis)==='x'){
-      var inward=(door.x>=INTERIOR_ORIGIN.x)?-12:12;
+    var px=returnPosition?returnPosition.x:door.x, pz=returnPosition?returnPosition.z:door.z, h=returnPosition?returnPosition.heading:heading;
+    if(!returnPosition&&(door.opts&&door.opts.axis)==='x'){
+      var inward=(door.opts&&door.opts.face||1)*12;
       px=door.x+inward;
       h=inward<0 ? -Math.PI/2 : Math.PI/2;
-    }else{
-      var inward=(door.z>=INTERIOR_ORIGIN.z)?-12:12;
+    }else if(!returnPosition){
+      var inward=(door.opts&&door.opts.face||1)*12;
       pz=door.z+inward;
       h=inward<0 ? Math.PI : 0;
     }
@@ -807,6 +822,7 @@ function leaveWalkableLectureTheatre(attended){
     playerGroup.position.set(player3d.x,0,player3d.z);
     heading=h;camYaw=h;playerGroup.rotation.y=heading;
     autoDoorCooldown=0.9;
+    lectureReturnGuard={x:door.x,z:door.z};
     compass('Back in the lecture corridor — outside the theatre door.');
   }else if(window.__placePlayerInLectureCorridor){
     window.__placePlayerInLectureCorridor();
@@ -954,7 +970,7 @@ var avatarAppearance={gender:'neutral',skin:0xf2c9a0,top:0xff9900,bottom:0x24304
 var avatarPreviewRenderer=null,avatarPreviewScene=null,avatarPreviewCamera=null,avatarPreviewModel=null,avatarPreviewRunning=false;
 var buildings=[], exteriorWalkSurfaces=[], exteriorMeshColliders=[], exteriorColliderGrid=Object.create(null), doorPoints=[], exteriorHotelAreas=[], palms=[], cars=[], helicopters=[], showgirls=[], cowboys=[], starField, moon;
 var ticketStand=null,ticketStandPoint=null,ridingHelicopter=false,helicopterRideProgress=0,helicopterRideCurve=null,helicopterRideCraft=null,helicopterRideSavedPos=null,helicopterRideClearance=[];
-var npcs=[],npcConfigs=[],nextNpcConfig=0,npcSpeechBubble=null,npcSpeechSpeaker=null,npcSpeechUntil=0,npcSpeechNext=0,npcConversation=null;
+var npcs=[],npcConfigs=[],nextNpcConfig=0,npcSpeechBubble=null,npcSpeechSpeaker=null,npcSpeechUntil=0,npcSpeechNext=0,npcConversation=null,interiorNpcPopulated={};
 var hotelDayMaterials=[];
 var bellagioFountainRoot=null, bellagioFountainJets=[],bellagioFountainMist=[],bellagioFountainUpdateAccum=0;
 var bellagioFountainWorldCenter=null, bellagioTrespassActive=false, bellagioTrespassDone=false, bellagioPolice=[], bellagioArrestTimer=0;
@@ -972,8 +988,8 @@ var keys={}, joy={active:false,x:0,y:0,id:null}, camDragBase=null;
 var SCALE=0.48, WORLD={cx:0,cz:0};
 var BUILDING_FOOTPRINT_SCALE=0.80, BUILDING_HEIGHT_SCALE=0.36;
 var nearPlace=null, SPAWN={x:0,z:0};
-var interiorMode=false, interiorRoot=null, interiorPlace=null, interiorDoors=[], interiorColliders=[], interiorSlots=[];
-var lectureMode=false, lectureRoot=null, lectureExit=null, lectureCtx=null, lectureIframe=null, lectureCssObject=null;
+var interiorMode=false, interiorRoot=null, interiorPlace=null, interiorDoors=[], interiorColliders=[], interiorSlots=[], expoBooths=[];
+var lectureMode=false, lectureRoot=null, lectureExit=null, lectureCtx=null, lectureIframe=null, lectureCssObject=null, lectureReturnGuard=null;
 var autoDoorCooldown=0;
 var INTERIOR_ORIGIN={x:5000,z:5000};
 
@@ -5038,11 +5054,11 @@ function animatePlayer(dt,speed){
   armL.userData.lower.rotation.x=-.16-Math.max(0,sw)*.25;armR.userData.lower.rotation.x=-.16-Math.max(0,-sw)*.25;
   torso.position.y=4.55+Math.abs(Math.sin(clock.elapsedTime*10))*0.18*Math.min(speed/18,1);
   var face=playerGroup.userData.face,blink=(Math.sin(clock.elapsedTime*.72)>0.992)?.08:1;face.eyeL.scale.y=face.eyeR.scale.y=blink;
-  var packScale=1+Math.min(st.swag.length,14)*0.12;
+  var packScale=1+st.swag.length*0.08;
   pack.scale.set(1,packScale,packScale);pack.position.y=4.4;
 }
 
-function currentNpcArea(){return lectureMode?'lecture':interiorMode?'interior':'exterior';}
+function currentNpcArea(){return lectureMode?'lecture':interiorMode?'interior:'+(interiorPlace?interiorPlace.id:'unknown'):'exterior';}
 function npcColor(value,fallback){
   var colors={'aws-orange':0xff9900,cyan:0x25e0ff,violet:0x9b8cff,indigo:0x3949ab,charcoal:0x303642,black:0x171923,'dark-brown':0x38251b,auburn:0x7a3527};
   return colors[value]===undefined?fallback:colors[value];
@@ -5078,6 +5094,36 @@ function spawnStripNpcPopulation(){
   if(!worldReady||!npcConfigs.length)return;
   for(var i=0;i<npcConfigs.length;i++){var pt=randomStripNpcPoint();createNpcAt(npcConfigs[i],pt.x,pt.z,'exterior');}
 }
+function npcInteriorBlocked(x,z,radius){
+  radius=radius||1.35;
+  for(var i=0;i<interiorColliders.length;i++){
+    var c=interiorColliders[i],cx=c.cx===undefined?INTERIOR_ORIGIN.x+c.x:c.cx,cz=c.cz===undefined?INTERIOR_ORIGIN.z+c.z:c.cz;
+    var hw=c.hw===undefined?c.w/2:c.hw,hd=c.hd===undefined?c.d/2:c.hd;
+    if(x>cx-hw-radius&&x<cx+hw+radius&&z>cz-hd-radius&&z<cz+hd+radius)return true;
+  }
+  return false;
+}
+function randomInteriorNpcPoint(area,index){
+  var branches=[-92,-166,-240];
+  for(var tries=0;tries<120;tries++){
+    var corridor=index%2===1,x,z;
+    if(corridor&&Math.random()<.58){x=INTERIOR_ORIGIN.x+(Math.random()-.5)*15;z=INTERIOR_ORIGIN.z-66-Math.random()*194;}
+    else if(corridor){var bz=rnd(branches),side=Math.random()<.5?-1:1;x=INTERIOR_ORIGIN.x+side*(18+Math.random()*38);z=INTERIOR_ORIGIN.z+bz+(Math.random()-.5)*10;}
+    else{x=INTERIOR_ORIGIN.x+(Math.random()-.5)*125;z=INTERIOR_ORIGIN.z-45+Math.random()*88;}
+    if(npcInteriorBlocked(x,z,1.5))continue;
+    var clear=true;
+    for(var n=0;n<npcs.length;n++)if(npcs[n].userData.area===area&&Math.hypot(x-npcs[n].position.x,z-npcs[n].position.z)<8){clear=false;break;}
+    if(clear)return {x:x,z:z};
+  }
+  return {x:INTERIOR_ORIGIN.x+(index%2?5:-5),z:INTERIOR_ORIGIN.z-70-index*5};
+}
+function spawnInteriorNpcPopulation(place){
+  if(!place||!npcConfigs.length||interiorNpcPopulated[place.id])return;
+  interiorNpcPopulated[place.id]=true;
+  var area='interior:'+place.id,count=Math.min(8,Math.max(4,npcConfigs.length));
+  for(var i=0;i<count;i++){var pt=randomInteriorNpcPoint(area,i);createNpcAt(npcConfigs[(nextNpcConfig+i)%npcConfigs.length],pt.x,pt.z,area);}
+  nextNpcConfig=(nextNpcConfig+count)%npcConfigs.length;
+}
 function spawnNpcNearPlayer(){
   if(!worldReady||!player3d||!scene)return;
   if(!npcConfigs.length){toast('No NPC configs loaded. Serve the folder over HTTP so npcs/index.json can be read.','bad');return;}
@@ -5096,8 +5142,19 @@ function updateNpcs(dt){
     var speed=roam.walkSpeed, nx=npc.position.x+Math.sin(d.angle)*speed*dt, nz=npc.position.z+Math.cos(d.angle)*speed*dt;
     if(d.talking){d.angle=Math.atan2(player3d.x-npc.position.x,player3d.z-npc.position.z);}
     else if(Math.hypot(nx-d.homeX,nz-d.homeZ)>roam.wanderRadius){d.angle=Math.atan2(d.homeX-npc.position.x,d.homeZ-npc.position.z);}
-    else if(!exteriorBlocked(nx,nz,1.2)&&!exteriorMeshQuery(nx,nz,1.2,0).blocked){npc.position.x=nx;npc.position.z=nz;}
-    else d.angle+=Math.PI*.65+(Math.random()-.5);
+    else{
+      var blocked=d.area.indexOf('interior:')===0?npcInteriorBlocked(nx,nz,1.25):(exteriorBlocked(nx,nz,1.2)||exteriorMeshQuery(nx,nz,1.2,0).blocked);
+      if(!blocked){npc.position.x=nx;npc.position.z=nz;}
+      else{
+        var turns=[Math.PI/2,-Math.PI/2,Math.PI*.75,-Math.PI*.75],movedAround=false;
+        for(var ti=0;ti<turns.length;ti++){
+          var tryAngle=d.angle+turns[ti],tx=npc.position.x+Math.sin(tryAngle)*speed*dt,tz=npc.position.z+Math.cos(tryAngle)*speed*dt;
+          var turnBlocked=d.area.indexOf('interior:')===0?npcInteriorBlocked(tx,tz,1.25):(exteriorBlocked(tx,tz,1.2)||exteriorMeshQuery(tx,tz,1.2,0).blocked);
+          if(!turnBlocked){d.angle=tryAngle;npc.position.x=tx;npc.position.z=tz;movedAround=true;break;}
+        }
+        if(!movedAround)d.angle+=Math.PI*.65+(Math.random()-.5);
+      }
+    }
     npc.rotation.y=d.angle;
     var sw=Math.sin(clock.elapsedTime*7+i)*.55,parts=d.parts,face=d.face;
     parts.legL.rotation.x=sw;parts.legR.rotation.x=-sw;parts.armL.rotation.x=-sw*.75;parts.armR.rotation.x=sw*.75;
@@ -5586,7 +5643,8 @@ addEventListener("keydown",function(e){keys[e.key.toLowerCase()]=true;
   if((e.key==="e"||e.key==="E"||e.key==="Enter")&&!paused)doEnter();
   if(e.key==="[" ){st.min=Math.max(0,st.min-60);toast('Time -1 hour: '+DAYS[st.day]+' '+hhmm(st.min),'info');updHUD();}
   if(e.key==="]" ){st.min+=60;toast('Time +1 hour: '+DAYS[st.day]+' '+hhmm(st.min),'info');updHUD();}
-  if(e.key.toLowerCase()==="t"&&!paused&&!e.repeat){var talk=nearestNpc();if(talk.npc&&talk.dist<12)interactWithNpc(talk.npc);}
+  if(e.key.toLowerCase()==="t"&&!paused&&!e.repeat){var sponsor=nearestExpoBooth();if(sponsor.booth&&sponsor.dist<15)talkToSponsor(sponsor.booth);else{var talk=nearestNpc();if(talk.npc&&talk.dist<12)interactWithNpc(talk.npc);}}
+  if(e.key.toLowerCase()==="c"&&!paused&&!e.repeat){var swagBooth=nearestExpoBooth();if(swagBooth.booth&&swagBooth.dist<15)collectSponsorSwag(swagBooth.booth);}
 });
 addEventListener("keyup",function(e){keys[e.key.toLowerCase()]=false;});
 var joyEl=$("joy"),nub=$("joyNub");
@@ -5631,7 +5689,7 @@ wireTimeTravel();
 function clearInterior(){
   clearCameraOcclusion();
   if(interiorRoot){scene.remove(interiorRoot);interiorRoot.traverse(function(o){if(o.geometry)o.geometry.dispose&&o.geometry.dispose();});}
-  interiorRoot=null;interiorDoors=[];interiorColliders=[];interiorSlots=[];interiorMode=false;interiorPlace=null;
+  interiorRoot=null;interiorDoors=[];interiorColliders=[];interiorSlots=[];expoBooths=[];interiorMode=false;interiorPlace=null;
 }
 function mat(color,emis,ei){
   var m=new THREEJS.MeshLambertMaterial({color:color});
@@ -5641,7 +5699,7 @@ function mat(color,emis,ei){
 function addInteriorBox(g,x,y,z,w,h,d,color,collide,emis){
   var mesh=new THREEJS.Mesh(new THREEJS.BoxGeometry(w,h,d),mat(color,emis,0.35));
   mesh.position.set(INTERIOR_ORIGIN.x+x,y,INTERIOR_ORIGIN.z+z);g.add(mesh);
-  if(collide)interiorColliders.push({cx:mesh.position.x,cz:mesh.position.z,hw:w/2,hd:d/2});
+  if(collide){interiorColliders.push({cx:mesh.position.x,cz:mesh.position.z,hw:w/2,hd:d/2});mesh.userData.interiorOccluder=true;}
   return mesh;
 }
 function addInteriorSign(g,text,x,z,w,color,opts){
@@ -5656,11 +5714,11 @@ function addInteriorSign(g,text,x,z,w,color,opts){
   sp.renderOrder=30;
   if(opts.axis==='x'){
     var face=opts.face||1;
-    sp.position.set(INTERIOR_ORIGIN.x+x+face*0.62,y,INTERIOR_ORIGIN.z+z);
+    sp.position.set(INTERIOR_ORIGIN.x+x+face*(opts.surfaceOffset||0.62),y,INTERIOR_ORIGIN.z+z);
     sp.rotation.y=face>0?Math.PI/2:-Math.PI/2;
   }else{
     var faceZ=opts.face||1;
-    sp.position.set(INTERIOR_ORIGIN.x+x,y,INTERIOR_ORIGIN.z+z+faceZ*0.62);
+    sp.position.set(INTERIOR_ORIGIN.x+x,y,INTERIOR_ORIGIN.z+z+faceZ*(opts.surfaceOffset||0.62));
     sp.rotation.y=faceZ>0?0:Math.PI;
   }
   sp.userData.noCameraOcclude=true;
@@ -5670,21 +5728,21 @@ function addInteriorDoor(g,kind,label,x,z,opts){
   opts=opts||{};
   var color=opts.color||0x25e0ff;
   var w=opts.w||8, axis=opts.axis||'z', face=opts.face||1;
-  // Do not fill the doorway with a glowing rectangle. Build only jambs + lintel around the opening.
+  // Build jambs around a clear opening, then continue the solid wall above the lintel.
   if(axis==='x'){
     addInteriorBox(g,x,4,z-w/2,1.1,8,0.75,opts.frame||0x171022,true,color);
     addInteriorBox(g,x,4,z+w/2,1.1,8,0.75,opts.frame||0x171022,true,color);
     addInteriorBox(g,x,8.2,z,1.1,0.75,w+1.0,opts.frame||0x171022,true,color);
-    addInteriorSign(g,label,x,z,Math.max(24,w*3.5),color,{axis:'x',face:face,y:10.2,fontSize:34,height:3.8,glow:8});
+    addInteriorBox(g,x,14.4,z,2.05,11.6,w+10,opts.capColor||opts.frame||0x30283b,true);
+    addInteriorSign(g,label,x,z,Math.max(24,w*3.5),color,{axis:'x',face:face,y:10.8,fontSize:34,height:3.8,glow:8,surfaceOffset:1.08});
   }else{
     addInteriorBox(g,x-w/2,4,z,0.75,8,1.1,opts.frame||0x171022,true,color);
     addInteriorBox(g,x+w/2,4,z,0.75,8,1.1,opts.frame||0x171022,true,color);
     addInteriorBox(g,x,8.2,z,w+1.0,0.75,1.1,opts.frame||0x171022,true,color);
-    addInteriorSign(g,label,x,z,Math.max(24,w*3.5),color,{axis:'z',face:face,y:10.2,fontSize:34,height:3.8,glow:8});
+    addInteriorBox(g,x,14.4,z,w+10,11.6,2.05,opts.capColor||opts.frame||0x30283b,true);
+    addInteriorSign(g,label,x,z,Math.max(24,w*3.5),color,{axis:'z',face:face,y:10.8,fontSize:34,height:3.8,glow:8,surfaceOffset:1.08});
   }
-  var beacon=new THREEJS.Mesh(new THREEJS.CylinderGeometry(0.45,0.45,4.5,10),new THREEJS.MeshBasicMaterial({color:color,transparent:true,opacity:0.18}));
-  beacon.position.set(INTERIOR_ORIGIN.x+x,4.8,INTERIOR_ORIGIN.z+z);beacon.userData.noCameraOcclude=true;g.add(beacon);
-  interiorDoors.push({kind:kind,label:label,x:INTERIOR_ORIGIN.x+x,z:INTERIOR_ORIGIN.z+z,opts:opts,beacon:beacon});
+  interiorDoors.push({kind:kind,label:label,x:INTERIOR_ORIGIN.x+x,z:INTERIOR_ORIGIN.z+z,opts:opts});
 }
 function addZWallWithGap(g,z,xMin,xMax,gaps,color){
   gaps=(gaps||[]).slice().sort(function(a,b){return a[0]-b[0];});
@@ -5797,36 +5855,111 @@ function buildCasinoFloor(g,place){
   addInteriorSign(g,'CASHIER • REWARDS',55,45,25,theme.accent,{axis:'z',face:1,y:7,fontSize:18,height:2.1,glow:5});
 }
 function buildConferenceCorridor(g,place){
-  // Bigger maze-like lecture corridor. No ceiling: the camera can look down without clipping into it.
-  addInteriorBox(g,0,-0.04,-163,122,0.3,214,0x1b1630,false);
-
-  var doorZ=[-86,-116,-151,-181,-216,-246];
-  var gaps=doorZ.map(function(z){return [z-6,z+6];});
-  // Outer walls with actual gaps where lecture theatre doorways sit.
-  addXWallWithGaps(g,-61,-56,-270,gaps,0x151026);
-  addXWallWithGaps(g,61,-56,-270,gaps,0x151026);
+  // A long hotel-convention spine with widely separated cross corridors and rooms along their walls.
+  var theme=casinoInteriorTheme(place),wall=0x30283b,trim=theme.accent,carpet=0x481b35,carpetDark=0x24142d;
+  var branchZ=[-92,-166,-240];
+  var gaps=branchZ.map(function(z){return [z-8,z+8];});
+  addInteriorBox(g,0,-0.04,-163,122,0.3,214,0x282332,false);
+  // Plush central runner: dark plum field, bright hotel border, and repeating medallions.
+  addInteriorBox(g,0,.12,-163,23,.12,210,carpet,false);
+  addInteriorBox(g,-10.3,.2,-163,.45,.08,210,trim,false,trim);
+  addInteriorBox(g,10.3,.2,-163,.45,.08,210,trim,false,trim);
+  addInteriorBox(g,-8.9,.19,-163,.18,.08,210,0xf3d399,false);
+  addInteriorBox(g,8.9,.19,-163,.18,.08,210,0xf3d399,false);
+  for(var mz=-72;mz>=-258;mz-=15){
+    var med=new THREEJS.Mesh(new THREEJS.CylinderGeometry(2.5,2.5,.08,8),mat((Math.abs(mz)%2)?trim:0x84506f));
+    med.position.set(INTERIOR_ORIGIN.x,.23,INTERIOR_ORIGIN.z+mz);med.rotation.y=Math.PI/8;g.add(med);
+    addInteriorBox(g,-5.7,.22,mz,2.1,.07,.35,0xe5bd72,false);addInteriorBox(g,5.7,.22,mz,2.1,.07,.35,0xe5bd72,false);
+  }
+  // Broad cross-corridors are separated by roughly 75 metres of main hall.
+  branchZ.forEach(function(z,idx){
+    addInteriorBox(g,-37,.13,z,48,.12,14,idx%2?carpetDark:carpet,false);
+    addInteriorBox(g,37,.13,z,48,.12,14,idx%2?carpetDark:carpet,false);
+    [-1,1].forEach(function(side){
+      addInteriorBox(g,side*37,.2,z-6.1,48,.08,.35,trim,false,trim);
+      addInteriorBox(g,side*37,.2,z+6.1,48,.08,.35,trim,false,trim);
+      for(var mx=22;mx<=54;mx+=8){
+        var diamond=new THREEJS.Mesh(new THREEJS.CylinderGeometry(1.05,1.05,.07,4),mat((mx/8)%2?trim:0xb46f91));
+        diamond.position.set(INTERIOR_ORIGIN.x+side*mx,.24,INTERIOR_ORIGIN.z+z);diamond.rotation.y=Math.PI/4;g.add(diamond);
+      }
+    });
+  });
+  // Main-hall walls open only at the three distant junctions. The outer ends are architectural end walls.
+  addXWallWithGaps(g,-13,-270,-56,gaps,wall);
+  addXWallWithGaps(g,13,-270,-56,gaps,wall);
+  addXWallWithGaps(g,-61,-270,-56,[],0x151026);
+  addXWallWithGaps(g,61,-270,-56,[],0x151026);
   addZWallWithGap(g,-56,-61,61,[[-12,12]],0x151026);
-  addZWallWithGap(g,-270,-61,61,[[-8,8]],0x151026);
-
-  // Interior maze walls. Each wall is split into doorway gaps, so the corridor feels like a venue maze, not a tunnel.
-  addXWallWithGaps(g,-22,-72,-258,[[-103,-88],[-170,-154],[-236,-220]],0x171029);
-  addXWallWithGaps(g,22,-72,-258,[[-132,-116],[-202,-186],[-252,-238]],0x171029);
-  addZWallWithGap(g,-128,-61,61,[[-52,-38],[-8,8],[37,52]],0x171029);
-  addZWallWithGap(g,-190,-61,61,[[-52,-36],[-8,8],[35,51]],0x171029);
-  addZWallWithGap(g,-236,-61,61,[[-18,18]],0x171029);
-
-  // Small wall-mounted wayfinding signs.
-  addInteriorSign(g,'SESSION MAZE',0,-57,30,0x25e0ff,{axis:'z',face:1,y:8.7,fontSize:18,height:2.0,glow:4});
-  addInteriorSign(g,'ROOMS A–F',-22,-128,20,0xff9900,{axis:'z',face:1,y:8.5,fontSize:15,height:1.7,glow:3});
-  addInteriorSign(g,'ROOMS G–L',22,-190,20,0xff9900,{axis:'z',face:1,y:8.5,fontSize:15,height:1.7,glow:3});
+  addZWallWithGap(g,-270,-61,61,place.id==='venetian'?[[-9,9]]:[],0x151026);
+  // Each side wing has lecture halls on both of its long sides, rather than at its end.
+  branchZ.forEach(function(z){
+    addZWallWithGap(g,z+8,-61,-13,[[-50.5,-39.5]],wall);
+    addZWallWithGap(g,z-8,-61,-13,[[-32.5,-21.5]],wall);
+    addZWallWithGap(g,z+8,13,61,[[21.5,32.5]],wall);
+    addZWallWithGap(g,z-8,13,61,[[39.5,50.5]],wall);
+    [-1,1].forEach(function(side){
+      addInteriorBox(g,side*56,6,z,1.2,12,12,0x382b42,false,trim);
+    });
+  });
+  // Continuous wall bays between wings. Trim is flush to the wall instead of projecting like a railing.
+  var solidWallBays=[[-56,-84],[-100,-158],[-174,-232],[-248,-270]];
+  solidWallBays.forEach(function(bay){
+    var zc=(bay[0]+bay[1])/2,len=Math.abs(bay[1]-bay[0]);
+    [-1,1].forEach(function(side){
+      addInteriorBox(g,side*11.88,3.2,zc,.18,5.8,len-.5,0x4a3d54,false);
+      addInteriorBox(g,side*11.76,6.18,zc,.12,.28,len-.5,trim,false,trim);
+      addInteriorBox(g,side*11.75,.75,zc,.14,.24,len-.5,0xd9b56c,false);
+    });
+  });
+  for(var lz=-68;lz>=-262;lz-=24){
+    var lamp=new THREEJS.Mesh(new THREEJS.CylinderGeometry(1.6,2.5,.65,16),mat(0xffd99a,0xffc65c,.9));lamp.position.set(INTERIOR_ORIGIN.x,15,INTERIOR_ORIGIN.z+lz);g.add(lamp);
+    var light=new THREEJS.PointLight(0xffc878,.42,29);light.position.set(INTERIOR_ORIGIN.x,13.8,INTERIOR_ORIGIN.z+lz);g.add(light);
+    addInteriorBox(g,0,16.2,lz,26,.35,.7,0x675a70,false,trim);
+  }
+  // Seating and greenery terminate each wing without blocking any lecture-room doorway.
+  branchZ.forEach(function(z,pi){
+    [-1,1].forEach(function(side){
+      addInteriorBox(g,side*55,1.15,z-4.8,8,2.1,2.2,0x7c3659,false,trim);
+      addInteriorBox(g,side*55,2.2,z+4.7,1.1,4.4,1.1,0x8a6237,false);
+      var plant=new THREEJS.Mesh(new THREEJS.SphereGeometry(2,10,7),mat(pi%2?0x39784a:0x2e6741));plant.scale.y=.75;plant.position.set(INTERIOR_ORIGIN.x+side*55,4.8,INTERIOR_ORIGIN.z+z+4.7);g.add(plant);
+    });
+  });
+  addInteriorSign(g,'CONFERENCE LEVEL',0,-57,34,0x25e0ff,{axis:'z',face:1,y:9,fontSize:20,height:2.2,glow:4});
 
   var sessions=PLAYLIST_SESSIONS.slice(0);
+  // Large digital directory on the first solid main-hall wall bay.
+  var directoryCanvas=document.createElement('canvas');directoryCanvas.width=1200;directoryCanvas.height=900;
+  var dc=directoryCanvas.getContext('2d'),dg=dc.createLinearGradient(0,0,0,900);dg.addColorStop(0,'#160b2d');dg.addColorStop(1,'#080510');dc.fillStyle=dg;dc.fillRect(0,0,1200,900);
+  dc.strokeStyle='#25e0ff';dc.lineWidth=14;dc.strokeRect(10,10,1180,880);
+  dc.fillStyle='#25e0ff';dc.font='bold 52px sans-serif';dc.textAlign='left';dc.fillText('SESSION DIRECTORY',48,72);
+  dc.fillStyle='#b9a9ca';dc.font='24px sans-serif';dc.fillText('ROOM CODES  •  NOW SHOWING',50,112);
+  dc.strokeStyle='#654a78';dc.lineWidth=2;dc.beginPath();dc.moveTo(600,135);dc.lineTo(600,850);dc.stroke();
+  function directoryTitle(text,maxWidth){
+    text=String(text||'re:Invent session');if(dc.measureText(text).width<=maxWidth)return text;
+    while(text.length>8&&dc.measureText(text+'…').width>maxWidth)text=text.slice(0,-1);
+    return text+'…';
+  }
+  for(var si=0;si<12;si++){
+    var col=si<6?0:1,row=si%6,tx=50+col*600,ty=170+row*112;
+    var code=String.fromCharCode(65+Math.floor(si/4))+(101+si%4),videoTitle=sessionRoomLabel(sessions[si%sessions.length]);
+    dc.fillStyle=si%2?'#ff9900':'#25e0ff';dc.font='bold 31px sans-serif';dc.fillText('ROOM '+code,tx,ty);
+    dc.fillStyle='#ffffff';dc.font='25px sans-serif';dc.fillText(directoryTitle(videoTitle,510),tx,ty+39);
+    dc.strokeStyle='#39294a';dc.beginPath();dc.moveTo(tx,ty+65);dc.lineTo(tx+510,ty+65);dc.stroke();
+  }
+  var directoryTexture=new THREEJS.CanvasTexture(directoryCanvas);directoryTexture.minFilter=THREEJS.LinearFilter;
+  addInteriorBox(g,11.72,10,-70,.35,18.8,25,0x080510,false,0x25e0ff);
+  var directoryScreen=new THREEJS.Mesh(new THREEJS.PlaneGeometry(23,17),new THREEJS.MeshBasicMaterial({map:directoryTexture,color:0xffffff}));
+  directoryScreen.position.set(INTERIOR_ORIGIN.x+11.5,10,INTERIOR_ORIGIN.z-70);directoryScreen.rotation.y=-Math.PI/2;directoryScreen.userData.noCameraOcclude=true;g.add(directoryScreen);
+  var roomDoors=[];
+  branchZ.forEach(function(z,wing){
+    roomDoors.push({x:-45,z:z+8,face:-1},{x:-27,z:z-8,face:1},{x:27,z:z+8,face:-1},{x:45,z:z-8,face:1});
+  });
   for(var d=0;d<12;d++){
-    var side=d<6?-1:1;
-    var z=doorZ[d%6];
+    var room=roomDoors[d];
     var session=sessions[d%sessions.length];
     var title=sessionRoomLabel(session);
-    addInteriorDoor(g,'theatre',title,side*61,z,{w:11,color:d%2?0xff9900:0x25e0ff,face:-side,axis:'x',sessionTitle:title,session:session});
+    var roomName='ROOM '+String.fromCharCode(65+Math.floor(d/4))+(101+d%4);
+    addInteriorDoor(g,'theatre',roomName,room.x,room.z,{w:11,color:d%2?0xff9900:0x25e0ff,face:room.face,axis:'z',sessionTitle:title,session:session});
   }
   addInteriorDoor(g,'casino','BACK TO CASINO',0,-57,{w:14,color:0x9b8cff,face:1,axis:'z'});
 }
@@ -5838,16 +5971,44 @@ function buildLectureTheatreRoom(g,door){
   addInteriorBox(g,0,3,-192,26,6,3,0x08070d,true,0xff9900);
   addInteriorSign(g,'LECTURE THEATRE',0,-193,24,0xff9900,{axis:'z',face:1,y:6.8,fontSize:16,height:1.8,glow:3});
 }
+function buildExpoHall(g){
+  // An intentionally oversized show floor beyond the Venetian conference spine.
+  addInteriorBox(g,0,-.03,-390,190,.3,240,0x171326,false);
+  addInteriorBox(g,0,.13,-390,28,.1,235,0x30204a,false);
+  addInteriorBox(g,-13.2,.2,-390,.4,.08,235,0xff9900,false,0xff9900);addInteriorBox(g,13.2,.2,-390,.4,.08,235,0x25e0ff,false,0x25e0ff);
+  addInteriorBox(g,-95,14,-390,2,28,240,0x151021,true);addInteriorBox(g,95,14,-390,2,28,240,0x151021,true);
+  addInteriorBox(g,0,14,-510,192,28,2,0x151021,true);
+  addInteriorBox(g,0,17,-283,86,7,1.2,0x151021,false,0x25e0ff);
+  addInteriorSign(g,'VENETIAN CLOUD EXPO  •  12 SPONSORS  •  SWAG THIS WAY',0,-282.35,78,0x25e0ff,{axis:'z',face:1,y:17,fontSize:28,height:4.4,glow:10});
+  for(var lz=-300;lz>=-490;lz-=38)for(var lx=-72;lx<=72;lx+=36){
+    var lamp=new THREEJS.Mesh(new THREEJS.CylinderGeometry(2.6,3.8,.65,16),mat(0xeaf8ff,0x9deaff,.75));lamp.position.set(INTERIOR_ORIGIN.x+lx,22,INTERIOR_ORIGIN.z+lz);g.add(lamp);
+    if(lx%72===0){var light=new THREEJS.PointLight(0xbdeeff,.3,48);light.position.set(INTERIOR_ORIGIN.x+lx,20,INTERIOR_ORIGIN.z+lz);g.add(light);}
+  }
+  var xs=[-68,-24,24,68],zs=[-320,-390,-460];
+  for(var i=0;i<EXPO_SPONSORS.length;i++){
+    var sponsor=EXPO_SPONSORS[i],x=xs[i%4],z=zs[Math.floor(i/4)],large=i===0||i===5||i===10,w=large?34:25;
+    addInteriorBox(g,x,7,z-5,w,14,2,0x21182e,true,sponsor.color);
+    addInteriorBox(g,x,1.5,z+2,w*.82,3,4,0x2b2038,true,sponsor.color);
+    addInteriorBox(g,x-w*.43,5,z-3,1.2,10,5,sponsor.color,false,sponsor.color);addInteriorBox(g,x+w*.43,5,z-3,1.2,10,5,sponsor.color,false,sponsor.color);
+    addInteriorSign(g,sponsor.name.toUpperCase(),x,z-3.85,w,sponsor.color,{axis:'z',face:1,y:8.4,fontSize:large?28:23,height:3.1,glow:8,surfaceOffset:1.08});
+    var logo=new THREEJS.Mesh(new THREEJS.TorusGeometry(large?3.2:2.5,.45,10,24),new THREEJS.MeshBasicMaterial({color:sponsor.color}));logo.position.set(INTERIOR_ORIGIN.x+x,13,INTERIOR_ORIGIN.z+z-3.85);g.add(logo);
+    addInteriorSign(g,sponsor.mark,x,z-3.75,9,0xffffff,{axis:'z',face:1,y:13,fontSize:30,height:2.5,glow:5,surfaceOffset:1.15});
+    expoBooths.push({index:i,x:INTERIOR_ORIGIN.x+x,z:INTERIOR_ORIGIN.z+z+8,sponsor:sponsor});
+  }
+  addInteriorBox(g,0,3,-496,62,6,8,0x25183b,true,0xff9900);
+  addInteriorSign(g,'SWAG SHIPPING • BAG OVERFLOW',0,-491.9,50,0xff9900,{axis:'z',face:1,y:7,fontSize:24,height:3,glow:8,surfaceOffset:1.08});
+}
 function enterInterior(place){
   clearInterior();
   interiorMode=true;interiorPlace=place;interiorRoot=new THREEJS.Group();scene.add(interiorRoot);
   buildCasinoFloor(interiorRoot,place);
   buildConferenceCorridor(interiorRoot,place);
-  buildLectureTheatreRoom(interiorRoot,null);
+  if(place.id==='venetian')buildExpoHall(interiorRoot);
   addInteriorDoor(interiorRoot,'exit','EXIT TO THE STRIP',0,55,{w:16,color:0xff5c5c,face:-1,axis:'z'});
   addInteriorDoor(interiorRoot,'corridor','CONFERENCE HALLS',0,-56,{w:16,color:0x25e0ff,face:-1,axis:'z'});
   if(place.id==='venetian')addInteriorDoor(interiorRoot,'registration','REGISTRATION',76,-28,{w:14,color:0xff9900,face:-1,axis:'x'});
-  if(place.main)addInteriorDoor(interiorRoot,'expo','EXPO HALL',76,30,{w:14,color:0x4dff9d,face:-1,axis:'x'});
+  if(place.id==='venetian')addInteriorDoor(interiorRoot,'expo','EXPO HALL',0,-270,{w:16,color:0x4dff9d,face:1,axis:'z'});
+  spawnInteriorNpcPopulation(place);
   player3d.x=INTERIOR_ORIGIN.x;player3d.z=INTERIOR_ORIGIN.z+45;playerGroup.position.set(player3d.x,0,player3d.z);
   heading=Math.PI;camYaw=Math.PI;
   compass('Inside '+place.name+' — cross the casino, enter Conference Halls, then pick a session door.');
@@ -5873,9 +6034,12 @@ function enterInteriorDoor(d){
     st.min+=20;st.badge=true;st.swag.push(['Attendee lanyard',12]);st.s+=5;toast('Badge acquired inside the Venetian. Session doors unlocked.','good');return true;
   }
   if(d.kind==='expo'){
-    if(!st.badge){toast('The scanner rejects you. Registration first.','bad');return false;}
-    if(!expoOpen()){toast('Expo hall is closed right now. Check the schedule.','info');return false;}
-    openExpo(interiorPlace); return true;
+    var enteringExpo=player3d.z>d.z;
+    if(enteringExpo&&!st.badge){toast('The scanner rejects you. Registration first.','bad');return false;}
+    if(enteringExpo&&!expoOpen()){toast('Expo hall is closed right now. Check the schedule.','info');return false;}
+    player3d.x=INTERIOR_ORIGIN.x;player3d.z=d.z+(enteringExpo?-18:18);playerGroup.position.set(player3d.x,0,player3d.z);
+    heading=enteringExpo?Math.PI:0;camYaw=heading;playerGroup.rotation.y=heading;
+    compass(enteringExpo?'Venetian Cloud Expo — [T] talk · [C] collect swag.':'Back in the Venetian conference corridor.');return true;
   }
   if(d.kind==='corridor'){
     player3d.x=INTERIOR_ORIGIN.x;player3d.z=INTERIOR_ORIGIN.z-67;playerGroup.position.set(player3d.x,0,player3d.z);
@@ -5891,7 +6055,8 @@ function enterInteriorDoor(d){
     var session=(d.opts&&d.opts.session)||{title:d.opts.sessionTitle||d.label,videoId:null};
     var title=sessionRoomLabel(session);
     var lvl=+((session.code||title).match(/[A-Z]+(\d)/)||[])[1]||2, kGain=({2:55,3:85,4:125})[lvl]||65;
-    openTheatre({title:title,k:kGain,dur:60,lvl:lvl,videoId:session.videoId,sessionMeta:session,returnDoor:d},false,null,interiorPlace); return true;
+    openTheatre({title:title,k:kGain,dur:60,lvl:lvl,videoId:session.videoId,sessionMeta:session,returnDoor:d,
+      returnPosition:{x:player3d.x,z:player3d.z,heading:heading}},false,null,interiorPlace); return true;
   }
   return false;
 }
@@ -5925,6 +6090,25 @@ function nearestSlotMachine(){
   var best=null,bd=1e9;
   for(var i=0;i<interiorSlots.length;i++){var slot=interiorSlots[i],d=Math.hypot(player3d.x-slot.x,player3d.z-slot.z);if(d<bd){best=slot;bd=d;}}
   return {slot:best,dist:bd};
+}
+function nearestExpoBooth(){
+  if(!interiorMode||!interiorPlace||interiorPlace.id!=='venetian'||!expoBooths.length)return {booth:null,dist:1e9};
+  var best=null,bd=1e9;
+  for(var i=0;i<expoBooths.length;i++){var b=expoBooths[i],d=Math.hypot(player3d.x-b.x,player3d.z-b.z);if(d<bd){best=b;bd=d;}}
+  return {booth:best,dist:bd};
+}
+function talkToSponsor(booth){
+  if(!booth)return;
+  var first=!booth.talked;
+  if(first){booth.talked=true;st.s+=3;st.min+=3;updHUD();}
+  toast(booth.sponsor.name+': “'+booth.sponsor.pitch+'”'+(first?' +3 social':''),'info');
+}
+function collectSponsorSwag(booth){
+  if(!booth)return;
+  var key='expo-'+booth.index;
+  if(st.boothsDone[key]){toast('You already collected '+booth.sponsor.name+' swag. Leave some for the architects.','info');return;}
+  st.boothsDone[key]=1;st.swag.push(booth.sponsor.swag.slice());st.vibes=Math.min(100,st.vibes+4);st.s+=1;st.min+=2;
+  toast('Collected '+booth.sponsor.swag[0]+'! Your backpack gets bigger.','good');updHUD();
 }
 function drawSlotScreen(slot,status){
   var c=slot.canvas,x=c.getContext('2d'),reels=slot.reels||['7','◆','☁'];
@@ -5967,7 +6151,7 @@ function finishSlotSpin(slot,wager){
 function isAutoTransitionDoor(d){
   if(!d)return false;
   if(interiorMode){
-    return d.kind==='exit'||d.kind==='corridor'||d.kind==='casino'||d.kind==='theatre'||d.kind==='registration'||d.kind==='expo';
+    return d.kind==='exit'||d.kind==='corridor'||d.kind==='casino'||d.kind==='registration'||d.kind==='expo';
   }
   return false;
 }
@@ -6005,6 +6189,7 @@ function doEnter(){
   var cr=nearestCoasterRide();
   if(!interiorMode&&!lectureMode&&cr.ride&&cr.dist<70)return startCoasterRide();
   var n=nearestDoor();
+  if(lectureReturnGuard&&Math.hypot(player3d.x-lectureReturnGuard.x,player3d.z-lectureReturnGuard.z)>12)lectureReturnGuard=null;
   if(!n.door||n.dist>=16)return;
   if(interiorMode)return enterInteriorDoor(n.door);
   var p=n.door.place;
@@ -6197,12 +6382,14 @@ function tick(dt){
   }
 
   var n=nearestDoor();
+  if(lectureReturnGuard&&Math.hypot(player3d.x-lectureReturnGuard.x,player3d.z-lectureReturnGuard.z)>12)lectureReturnGuard=null;
   var highRollerNear=nearestHighRollerRide();
   var coasterNear=nearestCoasterRide();
   var monorailNear=nearestMonorailStation();
   nearPlace=(n.door&&n.dist<16)?n.door.place:null;
 
-  if(n.door && isAutoTransitionDoor(n.door) && n.dist<10 && autoDoorCooldown<=0){
+  var guardedLectureDoor=n.door&&n.door.kind==='theatre'&&lectureReturnGuard&&Math.hypot(n.door.x-lectureReturnGuard.x,n.door.z-lectureReturnGuard.z)<1;
+  if(n.door && !guardedLectureDoor && isAutoTransitionDoor(n.door) && n.dist<10 && autoDoorCooldown<=0){
     if(triggerAutoDoor(n.door)){ updHUD(); return; }
   }
 
@@ -6211,7 +6398,12 @@ function tick(dt){
   var promptNpc=nearestNpc();
   var promptTickets=nearestTicketStand();
   var promptSlot=nearestSlotMachine();
-  if(promptSlot.slot&&promptSlot.dist<7){
+  var promptExpo=nearestExpoBooth();
+  if(promptExpo.booth&&promptExpo.dist<15){
+    var swagTaken=!!st.boothsDone['expo-'+promptExpo.booth.index];
+    $("prompt").style.display="block";promptKey.textContent='[T] TALK  [C] SWAG';
+    $("promptTxt").textContent=promptExpo.booth.sponsor.name+' · '+(swagTaken?'swag collected':promptExpo.booth.sponsor.swag[0]);
+  } else if(promptSlot.slot&&promptSlot.dist<7){
     $("prompt").style.display="block";
     if(matchMedia('(pointer:coarse)').matches){promptKey.textContent='[PLAY]';$("promptTxt").textContent='$25 spin · cash $'+Math.round(st.money);}
     else{promptKey.textContent='[1] $5  [2] $25  [3] $100';$("promptTxt").textContent=(promptSlot.slot.spinning?'reels spinning':'choose wager')+' · cash $'+Math.round(st.money);}
@@ -6246,7 +6438,10 @@ function tick(dt){
       }
     }else{
       promptKey.textContent='[E]';
-      if(interiorMode){$("promptTxt").textContent=(n.door.kind==='theatre'?'enter lecture theatre: ':n.door.kind==='exit'?'use ':'use ')+n.door.label;}
+      if(interiorMode){
+        if(n.door.kind==='theatre')$("promptTxt").textContent='Enter: '+((n.door.opts&&n.door.opts.sessionTitle)||n.door.label);
+        else $("promptTxt").textContent=(n.door.kind==='exit'?'use ':'use ')+n.door.label;
+      }
       else {
         $("promptTxt").textContent=(n.door.kind==='hotelArea'?'enter hotel: ':'Press E to enter ')+nearPlace.name;
       }
@@ -6285,9 +6480,18 @@ function clearCameraOcclusion(){
   occludedInterior.length=0;
 }
 function applyCameraOcclusion(target){
-  // No longer hides walls between the camera and player: that made adjacent rooms visible.
-  // Interior layouts now use proper doorways and wall-mounted signs instead.
   clearCameraOcclusion();
+  if(!interiorMode||!interiorRoot||!cam)return;
+  if(!raycasterCam)raycasterCam=new THREEJS.Raycaster();
+  var ray=cam.position.clone().sub(target),distance=ray.length();
+  if(distance<1)return;
+  raycasterCam.set(target,ray.normalize());raycasterCam.near=1.5;raycasterCam.far=Math.max(1.5,distance-.5);
+  var hits=raycasterCam.intersectObject(interiorRoot,true),seen=[];
+  for(var i=0;i<hits.length;i++){
+    var o=hits[i].object;
+    if(!o.userData||!o.userData.interiorOccluder||seen.indexOf(o)>=0)continue;
+    seen.push(o);o.userData.__oldVisible=o.visible;o.visible=false;occludedInterior.push(o);
+  }
 }
 function nightMix(){var h=(st.min/60)%24;
   if(h>=7&&h<16)return 0.1;if(h>=16&&h<19)return 0.1+(h-16)/3*0.8;return 0.9;}
@@ -6367,7 +6571,6 @@ function render(dt){
     var isNear=nearPlace&&nearPlace.id===PLACES[p].id;
     PLACES[p]._beam.material.opacity=(isNear?0.5:0.2)+0.12*Math.sin(clock.elapsedTime*3+p);
   }
-  if(interiorMode){for(var ib=0;ib<interiorDoors.length;ib++){var idr=interiorDoors[ib];if(idr.beacon)idr.beacon.material.opacity=0.22+0.14*Math.sin(clock.elapsedTime*3+ib);}}
   moveCars(dt);
 
   // camera chase (behind, GTA). Indoors stays zoomed out; walls/objects between camera and player are hidden for that frame.
