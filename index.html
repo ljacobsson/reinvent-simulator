@@ -70,7 +70,7 @@
   .showgirlBubble:after{content:"";position:absolute;left:50%;bottom:-9px;transform:translateX(-50%);border-width:9px 8px 0;border-style:solid;border-color:#ff5ce1 transparent transparent}
   .npcBubble{position:fixed;z-index:51;display:none;max-width:260px;padding:9px 12px;border-radius:14px;background:#f7fbff;color:#142534;border:2px solid #25e0ff;font:12px/1.35 var(--mono);text-align:center;transform:translate(-50%,-115%);box-shadow:0 5px 20px #0009,0 0 15px #25e0ff55;pointer-events:none}
   .npcBubble:after{content:"";position:absolute;left:50%;bottom:-9px;transform:translateX(-50%);border-width:9px 8px 0;border-style:solid;border-color:#25e0ff transparent transparent}
-  .npcBubbleHint{display:block;margin-top:6px;padding-top:5px;border-top:1px solid #25a8c866;color:#087a95;font-weight:900;font-size:10px;letter-spacing:.45px}
+  .npcBubbleHint{display:none}
   .npcBubble.mobile{pointer-events:auto;cursor:pointer;user-select:none}.npcBubble.mobile:active{transform:translate(-50%,-115%) scale(.97)}
   .npcBubble.conversation{position:relative;left:auto!important;top:auto!important;display:block!important;max-width:none;width:auto;margin:8px 0 14px;transform:none;z-index:auto;pointer-events:none}
   .npcBubble.conversation:after{left:28px}
@@ -5121,7 +5121,8 @@ function createNpcAt(cfg,x,z,area){
   var shirt=npcColor(cfg.appearance.top.color,0x25e0ff),pants=npcColor(cfg.appearance.bottom.color,0x263047);
   var npc=makeHumanoid({gender:cfg.appearance.gender,skin:npcSkin(cfg.appearance.skinTone),top:shirt,bottom:pants,hair:npcColor(cfg.appearance.hair.color,0x302019),hairStyle:cfg.appearance.hair.style});
   var a=Math.random()*Math.PI*2;
-  npc.position.set(x,0,z);
+  npc.updateMatrixWorld(true);var bounds=new THREEJS.Box3().setFromObject(npc),footLift=Math.max(0,-bounds.min.y)+.04;
+  npc.position.set(x,footLift,z);npc.userData.footLift=footLift;
   npc.userData.area=area||'exterior';npc.userData.angle=a;npc.userData.targetTimer=0;npc.userData.config=cfg;npc.userData.lastReward=-1e9;
   npc.userData.homeX=x;npc.userData.homeZ=z;npc.userData.expression=0;npc.userData.expressionNext=0;npc.userData.glance=0;
   npc.userData.greetingArmed=true;
@@ -6075,7 +6076,7 @@ function buildExpoHall(g){
         interaction:{greeting:sponsor.pitch,dialogue:[sponsor.pitch,'Ask us about the demo running behind the counter.'],cooldownSeconds:30,rewards:{social:2,knowledge:1,vibes:1}},
         factoids:[sponsor.name+' runs its entire demo environment in the cloud.'],jokes:['Our uptime is higher than the booth rental price.'],links:{}};
       rep=createNpcAt(repCfg,INTERIOR_ORIGIN.x+x,INTERIOR_ORIGIN.z+z-1,'interior:venetian');rep.userData.stationary=true;rep.userData.angle=0;rep.rotation.y=0;expoSponsorReps[i]=rep;
-    }else{rep.position.set(INTERIOR_ORIGIN.x+x,0,INTERIOR_ORIGIN.z+z-1);rep.userData.area='interior:venetian';}
+    }else{rep.position.set(INTERIOR_ORIGIN.x+x,rep.userData.footLift||0,INTERIOR_ORIGIN.z+z-1);rep.userData.area='interior:venetian';}
     expoBooths.push({index:i,x:INTERIOR_ORIGIN.x+x,z:INTERIOR_ORIGIN.z+z+8,sponsor:sponsor,rep:rep});
   }
   addInteriorBox(g,0,3,-496,62,6,8,0x25183b,true,0xff9900);
