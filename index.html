@@ -5026,7 +5026,6 @@ function processOsmData(data){
     scene.add(osmRoot);
     osmLoaded=true;
     osmBuildingCount=added;
-    toast('Loaded '+added+' Vegas buildings, road cleared of every footprint.'+(skipped?' Skipped '+skipped+' invalid footprints.':''),'good');
     compass('Vegas loaded — Strip alignment from '+ROAD_SOURCE+', '+added+' buildings.');
   }else{
     toast('Hardcoded OSM response contained no usable building geometry.','bad');
@@ -5374,9 +5373,11 @@ function updateNpcs(dt){
     face.pupilL.position.x+=((-.34+d.glance)-face.pupilL.position.x)*blend;
     face.pupilR.position.x+=((.34+d.glance)-face.pupilR.position.x)*blend;
 
-    // Smile and brighten the brows when the player comes over to talk.
-    var playerNear=Math.hypot(player3d.x-npc.position.x,player3d.z-npc.position.z)<14;
-    var smileX=playerNear?1.55:(emote==='friendly-wave'?1.35:emote==='thoughtful-nod'?.85:1);
+    // Expo representatives visibly welcome attendees from farther away. Keep the
+    // transition blended so stationary sponsor NPCs do not twitch between poses.
+    var expoRep=d.stationary&&d.area==='interior:venetian'&&String(d.config.id||'').indexOf('expo-')===0;
+    var playerDistance=Math.hypot(player3d.x-npc.position.x,player3d.z-npc.position.z),playerNear=playerDistance<(expoRep?24:14);
+    var smileX=playerNear?(expoRep?1.8:1.55):(emote==='friendly-wave'?1.35:emote==='thoughtful-nod'?.85:1);
     var smileY=playerNear?.62:1,smilePosY=playerNear?6.78:6.72;
     face.mouth.scale.x+=(smileX-face.mouth.scale.x)*blend;
     if(emote!=='animated-talk'||playerNear)face.mouth.scale.y+=(smileY-face.mouth.scale.y)*blend;
@@ -5385,6 +5386,17 @@ function updateNpcs(dt){
       face.mouth.rotation.z+=(0-face.mouth.rotation.z)*blend;
       face.browL.rotation.z+=(-.1-face.browL.rotation.z)*blend;
       face.browR.rotation.z+=(.1-face.browR.rotation.z)*blend;
+    }
+    // Animate the mouth only for the one NPC currently owning the speech bubble.
+    // The changing height and slight vertical movement read as syllables while
+    // retaining the wider expo smile underneath.
+    var speaking=npcSpeechSpeaker===npc&&(d.talking||npcSpeechUntil>clock.elapsedTime);
+    if(speaking){
+      var syllable=.45+Math.abs(Math.sin(clock.elapsedTime*9.5+i*.7))*1.75;
+      face.mouth.scale.x+=(1.35-face.mouth.scale.x)*blend;
+      face.mouth.scale.y+=(syllable-face.mouth.scale.y)*Math.min(1,dt*12);
+      face.mouth.position.y+=(6.72+Math.sin(clock.elapsedTime*9.5)*.045-face.mouth.position.y)*Math.min(1,dt*12);
+      face.mouth.rotation.z+=(0-face.mouth.rotation.z)*blend;
     }
   }
 }
@@ -7127,8 +7139,6 @@ $("startBtn").onclick=function(){
   sfx("good");$("intro").style.display="none";
   started=true;paused=false;
   compass("SUNDAY 15:00 — you landed near the Venetian. Press E at its entrance to register.");
-  toast("SUNDAY, 15:00. You're outside the Venetian — walk up and press E to register.","info");
-  toast("Using bundled Vegas OSM data with a more navigable Strip scale. No Overpass API lookup will run.","info");
   toast('Checked in at '+selectedHotelName()+'. Sleep there and wake there each morning.','good');updHUD();
 };
 updHUD();
