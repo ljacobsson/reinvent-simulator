@@ -164,6 +164,7 @@
   .designerGrid textarea{min-height:64px;resize:vertical}.designerWide{grid-column:span 3}.designerActions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}.designerActions button{border:1px solid var(--cyan);background:#142033;color:#fff;border-radius:999px;padding:9px 14px;cursor:pointer;font:11px var(--mono)}
   .npcBuilder{display:grid;grid-template-columns:280px 1fr;gap:18px}.npcAvatarStage{height:430px;border:1px solid #493773;border-radius:14px;background:radial-gradient(circle at 50% 35%,#30204f,#090611 70%);overflow:hidden;position:sticky;top:0}.npcAvatarStage canvas{width:100%;height:100%;display:block}.npcAvatarStage img{position:absolute;right:12px;top:12px;width:68px;height:68px;border-radius:50%;object-fit:cover;border:3px solid var(--orange);background:#171021;display:none;box-shadow:0 4px 18px #000}.profileLookup{display:flex;gap:7px}.profileLookup input{flex:1}.profileLookup button{border:1px solid var(--orange);background:#2b1b08;color:#fff;border-radius:7px;padding:8px;cursor:pointer}.designerGrid input[readonly],.designerGrid textarea[readonly]{color:#a99fc4;background:#12101b}
   #designerStatus{margin-top:10px;color:var(--dim);font:11px var(--mono);white-space:pre-wrap}@media(max-width:700px){.npcBuilder{grid-template-columns:1fr}.npcAvatarStage{height:300px;position:relative}.designerGrid{grid-template-columns:1fr}.designerWide{grid-column:span 1}}
+  #boothDesigner{position:fixed;inset:0;z-index:75;background:rgba(3,2,9,.94);display:none;align-items:center;justify-content:center;padding:18px}#boothDesigner .designerCard{width:min(1120px,96vw);max-height:94vh;overflow:auto;background:#100b20;border:1px solid #554681;border-radius:18px;padding:20px;box-shadow:0 24px 80px #000}.boothBuilder{display:grid;grid-template-columns:minmax(360px,1.2fr) minmax(330px,1fr);gap:18px}.boothVisual{display:flex;flex-direction:column;gap:9px}.boothPalette{display:flex;gap:7px;flex-wrap:wrap;align-items:center}.boothPalette button{border:1px solid #625087;background:#20183a;color:#fff;border-radius:7px;padding:7px 10px;cursor:grab;font:11px var(--mono)}.boothRotate{display:flex;align-items:center;gap:5px;color:var(--dim);font:10px var(--mono)}.boothRotate input{width:110px}#boothCanvas{position:relative;min-height:430px;overflow:hidden;border:2px solid var(--cyan);border-radius:12px;background:linear-gradient(#302743 0 68%,#1b1730 68%);touch-action:none;perspective:900px}#boothScene{position:absolute;inset:0;transform-style:preserve-3d;transform-origin:50% 82%;transition:transform .08s linear}.boothCanvasItem{position:absolute;transform:translate(-50%,-50%) translateZ(12px);box-sizing:border-box;width:90px;height:56px;min-width:42px;min-height:34px;padding:7px;border:2px solid #fff8;border-radius:6px;background:#18263d;color:#fff;text-align:center;cursor:move;user-select:none;font:12px var(--mono);box-shadow:0 8px 12px #0006}.boothCanvasItem[data-type=text],.boothCanvasItem[data-type=banner]{width:150px;height:48px;background:#ff9900;color:#17100a;font-weight:bold}.boothCanvasItem[data-type=counter]{width:150px;height:85px}.boothCanvasItemLabel{pointer-events:none}.boothResize{position:absolute;right:-6px;bottom:-6px;width:17px;height:17px;border:2px solid #fff;border-radius:4px;background:var(--pink);cursor:nwse-resize}.boothCanvasItem.selected{outline:3px solid var(--pink)}.boothHint{font:10px var(--mono);color:var(--dim)}#boothDesignerStatus{margin-top:10px;color:var(--dim);font:11px var(--mono);white-space:pre-wrap}@media(max-width:800px){.boothBuilder{grid-template-columns:1fr}#boothCanvas{min-height:330px}}
   #arrestScene{position:fixed;inset:0;z-index:120;display:none;overflow:hidden;background:#050711;color:#fff;font-family:var(--mono)}
   #arrestScene .sky{position:absolute;inset:0;background:linear-gradient(#111b35 0 48%,#16131d 48%)}
   #arrestScene .roadlines{position:absolute;left:-20%;right:-20%;top:62%;height:8px;background:repeating-linear-gradient(90deg,#ffd45a 0 70px,transparent 70px 130px);animation:arrestRoad .45s linear infinite}
@@ -247,6 +248,13 @@
   <div class="clock" id="hClock">15:00</div>
   <div class="role">ATTENDEE · FULL CONFERENCE PASS</div>
 </div>
+<div id="boothDesigner">
+ <div class="designerCard"><h2 style="margin:0 0 5px">Design an Expo Booth</h2><p style="margin:0 0 16px;color:var(--dim);font:12px var(--mono)">Drag items onto the booth, add sponsor dialogue and links, then download a contribution-ready JSON file.</p>
+  <div class="boothBuilder"><div class="boothVisual"><div class="boothPalette"><button draggable="true" data-booth-type="text">TEXT</button><button draggable="true" data-booth-type="banner">BANNER</button><button draggable="true" data-booth-type="screen">SCREEN</button><button draggable="true" data-booth-type="counter">COUNTER</button><button draggable="true" data-booth-type="plant">PLANT</button><button draggable="true" data-booth-type="orb">ORB</button><button id="boothDeleteItem" type="button">DELETE SELECTED</button><label class="boothRotate">ROTATE <input id="bdRotation" type="range" min="-60" max="60" value="0"></label></div><div id="boothCanvas" aria-label="Rotatable booth layout preview"><div id="boothScene"></div></div><div class="boothHint">Drag empty booth space or use ROTATE to inspect it. Drag items to move them; use the pink corner handle to resize.</div></div>
+   <div class="designerGrid"><label>Booth slot<select id="bdSlot"></select></label><label>Sponsor ID<input id="bdId" placeholder="cloud-company"></label><label>Company name<input id="bdCompany" placeholder="Cloud Company"></label><label>Logo initials<input id="bdMark" maxlength="4" placeholder="CC"></label><label>Brand color<input id="bdColor" type="color" value="#25e0ff"></label><label>Swag item<input id="bdSwag" placeholder="Enamel pin"></label><label class="designerWide">Tagline<input id="bdTagline" placeholder="A short line shown by the booth representative"></label><label>Representative name<input id="bdRepName" placeholder="Company representative"></label><label class="designerWide">Representative lines (one per line)<textarea id="bdLines" placeholder="Tell players what your company does"></textarea></label><label>Website<input id="bdWebsite" type="url" placeholder="https://example.com"></label><label>Demo<input id="bdDemo" type="url" placeholder="https://example.com/demo"></label><label>Contact<input id="bdContact" type="url" placeholder="https://example.com/contact"></label></div>
+  </div><div class="designerActions"><button id="bdPreview">PREVIEW IN EXPO</button><button id="bdDownload">DOWNLOAD JSON</button><button id="bdGithub">CONTRIBUTE VIA GITHUB ↗</button><button id="bdClose">CLOSE</button></div><div id="boothDesignerStatus"></div>
+ </div>
+</div>
 <div class="hud" id="stats">
   <div class="chip k"><span class="lbl">🧠 KNOW</span><b id="cK">0</b></div>
   <div class="chip s"><span class="lbl">🤝 SOCIAL</span><b id="cS">0</b></div>
@@ -298,6 +306,7 @@
   <button id="ttForward">+1h</button>
   <button id="ttMorning">Tue 10:00</button>
   <button id="designNpcBtn">✎ Design NPC</button>
+  <button id="designBoothBtn">▦ Design Booth</button>
 </div>
 
 <div class="overlay" id="intro">
@@ -566,6 +575,7 @@ var EXPO_SPONSORS=[
  {name:'Kube Canoe',mark:'KC',color:0x3f7cff,swag:['Container-shaped water bottle',21],pitch:'Paddle safely through your Kubernetes clusters.'},
  {name:'PromptForge',mark:'PF',color:0xff4d7d,swag:['Prompt engineer enamel pin',15],pitch:'Production-grade prompts, hammered into shape.'}
 ];
+var DEFAULT_EXPO_SPONSORS=EXPO_SPONSORS.slice(),boothConfigs=[];
 var PARTY_HOSTS=["an observability vendor","a database startup","a security unicorn","a CI/CD company",
  "a Kubernetes platform","three fintechs sharing a rooftop","a GPU cloud with money to burn"];
 var ROAM_EVENTS=[
@@ -1061,6 +1071,7 @@ function project(lat,lng){
 async function bootWorld(){
   THREEJS=window.THREE;
   try{await loadNpcConfigs();}catch(npcErr){console.warn('NPC configs unavailable',npcErr);}
+  try{await loadBoothConfigs();}catch(boothErr){console.warn('Booth configs unavailable; using defaults',boothErr);}
   try{ $("loadmsg").innerHTML='LOADING LAS VEGAS<br><span style="font-size:11px;color:#a89ec9">building the bundled Strip map…</span>'; }catch(e0){}
   try{ buildWorld(); }
   catch(e){ var el=$("err"); el.style.display="flex"; el.textContent="3D build error: "+e.message; console.error(e); return; }
@@ -1077,6 +1088,18 @@ async function loadNpcConfigs(){
   npcConfigs=await Promise.all((index.npcs||[]).map(function(file){
     return fetch('npcs/'+file+cacheBust,{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error(file+' '+r.status);return r.json();});
   }));
+}
+function boothConfigToSponsor(cfg){
+  var color=typeof cfg.color==='string'?parseInt(cfg.color.replace('#',''),16):cfg.color;
+  return {id:cfg.id,name:cfg.company,mark:cfg.mark||cfg.company.slice(0,2).toUpperCase(),color:isFinite(color)?color:0x25e0ff,swag:[cfg.swag||'Sponsor sticker',18],pitch:cfg.tagline||((cfg.lines||[])[0])||'Come see what we are building.',lines:cfg.lines||[],links:cfg.links||{},layout:cfg.layout||[],representative:cfg.representative||{}};
+}
+function applyBoothConfigs(){
+  EXPO_SPONSORS=DEFAULT_EXPO_SPONSORS.slice();
+  boothConfigs.forEach(function(cfg){var slot=Math.max(1,Math.min(12,Number(cfg.slot)||1));EXPO_SPONSORS[slot-1]=boothConfigToSponsor(cfg);});
+}
+async function loadBoothConfigs(){
+  var cacheBust='?v='+Date.now(),index=await fetch('booths/index.json'+cacheBust,{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error('Booth index '+r.status);return r.json();});
+  boothConfigs=await Promise.all((index.booths||[]).map(function(file){return fetch('booths/'+file+cacheBust,{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error(file+' '+r.status);return r.json();});}));applyBoothConfigs();
 }
 
 function npcDesignerConfig(){
@@ -1113,6 +1136,41 @@ $('ndGithub').onclick=function(){
     npcDesignerStatus('Opened GitHub with the NPC file prefilled. Commit to a new branch, add "'+cfg.id+'.json" to npcs/index.json, then choose “Create pull request”. The JSON is also copied to your clipboard.',false);
   }catch(e){npcDesignerStatus(e.message,true);}
 };
+
+/* ---- Sponsor booth designer ---- */
+var boothSelectedItem=null;
+function boothDesignerStatus(message,bad){$('boothDesignerStatus').style.color=bad?'#ff8fae':'#8fffc2';$('boothDesignerStatus').textContent=message;}
+function boothItemLabel(type){return ({text:'EDIT TEXT',banner:'EDIT BANNER',screen:'▣ SCREEN',counter:'▰ COUNTER',plant:'♣ PLANT',orb:'● ORB'})[type]||type.toUpperCase();}
+function selectBoothItem(el){document.querySelectorAll('.boothCanvasItem.selected').forEach(function(n){n.classList.remove('selected');});boothSelectedItem=el;if(el)el.classList.add('selected');}
+function addBoothCanvasItem(type,x,y,text){
+  var el=document.createElement('div'),label=document.createElement('span'),handle=document.createElement('i');el.className='boothCanvasItem';el.dataset.type=type;el.style.left=clamp(x,3,97)+'%';el.style.top=clamp(y,4,96)+'%';label.className='boothCanvasItemLabel';label.textContent=text||boothItemLabel(type);handle.className='boothResize';el.append(label,handle);$('boothScene').appendChild(el);selectBoothItem(el);
+  el.addEventListener('dblclick',function(event){if(event.target===handle||type!=='text'&&type!=='banner')return;var value=prompt('Booth text',label.textContent);if(value!==null&&value.trim())label.textContent=value.trim();});
+  el.addEventListener('pointerdown',function(event){if(event.target===handle)return;event.preventDefault();$('bdRotation').value=0;updateBoothRotation();selectBoothItem(el);el.setPointerCapture(event.pointerId);function move(e){var r=$('boothCanvas').getBoundingClientRect();el.style.left=clamp((e.clientX-r.left)/r.width*100,3,97)+'%';el.style.top=clamp((e.clientY-r.top)/r.height*100,4,96)+'%';}function up(){el.removeEventListener('pointermove',move);el.removeEventListener('pointerup',up);}el.addEventListener('pointermove',move);el.addEventListener('pointerup',up);});
+  handle.addEventListener('pointerdown',function(event){event.preventDefault();event.stopPropagation();$('bdRotation').value=0;updateBoothRotation();selectBoothItem(el);var startX=event.clientX,startY=event.clientY,startW=el.offsetWidth,startH=el.offsetHeight;handle.setPointerCapture(event.pointerId);function resize(e){el.style.width=Math.max(42,startW+e.clientX-startX)+'px';el.style.height=Math.max(34,startH+e.clientY-startY)+'px';}function done(){handle.removeEventListener('pointermove',resize);handle.removeEventListener('pointerup',done);}handle.addEventListener('pointermove',resize);handle.addEventListener('pointerup',done);});return el;
+}
+function updateBoothRotation(){var angle=Number($('bdRotation').value)||0;$('boothScene').style.transform='rotateY('+angle+'deg) rotateX('+(Math.abs(angle)*.05)+'deg)';}
+function boothDesignerConfig(){
+  function val(id){return $(id).value.trim();}function lines(id){return val(id).split(/\n+/).map(function(s){return s.trim();}).filter(Boolean);}
+  var id=val('bdId').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,''),links={};[['website','bdWebsite'],['demo','bdDemo'],['contact','bdContact']].forEach(function(pair){var url=val(pair[1]);if(url)links[pair[0]]=url;});
+  var canvas=$('boothCanvas'),layout=[].map.call($('boothScene').children,function(el){var label=el.querySelector('.boothCanvasItemLabel');return {type:el.dataset.type,text:(el.dataset.type==='text'||el.dataset.type==='banner')?label.textContent:'',x:Math.round(parseFloat(el.style.left)*10)/10,y:Math.round(parseFloat(el.style.top)*10)/10,w:Math.round(el.offsetWidth/canvas.clientWidth*1000)/10,h:Math.round(el.offsetHeight/canvas.clientHeight*1000)/10};});
+  var cfg={id:id,slot:Number($('bdSlot').value),company:val('bdCompany'),mark:(val('bdMark')||val('bdCompany').slice(0,2)).toUpperCase(),color:$('bdColor').value,tagline:val('bdTagline'),swag:val('bdSwag')||'Sponsor sticker',representative:{name:val('bdRepName')||val('bdCompany')+' representative'},lines:lines('bdLines'),links:links,layout:layout};
+  var errors=[];if(!cfg.id)errors.push('Sponsor ID is required.');if(!cfg.company)errors.push('Company name is required.');if(!cfg.tagline)errors.push('Tagline is required.');if(!cfg.lines.length)errors.push('Add at least one representative line.');if(!cfg.layout.length)errors.push('Drag at least one item onto the booth.');if(errors.length)throw new Error(errors.join('\n'));return cfg;
+}
+function boothJson(){return JSON.stringify(boothDesignerConfig(),null,2)+'\n';}
+function downloadBooth(){var cfg=boothDesignerConfig(),blob=new Blob([JSON.stringify(cfg,null,2)+'\n'],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=cfg.id+'.json';a.click();setTimeout(function(){URL.revokeObjectURL(a.href);},1000);return cfg;}
+(function initBoothDesigner(){
+  for(var i=1;i<=12;i++){var o=document.createElement('option');o.value=i;o.textContent='Slot '+i;$('bdSlot').appendChild(o);}
+  document.querySelectorAll('[data-booth-type]').forEach(function(button){button.addEventListener('dragstart',function(e){e.dataTransfer.setData('text/booth-item',button.dataset.boothType);});button.addEventListener('click',function(){addBoothCanvasItem(button.dataset.boothType,50,50);});});
+  $('boothCanvas').addEventListener('dragover',function(e){e.preventDefault();});$('boothCanvas').addEventListener('drop',function(e){e.preventDefault();var type=e.dataTransfer.getData('text/booth-item');if(!type)return;$('bdRotation').value=0;updateBoothRotation();var r=this.getBoundingClientRect();addBoothCanvasItem(type,(e.clientX-r.left)/r.width*100,(e.clientY-r.top)/r.height*100);});
+  $('bdRotation').addEventListener('input',updateBoothRotation);var rotating=false,rotateStartX=0,rotateStartValue=0;$('boothCanvas').addEventListener('pointerdown',function(e){if(e.target!==$('boothCanvas')&&e.target!==$('boothScene'))return;rotating=true;rotateStartX=e.clientX;rotateStartValue=Number($('bdRotation').value);this.setPointerCapture(e.pointerId);});$('boothCanvas').addEventListener('pointermove',function(e){if(!rotating)return;$('bdRotation').value=clamp(rotateStartValue+(e.clientX-rotateStartX)*.35,-60,60);updateBoothRotation();});$('boothCanvas').addEventListener('pointerup',function(){rotating=false;});
+  $('boothDeleteItem').onclick=function(){if(boothSelectedItem){boothSelectedItem.remove();boothSelectedItem=null;}};
+  $('bdColor').addEventListener('input',function(){$('boothCanvas').style.borderColor=this.value;document.querySelectorAll('.boothCanvasItem[data-type=text],.boothCanvasItem[data-type=banner]').forEach(function(el){el.style.background=$('bdColor').value;});});
+})();
+$('designBoothBtn').onclick=function(){paused=true;$('boothDesigner').style.display='flex';boothDesignerStatus('Choose a slot. A contributed booth replaces the default booth in that slot.',false);};
+$('bdClose').onclick=function(){$('boothDesigner').style.display='none';paused=false;};
+$('bdDownload').onclick=function(){try{var cfg=downloadBooth();boothDesignerStatus('Downloaded '+cfg.id+'.json. Add it to booths/ and booths/index.json.',false);}catch(e){boothDesignerStatus(e.message,true);}};
+$('bdGithub').onclick=function(){try{var cfg=boothDesignerConfig(),content=JSON.stringify(cfg,null,2)+'\n';navigator.clipboard&&navigator.clipboard.writeText(content).catch(function(){});window.open('https://github.com/ljacobsson/reinvent-simulator/new/main/booths?filename='+encodeURIComponent(cfg.id+'.json')+'&value='+encodeURIComponent(content)+'&message='+encodeURIComponent('Add expo booth '+cfg.company),'_blank','noopener');boothDesignerStatus('Opened GitHub with the booth JSON prefilled. Add the filename to booths/index.json in the same pull request.',false);}catch(e){boothDesignerStatus(e.message,true);}};
+$('bdPreview').onclick=function(){try{var cfg=boothDesignerConfig(),found=false;for(var i=0;i<boothConfigs.length;i++)if(boothConfigs[i].slot===cfg.slot){boothConfigs[i]=cfg;found=true;break;}if(!found)boothConfigs.push(cfg);applyBoothConfigs();$('boothDesigner').style.display='none';paused=false;var ven=PLACES.filter(function(p){return p.id==='venetian';})[0];enterInterior(ven);player3d.x=INTERIOR_ORIGIN.x;player3d.z=INTERIOR_ORIGIN.z-300;playerGroup.position.set(player3d.x,0,player3d.z);toast(cfg.company+' booth installed in expo slot '+cfg.slot+'.','good');}catch(e){boothDesignerStatus(e.message,true);}};
 
 /* ---- textures ---- */
 function windowTexture(baseHex,litHex,cols,rows){
@@ -6107,6 +6165,16 @@ function buildLectureTheatreRoom(g,door){
   addInteriorBox(g,0,3,-192,26,6,3,0x08070d,true,0xff9900);
   addInteriorSign(g,'LECTURE THEATRE',0,-193,24,0xff9900,{axis:'z',face:1,y:6.8,fontSize:16,height:1.8,glow:3});
 }
+function buildSponsorCustomLayout(g,sponsor,x,z,w){
+  (sponsor.layout||[]).forEach(function(item){
+    var ix=x+((Number(item.x)||50)-50)/100*w*.82,iy=3+(100-(Number(item.y)||50))/100*14,type=item.type,itemW=Math.max(3,w*(Number(item.w)||18)/100),itemH=Math.max(1.5,18*(Number(item.h)||12)/100);
+    if(type==='text'||type==='banner')addInteriorSign(g,item.text||sponsor.name,ix,z-3.7,itemW,sponsor.color,{axis:'z',face:1,y:iy,fontSize:type==='banner'?22:16,height:itemH,glow:5,surfaceOffset:1.22});
+    else if(type==='screen')addInteriorBox(g,ix,iy,z-3.25,itemW,itemH,.5,0x101827,false,sponsor.color);
+    else if(type==='counter')addInteriorBox(g,ix,Math.max(itemH/2,1),z+1,itemW,itemH,Math.max(2,itemH*.8),0x2b2038,true,sponsor.color);
+    else if(type==='plant'){addInteriorBox(g,ix,1.2,z,Math.max(1,itemW*.25),2.4,Math.max(1,itemW*.25),0x725036,false);var leaves=new THREEJS.Mesh(new THREEJS.SphereGeometry(Math.max(1.2,itemW*.2),8,6),mat(0x42a66b));leaves.scale.y=Math.max(.6,itemH/4);leaves.position.set(INTERIOR_ORIGIN.x+ix,3.4,INTERIOR_ORIGIN.z+z);g.add(leaves);}
+    else if(type==='orb'){var orb=new THREEJS.Mesh(new THREEJS.IcosahedronGeometry(Math.max(1.2,itemW*.28),1),new THREEJS.MeshBasicMaterial({color:sponsor.color,wireframe:true}));orb.scale.y=Math.max(.5,itemH/Math.max(1,itemW));orb.position.set(INTERIOR_ORIGIN.x+ix,iy,INTERIOR_ORIGIN.z+z-1);g.add(orb);}
+  });
+}
 function buildExpoHall(g){
   // An intentionally oversized show floor beyond the Venetian conference spine.
   addInteriorBox(g,0,-.03,-390,190,.3,240,0x171326,false);
@@ -6137,16 +6205,17 @@ function buildExpoHall(g){
     else if(style===3){var orb=new THREEJS.Mesh(new THREEJS.IcosahedronGeometry(3.8,1),new THREEJS.MeshBasicMaterial({color:sponsor.color,wireframe:true}));orb.position.set(INTERIOR_ORIGIN.x+x,17,INTERIOR_ORIGIN.z+z);g.add(orb);}
     else if(style===4){for(var fin=-2;fin<=2;fin++)addInteriorBox(g,x+fin*4,11+Math.abs(fin)*1.5,z-4,.7,18-Math.abs(fin)*2,3,sponsor.color,false,sponsor.color);}
     else{var halo=new THREEJS.Mesh(new THREEJS.TorusGeometry(large?8:6,.5,10,32),new THREEJS.MeshBasicMaterial({color:sponsor.color}));halo.position.set(INTERIOR_ORIGIN.x+x,11,INTERIOR_ORIGIN.z+z-3);g.add(halo);}
+    buildSponsorCustomLayout(g,sponsor,x,z,w);
     var rep=expoSponsorReps[i];
     if(!rep){
       var colors=['cyan','violet','charcoal','aws-orange','indigo','cyan'],hairStyles=['bob','side-part','curly-short','ponytail','buzz-cut','braided-bun'];
-      var repCfg={id:'expo-'+i,name:sponsor.name+' representative',title:sponsor.name,
+      var repCfg={id:'expo-'+i,name:(sponsor.representative&&sponsor.representative.name)||sponsor.name+' representative',title:sponsor.name,
         appearance:{gender:i%3===0?'female':i%3===1?'male':'neutral',skinTone:['light','medium','deep'][i%3],top:{color:colors[i%colors.length]},bottom:{color:'charcoal'},hair:{color:i%2?'dark-brown':'black',style:hairStyles[i%hairStyles.length]},emote:'thoughtful-nod'},
         roaming:{walkSpeed:0,wanderRadius:0,pauseSeconds:{min:30,max:60}},
-        interaction:{greeting:sponsor.pitch,dialogue:[sponsor.pitch,'Ask us about the demo running behind the counter.'],cooldownSeconds:30,rewards:{social:2,knowledge:1,vibes:1}},
-        factoids:[sponsor.name+' runs its entire demo environment in the cloud.'],jokes:['Our uptime is higher than the booth rental price.'],links:{}};
+        interaction:{greeting:sponsor.pitch,dialogue:sponsor.lines&&sponsor.lines.length?sponsor.lines:[sponsor.pitch,'Ask us about the demo running behind the counter.'],cooldownSeconds:30,rewards:{social:2,knowledge:1,vibes:1}},
+        factoids:[sponsor.name+' runs its entire demo environment in the cloud.'],jokes:['Our uptime is higher than the booth rental price.'],links:sponsor.links||{}};
       rep=createNpcAt(repCfg,INTERIOR_ORIGIN.x+x,INTERIOR_ORIGIN.z+z-1,'interior:venetian');rep.userData.stationary=true;rep.userData.angle=0;rep.rotation.y=0;expoSponsorReps[i]=rep;
-    }else{rep.position.set(INTERIOR_ORIGIN.x+x,rep.userData.footLift||0,INTERIOR_ORIGIN.z+z-1);rep.userData.area='interior:venetian';}
+    }else{rep.position.set(INTERIOR_ORIGIN.x+x,rep.userData.footLift||0,INTERIOR_ORIGIN.z+z-1);rep.userData.area='interior:venetian';rep.userData.config.name=(sponsor.representative&&sponsor.representative.name)||sponsor.name+' representative';rep.userData.config.title=sponsor.name;rep.userData.config.interaction.greeting=sponsor.pitch;rep.userData.config.interaction.dialogue=sponsor.lines&&sponsor.lines.length?sponsor.lines:[sponsor.pitch];rep.userData.config.links=sponsor.links||{};}
     expoBooths.push({index:i,x:INTERIOR_ORIGIN.x+x,z:INTERIOR_ORIGIN.z+z+8,sponsor:sponsor,rep:rep});
   }
   addInteriorBox(g,0,3,-496,62,6,8,0x25183b,true,0xff9900);
@@ -6272,8 +6341,10 @@ function talkToSponsor(booth){
   if(!booth)return;
   var first=!booth.talked;
   if(first){booth.talked=true;st.s+=3;st.min+=3;updHUD();}
-  if(booth.rep)showNpcSpeech(booth.rep,booth.sponsor.pitch,false);
-  toast(booth.sponsor.name+': “'+booth.sponsor.pitch+'”'+(first?' +3 social':''),'info');
+  if(booth.rep){npcConversation=booth.rep;booth.rep.userData.talking=true;showNpcSpeech(booth.rep,booth.sponsor.pitch,true);}
+  var sponsor=booth.sponsor,actions=(sponsor.lines&&sponsor.lines.length?sponsor.lines:[sponsor.pitch]).map(function(line,index){return {n:index?'Ask another question':'Talk',d:line,f:function(){if(booth.rep)showNpcSpeech(booth.rep,line,true);}};});
+  Object.keys(sponsor.links||{}).forEach(function(label){actions.push({n:'Open '+label,d:sponsor.links[label],f:function(){window.open(sponsor.links[label],'_blank','noopener');}});});
+  actions.push({n:'Walk away',d:'Return to the expo floor',f:closeMenu});openMenu(sponsor.name,sponsor.pitch+(first?' · +3 social':''),actions);
 }
 function collectSponsorSwag(booth){
   if(!booth)return;
