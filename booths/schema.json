@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "re:Invent Sim expo booth",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "slot", "company", "mark", "color", "tagline", "swag", "representative", "lines", "links", "layout"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+    "slot": { "type": "integer", "minimum": 1, "maximum": 12 },
+    "company": { "type": "string", "minLength": 1 },
+    "mark": { "type": "string", "minLength": 1, "maxLength": 4 },
+    "logoUrl": { "type": "string", "format": "uri" },
+    "youtubeUrl": { "type": "string", "format": "uri" },
+    "color": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+    "tagline": { "type": "string", "minLength": 1 },
+    "swag": { "type": "string", "minLength": 1 },
+    "representative": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name"],
+      "properties": { "name": { "type": "string", "minLength": 1 } }
+    },
+    "lines": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+    "links": { "type": "object", "additionalProperties": { "type": "string", "format": "uri" } },
+    "layout": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["type", "text", "x", "y", "w", "h"],
+        "properties": {
+          "type": { "type": "string", "enum": ["text", "banner", "screen", "counter", "plant", "orb"] },
+          "text": { "type": "string" },
+          "x": { "type": "number", "minimum": 0, "maximum": 100 },
+          "y": { "type": "number", "minimum": 0, "maximum": 100 },
+          "w": { "type": "number", "minimum": 1, "maximum": 100 },
+          "h": { "type": "number", "minimum": 1, "maximum": 100 }
+        }
+      }
+    }
+  }
+}
