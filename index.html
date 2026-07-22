@@ -5494,9 +5494,15 @@ function makeHumanoid(opts){
   var hat=opts.hat||'none';
   var hatColor=opts.hatColor===undefined?top:opts.hatColor;
   if(hat==='baseball-cap'){
-    var capCrown=sphere(1.12,hatColor,.9,.48,.9);capCrown.position.y=7.9;
-    var capBrim=box(1.45,.12,.72,hatColor);capBrim.position.set(0,7.82,.68);capBrim.rotation.x=-.1;
-    root.add(capCrown,capBrim);
+    // A fitted six-panel silhouette with a curved bill instead of a boxy slab.
+    var capCrown=sphere(1.08,hatColor,1.02,.62,1.02);capCrown.position.y=7.86;
+    var capBand=cyl(1.06,1.02,.2,hatColor);capBand.position.y=7.48;
+    var capBrim=sphere(.82,hatColor,1.08,.105,.9);capBrim.position.set(0,7.48,.86);capBrim.rotation.x=-.1;
+    var capShade=new THREEJS.Color(hatColor);capShade.multiplyScalar(.58);
+    var capUnderside=sphere(.79,capShade.getHex(),1.06,.07,.87);capUnderside.position.set(0,7.43,.87);capUnderside.rotation.x=-.1;
+    var capButton=cyl(.11,.11,.09,hatColor);capButton.position.y=8.53;
+    var capBack=box(.5,.12,.08,capShade.getHex());capBack.position.set(0,7.5,-1.03);
+    root.add(capCrown,capBand,capUnderside,capBrim,capButton,capBack);
   }else if(hat==='beanie'){
     var knit=sphere(1.13,hatColor,.89,.62,.89);knit.position.y=7.91;
     root.add(knit);
