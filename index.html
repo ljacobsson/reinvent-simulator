@@ -106,8 +106,8 @@
   .npcBubble.mobile{pointer-events:auto;cursor:pointer;user-select:none}.npcBubble.mobile:active{transform:translate(-50%,-115%) scale(.97)}
   .npcBubble.conversation{position:relative;left:auto!important;top:auto!important;display:block!important;max-width:none;width:auto;margin:8px 0 14px;transform:none;z-index:auto;pointer-events:none}
   .npcBubble.conversation:after{left:28px}
-  #venueUI.hasNpcPhoto .npcBubble.conversation:after{left:-11px;top:18px;bottom:auto;transform:translateY(-50%) rotate(28deg);transform-origin:left center;border-width:10px 11px 10px 0;border-color:transparent #25e0ff transparent transparent}
-  #venueUI.hasNpcPhoto .npcBubble.conversation:before{content:"";position:absolute;left:-7px;top:18px;transform:translateY(-50%) rotate(28deg);transform-origin:left center;border-width:7px 8px 7px 0;border-style:solid;border-color:transparent #f7fbff transparent transparent;z-index:1}
+  #venueUI.hasNpcPhoto .npcBubble.conversation:after{left:-13px;top:-5px;bottom:auto;width:20px;height:20px;transform:rotate(45deg);border:0;border-left:2px solid #25e0ff;border-bottom:2px solid #25e0ff;border-radius:0 0 0 4px;background:#f7fbff}
+  #venueUI.hasNpcPhoto .npcBubble.conversation:before{display:none}
 
   #minimap{position:fixed;left:12px;bottom:12px;z-index:10;border:2px solid rgba(230,235,255,.85);border-radius:50%;background:radial-gradient(circle at 50% 50%,#202534 0,#141827 62%,#080a12 100%);opacity:.96;box-shadow:0 0 0 3px rgba(0,0,0,.55),0 6px 24px rgba(0,0,0,.65)}
 
@@ -328,7 +328,7 @@
   <div class="vital" id="vVw"><div class="t"><span>VIBES</span><span id="vVt">85</span></div><div class="vbar v"><i id="vV" style="width:85%"></i></div></div>
 </div>
 <div id="prompt"><b>[E]</b> <span id="promptTxt"></span></div>
-<div id="theatreHint">LECTURE THEATRE · walk around · press <b>E</b> near the exit to leave</div>
+<div id="theatreHint">LECTURE THEATRE · press <b>E</b> at an open chair to sit · press <b>E</b> at the exit to leave</div>
 <div id="compass"></div>
 <div id="toasts"></div>
 <canvas id="minimap" width="150" height="150"></canvas>
@@ -621,9 +621,9 @@ function sessionRoomLabel(s){
 function youtubeSrcForSession(ctx){
   var s=ctx&&ctx.session?ctx.session:null;
   if(s&&s.videoId){
-    return "https://www.youtube-nocookie.com/embed/"+s.videoId+"?autoplay=1&mute=1&controls=1&rel=0&playsinline=1";
+    return "https://www.youtube-nocookie.com/embed/"+s.videoId+"?autoplay=1&mute=0&controls=1&rel=0&playsinline=1";
   }
-  return "https://www.youtube-nocookie.com/embed/videoseries?list="+PLAYLIST+"&index="+((ctx&&ctx.vidIndex)||1)+"&autoplay=1&mute=1&controls=1&rel=0&playsinline=1";
+  return "https://www.youtube-nocookie.com/embed/videoseries?list="+PLAYLIST+"&index="+((ctx&&ctx.vidIndex)||1)+"&autoplay=1&mute=0&controls=1&rel=0&playsinline=1";
 }
 
 var KEYNOTES=[
@@ -906,14 +906,16 @@ function lootBooth(i,b){
 /* ================= WALKABLE LECTURE THEATRE ================= */
 function buildWalkableLectureTheatre(ctx){
   if(lectureRoot){scene.remove(lectureRoot);lectureRoot=null;}
+  if(lectureAudienceRoot&&overlayScene){overlayScene.remove(lectureAudienceRoot);lectureAudienceRoot=null;}
   if(lectureCssObject&&cssScene){cssScene.remove(lectureCssObject);lectureCssObject=null;}
   if(interiorRoot){scene.remove(interiorRoot);interiorRoot=null;}
   lectureMode=true;interiorMode=false;paused=false;setPlayerOverlayMode(true);
   $("venueUI").style.display="none";$("theatre").style.display="none";$("tvHost").innerHTML="";
   $("theatreHint").style.display="block";
-  lectureCtx=ctx||{};lectureCtx.attended=false;
+  lectureCtx=ctx||{};lectureCtx.attended=false;lectureCtx.playerSeated=false;lectureSeats=[];lecturePlayerSeat=null;
   nearPlace=null;interiorDoors=[];interiorColliders=[];
   var g=new THREEJS.Group();g.position.set(INTERIOR_ORIGIN.x,0,INTERIOR_ORIGIN.z);scene.add(g);lectureRoot=g;
+  lectureAudienceRoot=new THREEJS.Group();lectureAudienceRoot.position.set(INTERIOR_ORIGIN.x,0,INTERIOR_ORIGIN.z);overlayScene.add(lectureAudienceRoot);
 
   function solid(x,y,z,w,h,d,c){
     var m=new THREEJS.Mesh(new THREEJS.BoxGeometry(w,h,d),new THREEJS.MeshLambertMaterial({color:c,emissive:0x07040e,emissiveIntensity:.25}));
@@ -932,13 +934,29 @@ function buildWalkableLectureTheatre(ctx){
   solid(0,5,-63,98,10,2,0x171022);
   solid(-26,5,64,44,10,2,0x171022); solid(26,5,64,44,10,2,0x171022);
 
+  var audienceTops=[0x25e0ff,0xff9900,0x9b6cff,0xe94b8b,0x38c98b,0xe4e7ef],audienceSkin=[0xf2c49b,0xc98d68,0x8c5a3c,0x6a402c,0xe0aa7e];
+  function seatedAttendee(x,y,z,i){
+    var person=new THREEJS.Group(),shirt=audienceTops[i%audienceTops.length],skin=audienceSkin[(i*3)%audienceSkin.length];
+    function part(geo,color,px,py,pz){var m=new THREEJS.Mesh(geo,new THREEJS.MeshLambertMaterial({color:color}));m.position.set(px,py,pz);person.add(m);}
+    part(new THREEJS.SphereGeometry(.58,8,6),skin,0,3.65,-.05);
+    part(new THREEJS.BoxGeometry(1.25,1.55,.72),shirt,0,2.5,0);
+    part(new THREEJS.BoxGeometry(1.5,.45,1.25),0x25314d,0,1.55,-.42);
+    part(new THREEJS.BoxGeometry(.42,1.25,.46),0x25314d,-.48,.92,-.95);part(new THREEJS.BoxGeometry(.42,1.25,.46),0x25314d,.48,.92,-.95);
+    part(new THREEJS.BoxGeometry(.3,1.3,.3),skin,-.82,2.45,-.12);part(new THREEJS.BoxGeometry(.3,1.3,.3),skin,.82,2.45,-.12);
+    person.position.set(x,y,z);lectureAudienceRoot.add(person);
+  }
+  deco(0,.08,8,10,.12,74,0x24143d,0x9b6cff);
+  deco(-5.1,.16,8,.14,.12,74,0xff9900,0xff9900);deco(5.1,.16,8,.14,.12,74,0x25e0ff,0x25e0ff);
+  var seatXs=[-36,-27,-18,-9,9,18,27,36],audienceIndex=0;
   for(var r=0;r<7;r++){
     var z=36-r*9, y=0.45+r*.18;
-    deco(0,y,z,80,.7,2.2,0x1d1430);
-    for(var c=0;c<9;c++){
-      var x=-36+c*9;
-      deco(x,1+r*.18,z-2.2,5.8,1,2.5,0x21183a);
-      deco(x,1.9+r*.18,z-3,5.8,1.2,.8,0x0f0a1d);
+    deco(-22,y,z,34,.7,2.2,0x1d1430);deco(22,y,z,34,.7,2.2,0x1d1430);
+    for(var c=0;c<seatXs.length;c++){
+      var x=seatXs[c],occupied=((r*3+c*5)%11)>1;
+      deco(x,1+r*.18,z-2.2,5.8,1,2.5,occupied?0x21183a:0x342653);
+      deco(x,1.9+r*.18,z-1.35,5.8,1.2,.8,0x0f0a1d);
+      lectureSeats.push({x:INTERIOR_ORIGIN.x+x,z:INTERIOR_ORIGIN.z+z-2.2,y:y,occupied:occupied});
+      if(occupied)seatedAttendee(x,.25+r*.18,z-2.1,audienceIndex++);
     }
   }
 
@@ -985,6 +1003,32 @@ function buildWalkableLectureTheatre(ctx){
   heading=Math.PI;playerGroup.rotation.y=heading;camYaw=heading;
   toast("Entered lecture theatre. Walk around; the video is on the stage.","info");
 }
+function nearestLectureSeat(){
+  var best=null,dist=1e9;
+  if(!lectureMode)return {seat:null,dist:dist};
+  for(var i=0;i<lectureSeats.length;i++){
+    var seat=lectureSeats[i];if(seat.occupied)continue;
+    var d=Math.hypot(player3d.x-seat.x,player3d.z-seat.z);
+    if(d<dist){best=seat;dist=d;}
+  }
+  return {seat:best,dist:dist};
+}
+function toggleLectureSeat(){
+  if(!lectureMode||!lectureCtx)return false;
+  if(lectureCtx.playerSeated){
+    var old=lecturePlayerSeat;lectureCtx.playerSeated=false;lecturePlayerSeat=null;
+    player3d.x=INTERIOR_ORIGIN.x+(old&&old.x<INTERIOR_ORIGIN.x?-3.5:3.5);
+    player3d.z=(old?old.z:player3d.z)+2.5;playerGroup.position.x=player3d.x;playerGroup.position.z=player3d.z;
+    toast("Back in the aisle.","info");return true;
+  }
+  var near=nearestLectureSeat();
+  if(!near.seat||near.dist>=7)return false;
+  lecturePlayerSeat=near.seat;lectureCtx.playerSeated=true;
+  player3d.x=near.seat.x;player3d.z=near.seat.z;
+  playerGroup.position.x=player3d.x;playerGroup.position.z=player3d.z;
+  heading=Math.PI;camYaw=Math.PI;playerGroup.rotation.y=heading;
+  toast("Seat secured. Conference mode: attentive nodding.","good");return true;
+}
 function leaveWalkableLectureTheatre(attended){
   var returnCtx=lectureCtx;
   if(returnCtx && !returnCtx.attended && attended!==false){
@@ -996,6 +1040,7 @@ function leaveWalkableLectureTheatre(attended){
   if(lectureCssObject&&cssScene){cssScene.remove(lectureCssObject);lectureCssObject=null;}
   if(lectureIframe&&lectureIframe.remove){lectureIframe.remove();lectureIframe=null;}
   if(lectureRoot){scene.remove(lectureRoot);lectureRoot=null;}
+  if(lectureAudienceRoot&&overlayScene){overlayScene.remove(lectureAudienceRoot);lectureAudienceRoot=null;}
   $("theatreHint").style.display="none";lectureMode=false;lectureCtx=null;setPlayerOverlayMode(false);
 
   var place=interiorPlace||PLACES.filter(function(p){return p.id==="venetian";})[0]||PLACES[16];
@@ -1231,7 +1276,7 @@ var partyMode=false,partyGuests=[],partyBand=[],partyMusic=null,partyMusicReques
 var PARTY_MUSIC_TRACKS=['audio/lounge-music/Cloud Inventory.mp3'];
 var replayMode=false,replayMusic=null,replayMusicRequested=false,replayLasers=[],replayLedPanels=[],replayGuests=[],replayDJ=null,dodgeballGame=null;
 var REPLAY_MUSIC_TRACKS=['audio/replay/Cloud untz.mp3','audio/replay/Cloud beats.mp3'];
-var lectureMode=false, lectureRoot=null, lectureExit=null, lectureCtx=null, lectureIframe=null, lectureCssObject=null, lectureReturnGuard=null;
+var lectureMode=false, lectureRoot=null, lectureAudienceRoot=null, lectureExit=null, lectureCtx=null, lectureIframe=null, lectureCssObject=null, lectureReturnGuard=null, lectureSeats=[], lecturePlayerSeat=null;
 var autoDoorCooldown=0;
 var INTERIOR_ORIGIN={x:5000,z:5000};
 
@@ -5660,6 +5705,15 @@ function buildPlayer(){
   playerGroup.position.set(SPAWN.x,playerFootLift,SPAWN.z);
 }
 function animatePlayer(dt,speed){
+  if(lectureMode&&lectureCtx&&lectureCtx.playerSeated){
+    legL.rotation.x=-1.45;legR.rotation.x=-1.45;legL.rotation.z=-.08;legR.rotation.z=.08;
+    legL.userData.lower.rotation.x=1.35;legR.userData.lower.rotation.x=1.35;
+    armL.rotation.x=-.25;armR.rotation.x=-.25;armL.rotation.z=-.12;armR.rotation.z=.12;
+    armL.userData.lower.rotation.x=-.7;armR.userData.lower.rotation.x=-.7;
+    torso.rotation.z=0;torso.position.y=4.55;
+    (playerGroup.userData.headParts||[]).forEach(function(part){part.rotation.z=part.rotation.x=0;part.position.x=part.userData.danceBaseX;part.position.y=part.userData.danceBaseY;});
+    return;
+  }
   if(playerDancing){
     var danceBeat=clock.elapsedTime*6.5,sway=Math.sin(danceBeat);
     if(clock.elapsedTime>=playerDanceNext){playerDanceMove=Math.floor(Math.random()*5);playerDanceNext=clock.elapsedTime+1.4+Math.random()*2.2;}
@@ -7184,10 +7238,11 @@ function doEnter(){
   if(ridingCoaster)return stopCoasterRide();
   if(ridingMonorail){toast('Please remain aboard. Next stop: '+monorailStations[monorailTo].name+'.','info');return;}
   if(lectureMode){
+    if(toggleLectureSeat())return;
     if(lectureExit){
       var dx=playerGroup.position.x-lectureExit.x, dz=playerGroup.position.z-lectureExit.z;
       if(Math.hypot(dx,dz)<18)return leaveWalkableLectureTheatre(true);
-      toast("Walk to the EXIT sign at the back of the theatre to leave.","info");
+      toast("Find an open purple chair or walk to the EXIT sign.","info");
     }
     return;
   }
@@ -7295,6 +7350,7 @@ function tick(dt){
   if(keys["d"]||keys["arrowright"])ix-=1;
   if(joy.active){ix=-joy.x;iz=joy.y;}
   if(playerDancing){ix=0;iz=0;}
+  if(lectureMode&&lectureCtx&&lectureCtx.playerSeated){ix=0;iz=0;}
   var mag=Math.hypot(ix,iz),speed=0;
   if(mag>0.15){
     var dx=0,dz=0, moving=false;
@@ -7387,6 +7443,7 @@ function tick(dt){
     resolvedFloor=Math.max(resolvedFloor,meshFloor);
   }
   playerGroup.position.y=resolvedFloor+playerFootLift;
+  if(lectureMode&&lectureCtx&&lectureCtx.playerSeated&&lecturePlayerSeat)playerGroup.position.y=lecturePlayerSeat.y-2+playerFootLift;
   checkVitals();
   animatePlayer(dt,speed);
 
@@ -7433,7 +7490,11 @@ function tick(dt){
   var promptRoulette=nearestRouletteTable();
   var promptExpo=nearestExpoBooth();
   var promptReplay=nearestReplayZone();
-  if(dodgeballGame&&dodgeballGame.active){
+  var promptLectureSeat=nearestLectureSeat();
+  if(lectureMode&&(lectureCtx&&lectureCtx.playerSeated||promptLectureSeat.seat&&promptLectureSeat.dist<7)){
+    $("prompt").style.display="block";promptKey.textContent='[E]';
+    $("promptTxt").textContent=lectureCtx.playerSeated?'stand up and return to the aisle':'sit in this open seat';
+  } else if(dodgeballGame&&dodgeballGame.active){
     $("prompt").style.display="block";promptKey.textContent=dodgeballGame.playerAlive?'[SPACE] THROW':'DODGEBALL';$("promptTxt").textContent='Blue '+(dodgeballAlive(dodgeballGame.blue)+(dodgeballGame.playerAlive?1:0))+' · Red '+dodgeballAlive(dodgeballGame.red)+' · '+Math.ceil(dodgeballGame.time)+'s';
   } else if(promptReplay.kind&&promptReplay.dist<18){
     $("prompt").style.display="block";promptKey.textContent='[E]';$("promptTxt").textContent=promptReplay.kind==='dodgeball'?'play dodgeball':'visit the food tent';
