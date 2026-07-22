@@ -164,13 +164,15 @@
   #spawnNpcBtn:hover{background:rgba(37,224,255,.18);color:#fff}
   #designNpcBtn{position:fixed;right:16px;top:118px;z-index:20;border:1px solid var(--violet);border-radius:999px;padding:8px 12px;background:rgba(20,14,40,.9);color:#c9c0ff;font:11px var(--mono);cursor:pointer}
   #npcDesigner{position:fixed;inset:0;z-index:90;display:none;align-items:center;justify-content:center;background:rgba(4,3,12,.84);backdrop-filter:blur(7px)}
-  #npcDesigner .designerCard{width:min(920px,94vw);max-height:90vh;overflow:auto;background:#100b20;border:1px solid #554681;border-radius:18px;padding:20px;box-shadow:0 24px 80px #000}
+  #npcDesigner .designerCard{position:relative;width:min(920px,94vw);max-height:90vh;overflow:auto;background:#100b20;border:1px solid #554681;border-radius:18px;padding:20px;box-shadow:0 24px 80px #000}#npcDesigner .designerCard>h2{padding-right:42px}.designerClose{position:absolute;right:14px;top:12px;width:34px;height:34px;border:1px solid #625087;border-radius:50%;background:#20163b;color:#fff;font:24px/1 var(--mono);cursor:pointer}.designerClose:hover{border-color:var(--cyan);color:var(--cyan)}
   .designerGrid{display:grid;grid-template-columns:repeat(3,minmax(150px,1fr));gap:12px}.designerGrid label{display:flex;flex-direction:column;gap:5px;color:#aaa0c7;font:11px var(--mono)}
   .designerGrid input,.designerGrid select,.designerGrid textarea{background:#090713;border:1px solid #3b3158;border-radius:7px;color:#fff;padding:8px;font:12px var(--mono)}
   .designerGrid textarea{min-height:64px;resize:vertical}.designerWide{grid-column:span 3}.designerActions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}.designerActions button{border:1px solid var(--cyan);background:#142033;color:#fff;border-radius:999px;padding:9px 14px;cursor:pointer;font:11px var(--mono)}
-  .npcBuilder{display:grid;grid-template-columns:280px 1fr;gap:18px}.npcAvatarStage{height:430px;border:1px solid #493773;border-radius:14px;background:radial-gradient(circle at 50% 35%,#30204f,#090611 70%);overflow:hidden;position:sticky;top:0}.npcAvatarStage canvas{width:100%;height:100%;display:block}.npcAvatarStage img{position:absolute;right:12px;top:12px;width:68px;height:68px;border-radius:50%;object-fit:cover;border:3px solid var(--orange);background:#171021;display:none;box-shadow:0 4px 18px #000}.profileLookup{display:flex;gap:7px;min-width:0}.profileLookup input{flex:1;min-width:0}.profileLookup button{flex:0 0 auto;white-space:nowrap;border:1px solid var(--orange);background:#2b1b08;color:#fff;border-radius:7px;padding:8px;cursor:pointer}.designerGrid input[readonly],.designerGrid textarea[readonly]{color:#a99fc4;background:#12101b}
+  .npcBuilder{display:grid;grid-template-columns:280px 1fr;gap:18px}.npcPreviewColumn{display:flex;flex-direction:column;gap:10px}.npcAvatarStage{height:430px;border:1px solid #493773;border-radius:14px;background:radial-gradient(circle at 50% 35%,#30204f,#090611 70%);overflow:hidden;position:relative}.npcAvatarStage canvas{width:100%;height:100%;display:block}.npcAvatarStage img{position:absolute;right:12px;top:12px;width:68px;height:68px;border-radius:50%;object-fit:cover;border:3px solid var(--orange);background:#171021;display:none;box-shadow:0 4px 18px #000}.npcPreviewButton{width:100%;border:1px solid var(--cyan);background:#142033;color:#fff;border-radius:10px;padding:11px 14px;cursor:pointer;font:11px var(--mono);letter-spacing:.5px}.npcPreviewButton:hover{background:#1a3048}.profileLookup{display:flex;gap:7px;min-width:0}.profileLookup input{flex:1;min-width:0}.profileLookup button{flex:0 0 auto;white-space:nowrap;border:1px solid var(--orange);background:#2b1b08;color:#fff;border-radius:7px;padding:8px;cursor:pointer}.designerGrid input[readonly],.designerGrid textarea[readonly]{color:#a99fc4;background:#12101b}
   #designerStatus{margin-top:10px;color:var(--dim);font:11px var(--mono);white-space:pre-wrap}@media(max-width:700px){.npcBuilder{grid-template-columns:1fr}.npcAvatarStage{height:300px;position:relative}.designerGrid{grid-template-columns:1fr}.designerWide{grid-column:span 1}}
-  #boothDesigner{position:fixed;inset:0;z-index:75;background:rgba(3,2,9,.94);display:none;align-items:center;justify-content:center;padding:18px}#boothDesigner .designerCard{width:min(1120px,96vw);max-height:94vh;overflow:auto;background:#100b20;border:1px solid #554681;border-radius:18px;padding:20px;box-shadow:0 24px 80px #000}.boothBuilder{display:grid;grid-template-columns:minmax(360px,1.2fr) minmax(330px,1fr);gap:18px}.boothVisual{display:flex;flex-direction:column;gap:9px}.boothPalette{display:flex;gap:7px;flex-wrap:wrap;align-items:center}.boothPalette button{border:1px solid #625087;background:#20183a;color:#fff;border-radius:7px;padding:7px 10px;cursor:grab;font:11px var(--mono)}.boothRotate{display:flex;align-items:center;gap:5px;color:var(--dim);font:10px var(--mono)}.boothRotate input{width:110px}#boothCanvas{position:relative;min-height:430px;overflow:hidden;border:2px solid var(--cyan);border-radius:12px;background:#171326;touch-action:none;perspective:900px}#booth3dCanvas{position:absolute;inset:0;width:100%;height:100%;display:block}#boothScene{position:absolute;left:12%;right:12%;top:15%;bottom:32%;transform-style:preserve-3d;transform-origin:50% 82%;transition:transform .08s linear}.boothCanvasItem{position:absolute;transform:translate(-50%,-50%) translateZ(12px);box-sizing:border-box;width:90px;height:56px;min-width:42px;min-height:34px;padding:7px;border:1px dashed #ffffff80;border-radius:6px;background:#18263d55;color:#fff;text-align:center;cursor:move;user-select:none;font:10px var(--mono);box-shadow:0 2px 8px #0008;opacity:.38}.boothCanvasItem:hover,.boothCanvasItem.selected{opacity:.9}.boothCanvasItem[data-type=text],.boothCanvasItem[data-type=banner]{width:150px;height:48px;background:#ff990066;color:#fff;font-weight:bold}.boothCanvasItem[data-type=counter]{width:150px;height:85px}.boothCanvasItemLabel{pointer-events:none}.boothResize{position:absolute;right:-6px;bottom:-6px;width:17px;height:17px;border:2px solid #fff;border-radius:4px;background:var(--pink);cursor:nwse-resize}.boothCanvasItem.selected{outline:3px solid var(--pink)}.boothHint{font:10px var(--mono);color:var(--dim)}#boothDesignerStatus{margin-top:10px;color:var(--dim);font:11px var(--mono);white-space:pre-wrap}@media(max-width:800px){.boothBuilder{grid-template-columns:1fr}#boothCanvas{min-height:330px}}
+  .npcContributeSteps{margin:16px 0 0;padding:14px 14px 4px 34px;border-top:1px solid #392a63;color:var(--dim);font:11px/1.6 var(--mono)}.npcContributeSteps li{padding:2px 4px}.npcContributeSteps a,.npcContributeSteps button{color:var(--cyan);font:inherit;text-decoration:underline}.npcContributeSteps button{border:0;background:none;padding:0;cursor:pointer}.npcContributeSteps code{color:#fff}
+  .npcContributeSteps a:hover,.npcContributeSteps button:hover{color:#fff}
+  #boothDesigner{position:fixed;inset:0;z-index:75;background:rgba(3,2,9,.94);display:none;align-items:center;justify-content:center;padding:18px}#boothDesigner .designerCard{position:relative;width:min(1120px,96vw);max-height:94vh;overflow:auto;background:#100b20;border:1px solid #554681;border-radius:18px;padding:20px;box-shadow:0 24px 80px #000}#boothDesigner .designerCard>h2{padding-right:42px}.boothBuilder{display:grid;grid-template-columns:minmax(360px,1.2fr) minmax(330px,1fr);gap:18px}.boothVisual{display:flex;flex-direction:column;gap:9px}.boothPalette{display:flex;gap:7px;flex-wrap:wrap;align-items:center}.boothPalette button{border:1px solid #625087;background:#20183a;color:#fff;border-radius:7px;padding:7px 10px;cursor:grab;font:11px var(--mono)}.boothRotate{display:flex;align-items:center;gap:5px;color:var(--dim);font:10px var(--mono)}.boothRotate input{width:110px}#boothCanvas{position:relative;min-height:430px;overflow:hidden;border:2px solid var(--cyan);border-radius:12px;background:#171326;touch-action:none;perspective:900px}#booth3dCanvas{position:absolute;inset:0;width:100%;height:100%;display:block}#boothScene{position:absolute;left:12%;right:12%;top:15%;bottom:32%;transform-style:preserve-3d;transform-origin:50% 82%;transition:transform .08s linear}.boothCanvasItem{position:absolute;transform:translate(-50%,-50%) translateZ(12px);box-sizing:border-box;width:90px;height:56px;min-width:42px;min-height:34px;padding:7px;border:1px dashed #ffffff80;border-radius:6px;background:#18263d55;color:#fff;text-align:center;cursor:move;user-select:none;font:10px var(--mono);box-shadow:0 2px 8px #0008;opacity:.38}.boothCanvasItem:hover,.boothCanvasItem.selected{opacity:.9}.boothCanvasItem[data-type=text],.boothCanvasItem[data-type=banner]{width:150px;height:48px;background:#ff990066;color:#fff;font-weight:bold}.boothCanvasItem[data-type=counter]{width:150px;height:85px}.boothCanvasItemLabel{pointer-events:none}.boothResize{position:absolute;right:-6px;bottom:-6px;width:17px;height:17px;border:2px solid #fff;border-radius:4px;background:var(--pink);cursor:nwse-resize}.boothCanvasItem.selected{outline:3px solid var(--pink)}.boothHint{font:10px var(--mono);color:var(--dim)}#boothDesignerStatus{margin-top:10px;color:var(--dim);font:11px var(--mono);white-space:pre-wrap}@media(max-width:800px){.boothBuilder{grid-template-columns:1fr}#boothCanvas{min-height:330px}}
   #arrestScene{position:fixed;inset:0;z-index:120;display:none;overflow:hidden;background:#050711;color:#fff;font-family:var(--mono)}
   #arrestScene .sky{position:absolute;inset:0;background:linear-gradient(#111b35 0 48%,#16131d 48%)}
   #arrestScene .roadlines{position:absolute;left:-20%;right:-20%;top:62%;height:8px;background:repeating-linear-gradient(90deg,#ffd45a 0 70px,transparent 70px 130px);animation:arrestRoad .45s linear infinite}
@@ -255,10 +257,10 @@
   <div class="role">ATTENDEE · FULL CONFERENCE PASS</div>
 </div>
 <div id="boothDesigner">
- <div class="designerCard"><h2 style="margin:0 0 5px">Design an Expo Booth</h2><p style="margin:0 0 16px;color:var(--dim);font:12px var(--mono)">Drag items onto the booth, add sponsor dialogue and links, then download a contribution-ready JSON file.</p>
-  <div class="boothBuilder"><div class="boothVisual"><div class="boothPalette"><button draggable="true" data-booth-type="text">TEXT</button><button draggable="true" data-booth-type="banner">BANNER</button><button draggable="true" data-booth-type="screen">SCREEN</button><button draggable="true" data-booth-type="counter">COUNTER</button><button draggable="true" data-booth-type="plant">PLANT</button><button draggable="true" data-booth-type="orb">ORB</button><button id="boothDeleteItem" type="button">DELETE SELECTED</button><label class="boothRotate">ROTATE <input id="bdRotation" type="range" min="-60" max="60" value="0"></label></div><div id="boothCanvas" aria-label="Rotatable booth layout preview"><canvas id="booth3dCanvas"></canvas><div id="boothScene"></div></div><div class="boothHint">This is the expo booth render. Drag items to move them; use the pink corner handle to resize. Drag empty space or use ROTATE to inspect it.</div></div>
-   <div class="designerGrid"><label>Booth slot<select id="bdSlot"></select></label><label>Sponsor ID<input id="bdId" placeholder="cloud-company"></label><label>Company name<input id="bdCompany" placeholder="Cloud Company"></label><label>Logo initials<input id="bdMark" maxlength="4" placeholder="CC"></label><label>Brand color<input id="bdColor" type="color" value="#25e0ff"></label><label>Swag item<input id="bdSwag" placeholder="Enamel pin"></label><label class="designerWide">Tagline<input id="bdTagline" placeholder="A short line shown by the booth representative"></label><label>Representative name<input id="bdRepName" placeholder="Company representative"></label><label class="designerWide">Representative lines (one per line)<textarea id="bdLines" placeholder="Tell players what your company does"></textarea></label><label>Logo image URL (optional)<input id="bdLogoUrl" type="url" placeholder="https://example.com/logo.png"></label><label>YouTube video URL (optional)<input id="bdYoutubeUrl" type="url" placeholder="https://www.youtube.com/watch?v=video-id"></label><label>Website<input id="bdWebsite" type="url" placeholder="https://example.com"></label><label>Demo<input id="bdDemo" type="url" placeholder="https://example.com/demo"></label><label>Contact<input id="bdContact" type="url" placeholder="https://example.com/contact"></label></div>
-  </div><div class="designerActions"><button id="bdPreview">PREVIEW IN EXPO</button><button id="bdDownload">DOWNLOAD JSON</button><button id="bdGithub">CONTRIBUTE VIA GITHUB ↗</button><button id="bdClose">CLOSE</button></div><div id="boothDesignerStatus"></div>
+ <div class="designerCard"><button id="bdClose" class="designerClose" type="button" aria-label="Close booth designer">×</button><h2 style="margin:0 0 5px">Design an Expo Booth</h2><p style="margin:0 0 16px;color:var(--dim);font:12px var(--mono)">Drag items onto the booth, add sponsor dialogue and links, then download a contribution-ready JSON file.</p>
+  <div class="boothBuilder"><div class="boothVisual"><div class="boothPalette"><button draggable="true" data-booth-type="text">TEXT</button><button draggable="true" data-booth-type="banner">BANNER</button><button draggable="true" data-booth-type="screen">SCREEN</button><button draggable="true" data-booth-type="counter">COUNTER</button><button draggable="true" data-booth-type="plant">PLANT</button><button draggable="true" data-booth-type="orb">ORB</button><button id="boothDeleteItem" type="button">DELETE SELECTED</button><label class="boothRotate">ROTATE <input id="bdRotation" type="range" min="-60" max="60" value="0"></label></div><div id="boothCanvas" aria-label="Rotatable booth layout preview"><canvas id="booth3dCanvas"></canvas><div id="boothScene"></div></div><div class="boothHint">This is the expo booth render. Drag items to move them; use the pink corner handle to resize. Drag empty space or use ROTATE to inspect it.</div><button id="bdPreview" class="npcPreviewButton" type="button">PREVIEW IN EXPO</button><ol class="npcContributeSteps"><li><button id="bdInstructionDownload" type="button">Download JSON</button></li><li><a href="https://github.com/ljacobsson/reinvent-simulator/fork" target="_blank" rel="noopener">Fork the repository</a></li><li>Add the JSON to the <code>./booths</code> folder.</li><li>Create a pull request.</li></ol><p class="boothHint">If you represent an actual company, please read <a href="SPONSOR-CONTRIBUTION.md" target="_blank" rel="noopener">the sponsor contribution guide</a>.</p></div>
+   <div class="designerGrid"><label>Sponsor ID<input id="bdId" placeholder="cloud-company"></label><label>Company name<input id="bdCompany" placeholder="Cloud Company"></label><label>Logo initials<input id="bdMark" maxlength="4" placeholder="CC"></label><label>Brand color<input id="bdColor" type="color" value="#25e0ff"></label><label>Swag item<input id="bdSwag" placeholder="Enamel pin"></label><label class="designerWide">Tagline<input id="bdTagline" placeholder="A short line shown by the booth representative"></label><label>Representative name<input id="bdRepName" placeholder="Company representative"></label><label class="designerWide">Representative lines (one per line)<textarea id="bdLines" placeholder="Tell players what your company does"></textarea></label><label>Logo image URL (optional)<input id="bdLogoUrl" type="url" placeholder="https://example.com/logo.png"></label><label>YouTube video URL (optional)<input id="bdYoutubeUrl" type="url" placeholder="https://www.youtube.com/watch?v=video-id"></label><label>Website<input id="bdWebsite" type="url" placeholder="https://example.com"></label><label>Demo<input id="bdDemo" type="url" placeholder="https://example.com/demo"></label><label>Contact<input id="bdContact" type="url" placeholder="https://example.com/contact"></label></div>
+  </div><div id="boothDesignerStatus"></div>
  </div>
 </div>
 <div class="hud" id="stats">
@@ -285,9 +287,9 @@
 <button id="camBtn">↺</button>
 
 <div id="npcDesigner">
- <div class="designerCard">
-  <h2 style="margin:0 0 5px">Design an NPC</h2><p style="margin:0 0 16px;color:var(--dim);font:12px var(--mono)">Creates a validated config and opens GitHub’s contribution editor for a PR to <b>ljacobsson/reinvent-simulator</b>.</p>
-  <div class="npcBuilder"><div class="npcAvatarStage"><canvas id="npcAvatarCanvas"></canvas><img id="ndProfilePhoto" alt="Fetched Builder profile avatar"></div><div class="designerGrid">
+ <div class="designerCard"><button id="ndClose" class="designerClose" type="button" aria-label="Close NPC designer">×</button>
+  <h2 style="margin:0 0 5px">Design an NPC</h2><p style="margin:0 0 16px;color:var(--dim);font:12px var(--mono)">Create, preview, and download a contribution-ready NPC configuration.</p>
+  <div class="npcBuilder"><div class="npcPreviewColumn"><div class="npcAvatarStage"><canvas id="npcAvatarCanvas"></canvas><img id="ndProfilePhoto" alt="Fetched Builder profile avatar"></div><button id="ndPreview" class="npcPreviewButton" type="button">SPAWN PREVIEW</button><ol class="npcContributeSteps"><li><button id="ndInstructionDownload" type="button">Download JSON</button></li><li><a href="https://github.com/ljacobsson/reinvent-simulator/fork" target="_blank" rel="noopener">Fork the repository</a></li><li>Add the JSON to the <code>./npcs</code> folder.</li><li>Create a pull request.</li></ol></div><div class="designerGrid">
    <label>AWS Builder alias<div class="profileLookup"><input id="ndAlias" placeholder="your-builder-alias"><button id="ndLookup" type="button">LOOK UP</button></div></label><label>Name<input id="ndName" placeholder="Your name"></label><label>Title<input id="ndTitle" placeholder="Your role or specialty"></label>
    <label class="designerWide">Profile image URL<input id="ndAvatar" type="url" placeholder="https://example.com/avatar.jpg"></label>
    <label>Body type<select id="ndGender"><option value="neutral">Neutral</option><option value="female">Feminine</option><option value="male">Masculine</option></select></label>
@@ -306,7 +308,7 @@
    <label class="designerWide">Factoids (one per line)<textarea id="ndFacts" placeholder="Add at least one personal or technical fact"></textarea></label>
    <label class="designerWide">Jokes (one per line)<textarea id="ndJokes" placeholder="Add at least one joke"></textarea></label>
   </div></div>
-  <div class="designerActions"><button id="ndPreview">SPAWN PREVIEW</button><button id="ndDownload">DOWNLOAD JSON</button><button id="ndGithub">CONTRIBUTE VIA GITHUB ↗</button><button id="ndClose">CLOSE</button></div><div id="designerStatus"></div>
+  <div id="designerStatus"></div>
  </div>
 </div>
 <div id="arrestScene"><div class="sky"></div><div class="roadlines"></div><div class="car"><div class="lightbar"></div><div class="headlight"></div><div class="taillight"></div><div class="window"><div class="officer"></div><div class="prisoner"></div><div class="bars"></div></div><div class="wheel a"></div><div class="wheel b"></div></div><div class="cell"><div class="cellLight"></div><div class="bunk"></div><div class="toilet"></div><div class="sink"></div><div class="cellDoor"></div><div class="wallMarks">||||  |||<br>DON'T TOUCH<br>THE FOUNTAINS</div></div><div class="caption" id="arrestCaption"></div></div><div id="cellFrontBars"></div>
@@ -469,6 +471,7 @@ var PLACES=[
  {id:"trump", name:"Trump International Hotel",     lat:36.12950, lng:-115.17265, w:72, d:58, h:190, color:0xb8943f, sign:0xffd25a, type:"photo", shape:"gold"},
  {id:"sphere",name:"The Sphere",                    lat:36.12110, lng:-115.16200, w:120,d:120,h:110, color:0x1a1030, sign:0xff9a4d, type:"photo", shape:"sphere"},
  {id:"wynn",  name:"Wynn",                          lat:36.12680, lng:-115.16550, w:180,d:140,h:150, color:0x8a6a48, sign:0xc9a227, type:"venue", tracks:["SVS","API","BIZ"], shape:"wynn"},
+ {id:"fashion",name:"Fashion Show Mall",            lat:36.12755, lng:-115.17235, w:150,d:100,h:24, color:0xd8c5a2, sign:0xff4d91, type:"photo", shape:"mall",descText:"The Strip's landmark shopping mall, fronted by its floating oval Cloud canopy."},
  {id:"encore",name:"Encore",                        lat:36.12910, lng:-115.16520, w:160,d:125,h:155, color:0x9a7954, sign:0xffc857, type:"venue", tracks:["DOP","STG","AIM"], shape:"wynn"},
  {id:"circus",name:"Circus Circus",                 lat:36.13760, lng:-115.16690, w:190,d:145,h:120, color:0xf3eee4, sign:0xff334f, type:"photo", shape:"circus"},
  {id:"strat", name:"The STRAT",                      lat:36.14750, lng:-115.15660, w:150,d:110,h:350, color:0xd8d3c8, sign:0xff4055, type:"photo", shape:"tower"},
@@ -1223,11 +1226,8 @@ $('ndAlias').addEventListener('input',clearNpcDesignerDraft);
 $('designNpcBtn').onclick=function(){paused=true;$('npcDesigner').style.display='flex';initNpcDesignerAvatar();npcDesignerStatus('Builder alias, name, and greeting are required. Everything else is optional.',false);};
 $('ndClose').onclick=function(){$('npcDesigner').style.display='none';paused=false;};
 $('ndPreview').onclick=function(){try{var cfg=npcDesignerConfig();npcConfigs.push(cfg);nextNpcConfig=npcConfigs.length-1;$('npcDesigner').style.display='none';paused=false;spawnNpcNearPlayer();npcDesignerStatus('',false);}catch(e){npcDesignerStatus(e.message,true);}};
-$('ndDownload').onclick=function(){try{var cfg=npcDesignerConfig(),blob=new Blob([JSON.stringify(cfg,null,2)+'\n'],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=cfg.id+'.json';a.click();setTimeout(function(){URL.revokeObjectURL(a.href);},1000);npcDesignerStatus('Downloaded '+cfg.id+'.json',false);}catch(e){npcDesignerStatus(e.message,true);}};
-$('ndGithub').onclick=function(){
-  window.open('https://github.com/ljacobsson/reinvent-simulator/blob/main/CONTRIBUTING.md','_blank','noopener');
-  npcDesignerStatus('Opened the contribution guide. Fork the repository first, then follow the short checklist.',false);
-};
+function downloadNpcJson(){try{var cfg=npcDesignerConfig(),blob=new Blob([JSON.stringify(cfg,null,2)+'\n'],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=cfg.id+'.json';a.click();setTimeout(function(){URL.revokeObjectURL(a.href);},1000);npcDesignerStatus('Downloaded '+cfg.id+'.json',false);}catch(e){npcDesignerStatus(e.message,true);}}
+$('ndInstructionDownload').onclick=downloadNpcJson;
 
 /* ---- Sponsor booth designer ---- */
 var boothSelectedItem=null,boothDraftRestoring=false,BOOTH_DRAFT_KEY='reinvent.boothDesignerDraft.v1',boothPreviewRenderer=null,boothPreviewScene=null,boothPreviewCamera=null,boothPreviewRoot=null,boothPreviewFrame=0,boothPreviewGeneration=0;
@@ -1235,7 +1235,7 @@ function boothDesignerStatus(message,bad){$('boothDesignerStatus').style.color=b
 function boothItemLabel(type){return ({text:'EDIT TEXT',banner:'EDIT BANNER',screen:'▣ SCREEN',counter:'▰ COUNTER',plant:'♣ PLANT',orb:'● ORB'})[type]||type.toUpperCase();}
 function selectBoothItem(el){document.querySelectorAll('.boothCanvasItem.selected').forEach(function(n){n.classList.remove('selected');});boothSelectedItem=el;if(el)el.classList.add('selected');}
 function boothDraftSnapshot(){
-  var fields={},ids=['bdSlot','bdId','bdCompany','bdMark','bdColor','bdSwag','bdTagline','bdRepName','bdLines','bdLogoUrl','bdYoutubeUrl','bdWebsite','bdDemo','bdContact'],canvas=$('boothScene');
+  var fields={},ids=['bdId','bdCompany','bdMark','bdColor','bdSwag','bdTagline','bdRepName','bdLines','bdLogoUrl','bdYoutubeUrl','bdWebsite','bdDemo','bdContact'],canvas=$('boothScene');
   ids.forEach(function(id){fields[id]=$(id).value;});
   var layout=[].map.call($('boothScene').children,function(el){var label=el.querySelector('.boothCanvasItemLabel');return {type:el.dataset.type,text:label.textContent,x:parseFloat(el.style.left)||50,y:parseFloat(el.style.top)||50,w:canvas.clientWidth?el.offsetWidth/canvas.clientWidth*100:20,h:canvas.clientHeight?el.offsetHeight/canvas.clientHeight*100:14};});
   return {fields:fields,rotation:$('bdRotation').value,layout:layout};
@@ -1272,14 +1272,13 @@ function boothDesignerConfig(){
   function val(id){return $(id).value.trim();}function lines(id){return val(id).split(/\n+/).map(function(s){return s.trim();}).filter(Boolean);}
   var id=val('bdId').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,''),links={};[['website','bdWebsite'],['demo','bdDemo'],['contact','bdContact']].forEach(function(pair){var url=val(pair[1]);if(url)links[pair[0]]=url;});
   var canvas=$('boothScene'),layout=[].map.call($('boothScene').children,function(el){var label=el.querySelector('.boothCanvasItemLabel');return {type:el.dataset.type,text:(el.dataset.type==='text'||el.dataset.type==='banner')?label.textContent:'',x:Math.round(parseFloat(el.style.left)*10)/10,y:Math.round(parseFloat(el.style.top)*10)/10,w:Math.round(el.offsetWidth/canvas.clientWidth*1000)/10,h:Math.round(el.offsetHeight/canvas.clientHeight*1000)/10};});
-  var cfg={id:id,slot:Number($('bdSlot').value),company:val('bdCompany'),mark:(val('bdMark')||val('bdCompany').slice(0,2)).toUpperCase(),color:$('bdColor').value,tagline:val('bdTagline'),swag:val('bdSwag')||'Sponsor sticker',representative:{name:val('bdRepName')||val('bdCompany')+' representative'},lines:lines('bdLines'),links:links,layout:layout};
+  var cfg={id:id,company:val('bdCompany'),mark:(val('bdMark')||val('bdCompany').slice(0,2)).toUpperCase(),color:$('bdColor').value,tagline:val('bdTagline'),swag:val('bdSwag')||'Sponsor sticker',representative:{name:val('bdRepName')||val('bdCompany')+' representative'},lines:lines('bdLines'),links:links,layout:layout};
   var logoUrl=val('bdLogoUrl'),youtubeUrl=val('bdYoutubeUrl');if(logoUrl)cfg.logoUrl=logoUrl;if(youtubeUrl)cfg.youtubeUrl=youtubeUrl;
   var errors=[];if(!cfg.id)errors.push('Sponsor ID is required.');if(!cfg.company)errors.push('Company name is required.');if(!cfg.tagline)errors.push('Tagline is required.');if(!cfg.lines.length)errors.push('Add at least one representative line.');if(!cfg.layout.length)errors.push('Drag at least one item onto the booth.');if(errors.length)throw new Error(errors.join('\n'));return cfg;
 }
 function boothJson(){return JSON.stringify(boothDesignerConfig(),null,2)+'\n';}
 function downloadBooth(){var cfg=boothDesignerConfig(),blob=new Blob([JSON.stringify(cfg,null,2)+'\n'],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=cfg.id+'.json';a.click();setTimeout(function(){URL.revokeObjectURL(a.href);},1000);return cfg;}
 (function initBoothDesigner(){
-  for(var i=1;i<=12;i++){var o=document.createElement('option');o.value=i;o.textContent='Slot '+i;$('bdSlot').appendChild(o);}
   document.querySelectorAll('[data-booth-type]').forEach(function(button){button.addEventListener('dragstart',function(e){e.dataTransfer.setData('text/booth-item',button.dataset.boothType);});button.addEventListener('click',function(){addBoothCanvasItem(button.dataset.boothType,50,50);});});
   $('boothCanvas').addEventListener('dragover',function(e){e.preventDefault();});$('boothCanvas').addEventListener('drop',function(e){e.preventDefault();var type=e.dataTransfer.getData('text/booth-item');if(!type)return;$('bdRotation').value=0;updateBoothRotation();var r=$('boothScene').getBoundingClientRect();addBoothCanvasItem(type,(e.clientX-r.left)/r.width*100,(e.clientY-r.top)/r.height*100);});
   $('bdRotation').addEventListener('input',function(){updateBoothRotation();saveBoothDraft();});var rotating=false,rotateStartX=0,rotateStartValue=0;$('boothCanvas').addEventListener('pointerdown',function(e){if(e.target!==$('boothCanvas')&&e.target!==$('boothScene'))return;rotating=true;rotateStartX=e.clientX;rotateStartValue=Number($('bdRotation').value);this.setPointerCapture(e.pointerId);});$('boothCanvas').addEventListener('pointermove',function(e){if(!rotating)return;$('bdRotation').value=clamp(rotateStartValue+(e.clientX-rotateStartX)*.35,-60,60);updateBoothRotation();});$('boothCanvas').addEventListener('pointerup',function(){rotating=false;saveBoothDraft();});
@@ -1287,11 +1286,10 @@ function downloadBooth(){var cfg=boothDesignerConfig(),blob=new Blob([JSON.strin
   $('bdColor').addEventListener('input',function(){$('boothCanvas').style.borderColor=this.value;document.querySelectorAll('.boothCanvasItem[data-type=text],.boothCanvasItem[data-type=banner]').forEach(function(el){el.style.background=$('bdColor').value;});saveBoothDraft();});
   $('boothDesigner').querySelector('.designerGrid').addEventListener('input',saveBoothDraft);$('boothDesigner').querySelector('.designerGrid').addEventListener('change',saveBoothDraft);
 })();
-$('designBoothBtn').onclick=function(){paused=true;$('boothDesigner').style.display='flex';requestAnimationFrame(function(){var restored=restoreBoothDraft();rebuildBoothPreview();boothDesignerStatus(restored?'Restored your locally saved booth draft.':'Choose a slot. A contributed booth replaces the default booth in that slot.',false);});};
+$('designBoothBtn').onclick=function(){paused=true;$('boothDesigner').style.display='flex';requestAnimationFrame(function(){var restored=restoreBoothDraft();rebuildBoothPreview();boothDesignerStatus(restored?'Restored your locally saved booth draft.':'Design your booth, preview it, then download the JSON for your pull request.',false);});};
 $('bdClose').onclick=function(){$('boothDesigner').style.display='none';paused=false;};
-$('bdDownload').onclick=function(){try{var cfg=downloadBooth();boothDesignerStatus('Downloaded '+cfg.id+'.json. Add it to booths/ and booths/index.json.',false);}catch(e){boothDesignerStatus(e.message,true);}};
-$('bdGithub').onclick=function(){try{var cfg=boothDesignerConfig(),content=JSON.stringify(cfg,null,2)+'\n';navigator.clipboard&&navigator.clipboard.writeText(content).catch(function(){});window.open('https://github.com/ljacobsson/reinvent-simulator/new/main/booths?filename='+encodeURIComponent(cfg.id+'.json')+'&value='+encodeURIComponent(content)+'&message='+encodeURIComponent('Add expo booth '+cfg.company),'_blank','noopener');boothDesignerStatus('Opened GitHub with the booth JSON prefilled. Add the filename to booths/index.json in the same pull request.',false);}catch(e){boothDesignerStatus(e.message,true);}};
-$('bdPreview').onclick=function(){try{var cfg=boothDesignerConfig(),found=false;for(var i=0;i<boothConfigs.length;i++)if(boothConfigs[i].slot===cfg.slot){boothConfigs[i]=cfg;found=true;break;}if(!found)boothConfigs.push(cfg);applyBoothConfigs();$('boothDesigner').style.display='none';paused=false;var ven=PLACES.filter(function(p){return p.id==='venetian';})[0];enterInterior(ven);player3d.x=INTERIOR_ORIGIN.x;player3d.z=INTERIOR_ORIGIN.z-300;playerGroup.position.set(player3d.x,0,player3d.z);toast(cfg.company+' booth installed in expo slot '+cfg.slot+'.','good');}catch(e){boothDesignerStatus(e.message,true);}};
+$('bdInstructionDownload').onclick=function(){try{var cfg=downloadBooth();boothDesignerStatus('Downloaded '+cfg.id+'.json. Add it to booths/ and booths/index.json.',false);}catch(e){boothDesignerStatus(e.message,true);}};
+$('bdPreview').onclick=function(){try{var cfg=boothDesignerConfig(),previewSlot=1,found=false;cfg.slot=previewSlot;for(var i=0;i<boothConfigs.length;i++)if(boothConfigs[i].slot===previewSlot){boothConfigs[i]=cfg;found=true;break;}if(!found)boothConfigs.push(cfg);applyBoothConfigs();$('boothDesigner').style.display='none';paused=false;var ven=PLACES.filter(function(p){return p.id==='venetian';})[0];enterInterior(ven);player3d.x=INTERIOR_ORIGIN.x;player3d.z=INTERIOR_ORIGIN.z-300;playerGroup.position.set(player3d.x,0,player3d.z);toast(cfg.company+' booth installed in a temporary preview slot.','good');}catch(e){boothDesignerStatus(e.message,true);}};
 
 /* ---- textures ---- */
 function windowTexture(baseHex,litHex,cols,rows){
@@ -1871,6 +1869,37 @@ function arrestAtBellagio(){
   }
 
   toast("Arrested for trespassing in the Bellagio fountains.","bad");updHUD();playArrestSequence();
+}
+
+function buildFashionShowMallLandmark(){
+  var p=null;for(var i=0;i<PLACES.length;i++)if(PLACES[i].id==='fashion'){p=PLACES[i];break;}if(!p)return;
+  var q=project(p.lat,p.lng),root=new THREEJS.Group();
+  root.position.set(q.x,0,q.z);
+  var sandstone=new THREEJS.MeshStandardMaterial({color:0xc8b89b,roughness:.68,metalness:.08});
+  var trim=new THREEJS.MeshStandardMaterial({color:0x6d6258,roughness:.38,metalness:.52});
+  var glass=new THREEJS.MeshStandardMaterial({color:0x183246,roughness:.12,metalness:.35,transparent:true,opacity:.88,emissive:new THREEJS.Color(0x102a3b),emissiveIntensity:.3});
+  var steel=new THREEJS.MeshStandardMaterial({color:0xd9dde2,roughness:.24,metalness:.9});
+  function block(x,y,z,w,h,d,mat){var m=new THREEJS.Mesh(new THREEJS.BoxGeometry(w,h,d),mat);m.position.set(x,y,z);root.add(m);return m;}
+  block(0,9,0,130,18,66,sandstone);
+  block(-56,12,-8,34,24,54,sandstone);block(54,11,-5,38,22,58,sandstone);
+  block(0,5,35,112,10,12,trim);
+  for(var bay=-7;bay<=7;bay++){
+    block(bay*7.1,5.2,41.15,5.5,7.2,.35,glass);
+  }
+  var skylightMat=new THREEJS.MeshStandardMaterial({color:0x86c7e5,roughness:.08,metalness:.2,transparent:true,opacity:.7});
+  for(var sky=-2;sky<=2;sky++){var skylight=block(sky*20,18.5,0,13,.8,35,skylightMat);skylight.rotation.z=sky*.015;}
+  var cloud=new THREEJS.Mesh(new THREEJS.SphereGeometry(1,32,14),steel);
+  cloud.scale.set(34,2.25,14);cloud.position.set(24,23,51);cloud.rotation.z=-.07;
+  root.add(cloud);
+  for(var support=-1;support<=1;support+=2){var pole=block(24+support*21,11.5,48,.85,23,.85,steel);pole.rotation.z=support*.1;}
+  var sign=signSprite('FASHION SHOW',0xffffff,{fontSize:58,width:47,height:6,glow:10,depthTest:true,renderOrder:8,frontOnly:true});
+  sign.position.set(-23,15.5,41.5);root.add(sign);
+  var cloudSign=signSprite('THE CLOUD',0xff4d91,{fontSize:28,width:18,height:3.5,glow:9,depthTest:true,renderOrder:9,frontOnly:true});
+  cloudSign.position.set(24,24.2,65.1);root.add(cloudSign);
+  root.userData.placeId='fashion';root.userData.aabb={cx:q.x,cz:q.z,hw:72,hd:51};
+  setFootprintFromLocal(root,[[-72,-37],[72,-37],[72,43],[58,51],[-70,51]],1.0);
+  buildings.push(root);scene.add(root);
+  registerExteriorEntry(p,q.x,q.z,144,102);
 }
 
 function buildTrumpHotelLandmark(){
@@ -4361,18 +4390,23 @@ function updateShowgirlBubbles(){
     b.style.display='block';b.style.left=((p.x*.5+.5)*innerWidth)+'px';b.style.top=((-p.y*.5+.5)*innerHeight)+'px';
   }
 }
-function placeShowgirlsNearPlayer(){
-  if(!player3d||!window.__road||!showgirls.length)return;
-  var road=window.__road,bestSeg=0,bestT=0,best=1e9;
+function placeShowgirlsOutsideMgm(){
+  if(!window.__road||!showgirls.length)return;
+  var road=window.__road,mgm=null;for(var p=0;p<PLACES.length;p++)if(PLACES[p].id==='mgm'){mgm=PLACES[p];break;}
+  var target=mgm?project(mgm.lat,mgm.lng):(player3d||{x:SPAWN.x,z:SPAWN.z});
+  var bestSeg=0,bestT=0,best=1e9;
   for(var s=0;s<road.length-1;s++){
     var a=road[s],b=road[s+1],dx=b.x-a.x,dz=b.z-a.z,l2=dx*dx+dz*dz;
-    var t=l2?Math.max(0,Math.min(1,((player3d.x-a.x)*dx+(player3d.z-a.z)*dz)/l2)):0;
-    var d=Math.hypot(player3d.x-(a.x+dx*t),player3d.z-(a.z+dz*t));if(d<best){best=d;bestSeg=s;bestT=t;}
+    var t=l2?Math.max(0,Math.min(1,((target.x-a.x)*dx+(target.z-a.z)*dz)/l2)):0;
+    var d=Math.hypot(target.x-(a.x+dx*t),target.z-(a.z+dz*t));if(d<best){best=d;bestSeg=s;bestT=t;}
   }
-  // Keep one complete pair discoverable at the Venetian; all other pairs remain distributed.
+  var segA=road[bestSeg],segB=road[bestSeg+1],segDx=segB.x-segA.x,segDz=segB.z-segA.z,segLen=Math.max(1,Math.hypot(segDx,segDz));
+  var roadX=segA.x+segDx*bestT,roadZ=segA.z+segDz*bestT,nx=-segDz/segLen,nz=segDx/segLen;
+  var mgmSide=((target.x-roadX)*nx+(target.z-roadZ)*nz)>=0?1:-1;
+  // Keep the complete pair together on the MGM-facing side of the Strip sidewalk.
   for(var i=0;i<Math.min(2,showgirls.length);i++){
     var sg=showgirls[i].userData.showgirl;
-    sg.seg=Math.max(0,Math.min(road.length-2,bestSeg));sg.t=Math.max(.08,Math.min(.92,bestT+.1));sg.side=1;sg.dir=1;
+    sg.seg=Math.max(0,Math.min(road.length-2,bestSeg));sg.t=Math.max(.08,Math.min(.92,bestT+(i?.012:-.012)));sg.side=mgmSide;sg.dir=1;
   }
   updateShowgirls(.016);
 }
@@ -4957,6 +4991,8 @@ function makeOsmFootprint(el){
   if(el.id===52175576||el.id===134930088||el.id===134930089||el.id===134930090||
      el.id===134930091||el.id===134930092||el.id===463856739)return null;
   // Custom Trump gold tower replaces the hotel footprint; its valet garage remains.
+  // Custom Fashion Show model replaces the mall only; both self-parking garages remain.
+  if(el.id===180584255)return null;
   if(el.id===111380666)return null;
   // Custom Bellagio hotel replaces the main tower, spa tower and casino relation.
   // The self-parking garage remains independently mapped.
@@ -6070,6 +6106,7 @@ function buildWorld(){
   buildWelcomeSignLandmark();
   buildMandalayBayLandmark();
   buildTrumpHotelLandmark();
+  buildFashionShowMallLandmark();
   buildParkMgmLandmark();
   buildAriaLandmark();
   buildMgmGrandLandmark();
@@ -6117,7 +6154,7 @@ function buildWorld(){
   SPAWN.z=stripSpawn?stripSpawn.pz:spawnHint.z;
   var clearSpawn=nearestClearExteriorPoint(SPAWN.x,SPAWN.z,2.2,120);SPAWN.x=clearSpawn.x;SPAWN.z=clearSpawn.z;
   buildPlayer();
-  placeShowgirlsNearPlayer();
+  placeShowgirlsOutsideMgm();
   placeCowboysNearPlayer();
   heading=Math.PI; camYaw=Math.PI;
 
