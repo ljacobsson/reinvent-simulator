@@ -22,7 +22,9 @@
           "description": "Supported styles: bald, buzz-cut, short, curly-short, side-part, braided-bun, long-straight, long-wavy, ponytail, bob, mohawk."
         },
         "top": { "$ref": "#/$defs/styleColor" },
+        "hat": { "anyOf": [{ "type": "string", "enum": ["none", "baseball-cap", "beanie", "cowboy", "fedora", "top-hat", "party-hat", "wizard-hat"] }, { "type": "object", "additionalProperties": false, "required": ["style", "color"], "properties": { "style": { "type": "string", "enum": ["none", "baseball-cap", "beanie", "cowboy", "fedora", "top-hat", "party-hat", "wizard-hat"] }, "color": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" } } }] },
         "bottom": { "$ref": "#/$defs/styleColor" },
+        "backpack": { "type": "object", "additionalProperties": false, "required": ["color"], "properties": { "color": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" } } },
         "accessories": { "type": "array", "items": { "type": "string" } },
         "emote": { "type": "string" }
       }

@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>re:Invent WEEK — Vegas 3D</title>
+<script>window.BUILDER_PROFILE_API_URL = 'https://3sg5bwuvf5.execute-api.eu-west-1.amazonaws.com/profile';</script>
+
 <style>
   :root{
     --bg:#0b0716;--panel:#140d26;--panel2:#1c1233;
@@ -74,6 +76,8 @@
   .npcBubble.mobile{pointer-events:auto;cursor:pointer;user-select:none}.npcBubble.mobile:active{transform:translate(-50%,-115%) scale(.97)}
   .npcBubble.conversation{position:relative;left:auto!important;top:auto!important;display:block!important;max-width:none;width:auto;margin:8px 0 14px;transform:none;z-index:auto;pointer-events:none}
   .npcBubble.conversation:after{left:28px}
+  #venueUI.hasNpcPhoto .npcBubble.conversation:after{left:-11px;top:18px;bottom:auto;transform:translateY(-50%) rotate(28deg);transform-origin:left center;border-width:10px 11px 10px 0;border-color:transparent #25e0ff transparent transparent}
+  #venueUI.hasNpcPhoto .npcBubble.conversation:before{content:"";position:absolute;left:-7px;top:18px;transform:translateY(-50%) rotate(28deg);transform-origin:left center;border-width:7px 8px 7px 0;border-style:solid;border-color:transparent #f7fbff transparent transparent;z-index:1}
 
   #minimap{position:fixed;left:12px;bottom:12px;z-index:10;border:2px solid rgba(230,235,255,.85);border-radius:50%;background:radial-gradient(circle at 50% 50%,#202534 0,#141827 62%,#080a12 100%);opacity:.96;box-shadow:0 0 0 3px rgba(0,0,0,.55),0 6px 24px rgba(0,0,0,.65)}
 
@@ -112,6 +116,8 @@
 
   #vTitle{font-family:var(--disp);font-size:26px;letter-spacing:2px;color:var(--cyan);text-shadow:0 0 14px #25e0ff66}
   #vDesc{font-size:12.5px;color:var(--dim);margin:3px 0 14px}
+  #vHeader{display:flex;align-items:flex-start;gap:16px}#vHeaderText{flex:1;min-width:0}
+  #vPhoto{display:none;flex:0 0 104px;width:104px;height:104px;object-fit:cover;border-radius:16px;border:2px solid var(--cyan);background:#17102c;box-shadow:0 0 16px #25e0ff33}
   .act{width:100%;text-align:left;background:var(--panel2);border:1px solid #392a63;border-radius:10px;
     padding:10px 13px;margin:6px 0;cursor:pointer;color:var(--ink);font-family:inherit;transition:border-color .15s, transform .1s}
   .act:hover{border-color:var(--cyan)}.act:active{transform:scale(.985)}
@@ -162,7 +168,7 @@
   .designerGrid{display:grid;grid-template-columns:repeat(3,minmax(150px,1fr));gap:12px}.designerGrid label{display:flex;flex-direction:column;gap:5px;color:#aaa0c7;font:11px var(--mono)}
   .designerGrid input,.designerGrid select,.designerGrid textarea{background:#090713;border:1px solid #3b3158;border-radius:7px;color:#fff;padding:8px;font:12px var(--mono)}
   .designerGrid textarea{min-height:64px;resize:vertical}.designerWide{grid-column:span 3}.designerActions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}.designerActions button{border:1px solid var(--cyan);background:#142033;color:#fff;border-radius:999px;padding:9px 14px;cursor:pointer;font:11px var(--mono)}
-  .npcBuilder{display:grid;grid-template-columns:280px 1fr;gap:18px}.npcAvatarStage{height:430px;border:1px solid #493773;border-radius:14px;background:radial-gradient(circle at 50% 35%,#30204f,#090611 70%);overflow:hidden;position:sticky;top:0}.npcAvatarStage canvas{width:100%;height:100%;display:block}.npcAvatarStage img{position:absolute;right:12px;top:12px;width:68px;height:68px;border-radius:50%;object-fit:cover;border:3px solid var(--orange);background:#171021;display:none;box-shadow:0 4px 18px #000}.profileLookup{display:flex;gap:7px}.profileLookup input{flex:1}.profileLookup button{border:1px solid var(--orange);background:#2b1b08;color:#fff;border-radius:7px;padding:8px;cursor:pointer}.designerGrid input[readonly],.designerGrid textarea[readonly]{color:#a99fc4;background:#12101b}
+  .npcBuilder{display:grid;grid-template-columns:280px 1fr;gap:18px}.npcAvatarStage{height:430px;border:1px solid #493773;border-radius:14px;background:radial-gradient(circle at 50% 35%,#30204f,#090611 70%);overflow:hidden;position:sticky;top:0}.npcAvatarStage canvas{width:100%;height:100%;display:block}.npcAvatarStage img{position:absolute;right:12px;top:12px;width:68px;height:68px;border-radius:50%;object-fit:cover;border:3px solid var(--orange);background:#171021;display:none;box-shadow:0 4px 18px #000}.profileLookup{display:flex;gap:7px;min-width:0}.profileLookup input{flex:1;min-width:0}.profileLookup button{flex:0 0 auto;white-space:nowrap;border:1px solid var(--orange);background:#2b1b08;color:#fff;border-radius:7px;padding:8px;cursor:pointer}.designerGrid input[readonly],.designerGrid textarea[readonly]{color:#a99fc4;background:#12101b}
   #designerStatus{margin-top:10px;color:var(--dim);font:11px var(--mono);white-space:pre-wrap}@media(max-width:700px){.npcBuilder{grid-template-columns:1fr}.npcAvatarStage{height:300px;position:relative}.designerGrid{grid-template-columns:1fr}.designerWide{grid-column:span 1}}
   #boothDesigner{position:fixed;inset:0;z-index:75;background:rgba(3,2,9,.94);display:none;align-items:center;justify-content:center;padding:18px}#boothDesigner .designerCard{width:min(1120px,96vw);max-height:94vh;overflow:auto;background:#100b20;border:1px solid #554681;border-radius:18px;padding:20px;box-shadow:0 24px 80px #000}.boothBuilder{display:grid;grid-template-columns:minmax(360px,1.2fr) minmax(330px,1fr);gap:18px}.boothVisual{display:flex;flex-direction:column;gap:9px}.boothPalette{display:flex;gap:7px;flex-wrap:wrap;align-items:center}.boothPalette button{border:1px solid #625087;background:#20183a;color:#fff;border-radius:7px;padding:7px 10px;cursor:grab;font:11px var(--mono)}.boothRotate{display:flex;align-items:center;gap:5px;color:var(--dim);font:10px var(--mono)}.boothRotate input{width:110px}#boothCanvas{position:relative;min-height:430px;overflow:hidden;border:2px solid var(--cyan);border-radius:12px;background:#171326;touch-action:none;perspective:900px}#booth3dCanvas{position:absolute;inset:0;width:100%;height:100%;display:block}#boothScene{position:absolute;left:12%;right:12%;top:15%;bottom:32%;transform-style:preserve-3d;transform-origin:50% 82%;transition:transform .08s linear}.boothCanvasItem{position:absolute;transform:translate(-50%,-50%) translateZ(12px);box-sizing:border-box;width:90px;height:56px;min-width:42px;min-height:34px;padding:7px;border:1px dashed #ffffff80;border-radius:6px;background:#18263d55;color:#fff;text-align:center;cursor:move;user-select:none;font:10px var(--mono);box-shadow:0 2px 8px #0008;opacity:.38}.boothCanvasItem:hover,.boothCanvasItem.selected{opacity:.9}.boothCanvasItem[data-type=text],.boothCanvasItem[data-type=banner]{width:150px;height:48px;background:#ff990066;color:#fff;font-weight:bold}.boothCanvasItem[data-type=counter]{width:150px;height:85px}.boothCanvasItemLabel{pointer-events:none}.boothResize{position:absolute;right:-6px;bottom:-6px;width:17px;height:17px;border:2px solid #fff;border-radius:4px;background:var(--pink);cursor:nwse-resize}.boothCanvasItem.selected{outline:3px solid var(--pink)}.boothHint{font:10px var(--mono);color:var(--dim)}#boothDesignerStatus{margin-top:10px;color:var(--dim);font:11px var(--mono);white-space:pre-wrap}@media(max-width:800px){.boothBuilder{grid-template-columns:1fr}#boothCanvas{min-height:330px}}
   #arrestScene{position:fixed;inset:0;z-index:120;display:none;overflow:hidden;background:#050711;color:#fff;font-family:var(--mono)}
@@ -282,11 +288,16 @@
  <div class="designerCard">
   <h2 style="margin:0 0 5px">Design an NPC</h2><p style="margin:0 0 16px;color:var(--dim);font:12px var(--mono)">Creates a validated config and opens GitHub’s contribution editor for a PR to <b>ljacobsson/reinvent-simulator</b>.</p>
   <div class="npcBuilder"><div class="npcAvatarStage"><canvas id="npcAvatarCanvas"></canvas><img id="ndProfilePhoto" alt="Fetched Builder profile avatar"></div><div class="designerGrid">
-   <label>AWS Builder alias<input id="ndAlias" placeholder="your-builder-alias"></label><label>Name<input id="ndName" placeholder="Your name"></label><label>Title<input id="ndTitle" placeholder="Your role or specialty"></label>
+   <label>AWS Builder alias<div class="profileLookup"><input id="ndAlias" placeholder="your-builder-alias"><button id="ndLookup" type="button">LOOK UP</button></div></label><label>Name<input id="ndName" placeholder="Your name"></label><label>Title<input id="ndTitle" placeholder="Your role or specialty"></label>
    <label class="designerWide">Profile image URL<input id="ndAvatar" type="url" placeholder="https://example.com/avatar.jpg"></label>
    <label>Body type<select id="ndGender"><option value="neutral">Neutral</option><option value="female">Feminine</option><option value="male">Masculine</option></select></label>
    <label>Hair style<select id="ndHair"><option value="short">Short</option><option value="buzz-cut">Buzz cut</option><option value="curly-short">Curly</option><option value="side-part">Side part</option><option value="bob">Bob</option><option value="long-straight">Long straight</option><option value="long-wavy">Long wavy</option><option value="ponytail">Ponytail</option><option value="braided-bun">Braided bun</option><option value="mohawk">Mohawk</option><option value="bald">Bald</option></select></label>
-   <label>Skin tone<input id="ndSkin" type="color" value="#d9a476"></label><label>Hair color<input id="ndHairColor" type="color" value="#3b2418"></label><label>Top color<input id="ndTop" type="color" value="#25e0ff"></label><label>Pants color<input id="ndBottom" type="color" value="#24304a"></label>
+   <label>Hat<select id="ndHat"><option value="none">None</option><option value="baseball-cap">Baseball cap</option><option value="beanie">Beanie</option><option value="cowboy">Cowboy hat</option><option value="fedora">Fedora</option><option value="top-hat">Top hat</option><option value="party-hat">Party hat</option><option value="wizard-hat">Wizard hat</option></select></label>
+   <label>Hat color<input id="ndHatColor" type="color" value="#ff9900"></label>
+   <label>Top style<select id="ndTopStyle"><option value="t-shirt">T-shirt</option><option value="hoodie">Hoodie</option></select></label>
+   <label>Bottom style<select id="ndBottomStyle"><option value="trousers">Trousers</option><option value="shorts">Shorts</option><option value="skirt">Skirt</option></select></label>
+   <label>Backpack color<input id="ndBackpackColor" type="color" value="#3a7bd5"></label>
+   <label>Skin tone<input id="ndSkin" type="color" value="#d9a476"></label><label>Hair color<input id="ndHairColor" type="color" value="#3b2418"></label><label>Top color<input id="ndTop" type="color" value="#25e0ff"></label><label>Bottom color<input id="ndBottom" type="color" value="#24304a"></label>
    <label class="designerWide">Bio<textarea id="ndBio" placeholder="Tell players who you are and what you build"></textarea></label>
    <label>Blog<input id="ndBlog" type="url" placeholder="https://example.com"></label><label>GitHub<input id="ndGithubUrl" type="url" placeholder="https://github.com/username"></label><label>LinkedIn<input id="ndLinkedIn" type="url" placeholder="https://linkedin.com/in/username"></label>
    <label>Dev.to<input id="ndDevto" type="url" placeholder="https://dev.to/username"></label><label>Personal / sessions<input id="ndPersonal" type="url" placeholder="https://sessionize.com/username"></label>
@@ -322,10 +333,15 @@
         <div class="avatarFields">
           <label>Body type<select id="avGender"><option value="neutral">Neutral</option><option value="female">Feminine</option><option value="male">Masculine</option></select></label>
           <label>Hair style<select id="avHairStyle"><option value="short">Short</option><option value="buzz-cut">Buzz cut</option><option value="curly-short">Curly</option><option value="side-part">Side part</option><option value="bob">Bob</option><option value="long-straight">Long straight</option><option value="long-wavy">Long wavy</option><option value="ponytail">Ponytail</option><option value="braided-bun">Braided bun</option><option value="mohawk">Mohawk</option><option value="bald">Bald</option></select></label>
+          <label>Hat<select id="avHat"><option value="none">None</option><option value="baseball-cap">Baseball cap</option><option value="beanie">Beanie</option><option value="cowboy">Cowboy hat</option><option value="fedora">Fedora</option><option value="top-hat">Top hat</option><option value="party-hat">Party hat</option><option value="wizard-hat">Wizard hat</option></select></label>
+          <label>Hat color<input id="avHatColor" type="color" value="#ff9900"></label>
+          <label>Top style<select id="avTopStyle"><option value="t-shirt">T-shirt</option><option value="hoodie">Hoodie</option></select></label>
+          <label>Bottom style<select id="avBottomStyle"><option value="trousers">Trousers</option><option value="shorts">Shorts</option><option value="skirt">Skirt</option></select></label>
+          <label>Backpack color<input id="avBackpackColor" type="color" value="#3a7bd5"></label>
           <label>Skin tone<input id="avSkin" type="color" value="#f2c9a0"></label>
           <label>Hair color<input id="avHair" type="color" value="#3b2418"></label>
           <label>Top color<input id="avTop" type="color" value="#ff9900"></label>
-          <label>Pants color<input id="avBottom" type="color" value="#24304a"></label>
+          <label>Bottom color<input id="avBottom" type="color" value="#24304a"></label>
           <label class="hotelChoice">Your hotel<select id="hotelSelect"></select></label>
         </div>
         <button class="avatarRandom" id="avatarRandom" type="button">SURPRISE ME</button>
@@ -338,7 +354,7 @@
 
 <div class="overlay" id="venueUI" style="display:none">
   <div class="card">
-    <div id="vTitle"></div><div id="vDesc"></div><div id="vActs"></div>
+    <div id="vHeader"><img id="vPhoto" alt=""><div id="vHeaderText"><div id="vTitle"></div><div id="vDesc"></div></div></div><div id="vActs"></div>
     <button class="btn ghost" id="vClose">Walk away</button>
   </div>
 </div>
@@ -652,8 +668,19 @@ function activeKeynote(){for(var i=0;i<KEYNOTES.length;i++){var kn=KEYNOTES[i];
   if(kn.day===st.day&&st.min>=kn.from-30&&st.min<=kn.to)return kn;}return null;}
 
 /* ================= MENUS ================= */
+function hideMenuPhoto(){
+  var photo=$("vPhoto");photo.onload=photo.onerror=null;photo.removeAttribute('src');photo.style.display='none';photo.alt='';$("venueUI").classList.remove('hasNpcPhoto');
+}
+function showNpcMenuPhoto(url,name){
+  url=typeof url==='string'?url.trim():'';
+  if(!url||/^(?:https?:\/\/)?(?:www\.)?example\.com(?:\/|$)/i.test(url)){hideMenuPhoto();return;}
+  var photo=$("vPhoto");photo.style.display='none';photo.alt=(name||'NPC')+' profile photo';
+  photo.onload=function(){if(photo.getAttribute('src')===url){photo.style.display='block';$("venueUI").classList.add('hasNpcPhoto');}};
+  photo.onerror=function(){if(photo.getAttribute('src')===url)hideMenuPhoto();};
+  photo.setAttribute('src',url);
+}
 function openMenu(title,desc,actions){
-  paused=true;$("venueUI").style.display="flex";
+  hideMenuPhoto();paused=true;$("venueUI").style.display="flex";
   $("vTitle").textContent=title;$("vDesc").textContent=desc||"";
   var box=$("vActs");box.innerHTML="";
   actions.forEach(function(a){
@@ -1061,9 +1088,9 @@ function checkVitals(){
 /* ================= 3D WORLD (Three.js) ================= */
 var THREEJS, renderer, overlayRenderer, scene, overlayScene, cssRenderer, cssScene, cam, clock, boothDepthMaterial;
 var player3d, playerGroup, legL, legR, armL, armR, torso, pack, playerFootLift=0;
-var avatarAppearance={gender:'neutral',skin:0xf2c9a0,top:0xff9900,bottom:0x24304a,hair:0x3b2418,hairStyle:'short'};
+var avatarAppearance={gender:'neutral',skin:0xf2c9a0,top:0xff9900,bottom:0x24304a,hair:0x3b2418,hairStyle:'short',hat:'none',topStyle:'t-shirt',bottomStyle:'trousers',backpackColor:0x3a7bd5};
 var avatarPreviewRenderer=null,avatarPreviewScene=null,avatarPreviewCamera=null,avatarPreviewModel=null,avatarPreviewRunning=false;
-var npcDesignerRenderer=null,npcDesignerScene=null,npcDesignerCamera=null,npcDesignerModel=null;
+var npcDesignerRenderer=null,npcDesignerScene=null,npcDesignerCamera=null,npcDesignerModel=null,npcBuilderProgramLabel='';
 var buildings=[], exteriorWalkSurfaces=[], exteriorMeshColliders=[], exteriorColliderGrid=Object.create(null), doorPoints=[], exteriorHotelAreas=[], palms=[], cars=[], helicopters=[], showgirls=[], cowboys=[], starField, moon;
 var ticketStand=null,ticketStandPoint=null,ridingHelicopter=false,helicopterRideProgress=0,helicopterRideCurve=null,helicopterRideCraft=null,helicopterRideSavedPos=null,helicopterRideClearance=[];
 var npcs=[],npcConfigs=[],nextNpcConfig=0,npcSpeechBubble=null,npcSpeechSpeaker=null,npcSpeechUntil=0,npcSpeechNext=0,npcConversation=null,interiorNpcPopulated={};
@@ -1145,7 +1172,7 @@ function npcDesignerConfig(){
   var cfg={
     id:id,name:name,title:title,tagline:val('ndBio')||title,photoUrl:val('ndAvatar')||'https://example.com/avatar.jpg',
     links:links,
-    appearance:{gender:val('ndGender'),skinTone:val('ndSkin'),hair:{style:val('ndHair'),color:val('ndHairColor')},top:{style:'conference-top',color:val('ndTop')},bottom:{style:'conference-pants',color:val('ndBottom')},accessories:['conference-badge'],emote:'friendly-wave'},
+    appearance:{gender:val('ndGender'),skinTone:val('ndSkin'),hair:{style:val('ndHair'),color:val('ndHairColor')},hat:{style:val('ndHat'),color:val('ndHatColor')},top:{style:val('ndTopStyle'),color:val('ndTop')},bottom:{style:val('ndBottomStyle'),color:val('ndBottom')},backpack:{color:val('ndBackpackColor')},accessories:['conference-badge'].concat(npcBuilderProgramLabel==='HERO'?['aws-hero']:npcBuilderProgramLabel?['community-builder']:[]),emote:'friendly-wave'},
     factoids:authoredFacts.length?authoredFacts:[name+' is attending re:Invent in Las Vegas.'],jokes:jokes.length?jokes:['My cloud joke is still scaling up.'],
     roaming:{spawnAreas:['venetian','expo'],walkSpeed:5.5,pauseSeconds:{min:3,max:9},wanderRadius:55},
     interaction:{greeting:greeting,dialogue:dialogue.length?dialogue:[greeting],rewards:{social:6,knowledge:6,vibes:3},cooldownSeconds:90}
@@ -1157,19 +1184,49 @@ function npcDesignerConfig(){
 }
 function npcDesignerJson(){return JSON.stringify(npcDesignerConfig(),null,2)+'\n';}
 function npcDesignerStatus(message,bad){$('designerStatus').style.color=bad?'#ff8fae':'#8fffc2';$('designerStatus').textContent=message;}
+function builderProfileApiUrl(){return window.BUILDER_PROFILE_API_URL||'/profile';}
+function firstProfileValue(profile,keys){for(var i=0;i<keys.length;i++){var value=profile&&profile[keys[i]];if(typeof value==='string'&&value.trim())return value.trim();}return '';}
+async function lookupBuilderProfile(){
+  var alias=$('ndAlias').value.trim(),button=$('ndLookup');
+  if(!alias){npcDesignerStatus('Enter an AWS Builder alias first.',true);return;}
+  npcBuilderProgramLabel='';
+  if(npcDesignerRenderer)rebuildNpcDesignerAvatar();
+  button.disabled=true;button.textContent='LOOKING…';npcDesignerStatus('Looking up '+alias+'…',false);
+  try{
+    var response=await fetch(builderProfileApiUrl(),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({alias:alias})});
+    var payload=await response.json().catch(function(){return {};});
+    if(!response.ok)throw new Error(payload.message||payload.error||('Profile lookup failed ('+response.status+').'));
+    var profile=payload.profile||payload.data||payload,basic=profile.basicInfo||profile,socials=profile.socials||{},programs=Array.isArray(profile.awsPrograms)?profile.awsPrograms:[];
+    if(programs.some(function(program){return String(program.programName||'').toUpperCase()==='HERO';}))npcBuilderProgramLabel='HERO';
+    else if(programs.some(function(program){var name=String(program.programName||'').toUpperCase();return name==='CC'||name==='COMMUNITY_BUILDER';}))npcBuilderProgramLabel='Community\nBuilder';
+    var canonicalAlias=firstProfileValue(basic,['alias']),name=firstProfileValue(basic,['displayName','name','fullName']),title=firstProfileValue(basic,['title','jobTitle','headline']),photo=firstProfileValue(basic,['avatar','photoUrl','profilePhotoUrl','avatarUrl','imageUrl']),bio=firstProfileValue(basic,['bio']);
+    if(canonicalAlias)$('ndAlias').value=canonicalAlias;if(name)$('ndName').value=name;if(title)$('ndTitle').value=title;if(bio)$('ndBio').value=bio;if(photo){$('ndAvatar').value=photo;$('ndAvatar').dispatchEvent(new Event('input'));}
+    [['blog','ndBlog'],['github','ndGithubUrl'],['linkedIn','ndLinkedIn'],['devto','ndDevto'],['personal','ndPersonal']].forEach(function(item){var url=firstProfileValue(socials,[item[0]]);if(url)$(item[1]).value=url;});
+    npcDesignerStatus(name||title||photo||bio?'Builder profile found. Review the imported details before contributing.':'Builder profile found, but it did not contain importable public details.',false);
+    if(npcDesignerRenderer)rebuildNpcDesignerAvatar();
+  }catch(error){npcDesignerStatus(error.message||'Builder profile lookup failed.',true);}
+  finally{button.disabled=false;button.textContent='LOOK UP';}
+}
+function clearNpcDesignerDraft(){
+  document.querySelectorAll('#npcDesigner input,#npcDesigner textarea,#npcDesigner select').forEach(function(field){
+    if(field.id==='ndAlias')return;
+    if(field.tagName==='SELECT')field.selectedIndex=0;
+    else field.value=field.defaultValue||'';
+  });
+  var photo=$('ndProfilePhoto');photo.removeAttribute('src');photo.style.display='none';npcBuilderProgramLabel='';
+  if(npcDesignerRenderer)rebuildNpcDesignerAvatar();
+}
 $('ndAvatar').addEventListener('input',function(){var photo=$('ndProfilePhoto'),url=this.value.trim();if(url){photo.src=url;photo.style.display='block';}else{photo.removeAttribute('src');photo.style.display='none';}});
+$('ndLookup').onclick=lookupBuilderProfile;
+$('ndAlias').addEventListener('keydown',function(event){if(event.key==='Enter'){event.preventDefault();lookupBuilderProfile();}});
+$('ndAlias').addEventListener('input',clearNpcDesignerDraft);
 $('designNpcBtn').onclick=function(){paused=true;$('npcDesigner').style.display='flex';initNpcDesignerAvatar();npcDesignerStatus('Builder alias, name, and greeting are required. Everything else is optional.',false);};
 $('ndClose').onclick=function(){$('npcDesigner').style.display='none';paused=false;};
 $('ndPreview').onclick=function(){try{var cfg=npcDesignerConfig();npcConfigs.push(cfg);nextNpcConfig=npcConfigs.length-1;$('npcDesigner').style.display='none';paused=false;spawnNpcNearPlayer();npcDesignerStatus('',false);}catch(e){npcDesignerStatus(e.message,true);}};
 $('ndDownload').onclick=function(){try{var cfg=npcDesignerConfig(),blob=new Blob([JSON.stringify(cfg,null,2)+'\n'],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=cfg.id+'.json';a.click();setTimeout(function(){URL.revokeObjectURL(a.href);},1000);npcDesignerStatus('Downloaded '+cfg.id+'.json',false);}catch(e){npcDesignerStatus(e.message,true);}};
 $('ndGithub').onclick=function(){
-  try{
-    var cfg=npcDesignerConfig(),content=JSON.stringify(cfg,null,2)+'\n';
-    navigator.clipboard&&navigator.clipboard.writeText(content).catch(function(){});
-    var url='https://github.com/ljacobsson/reinvent-simulator/new/main/npcs?filename='+encodeURIComponent(cfg.id+'.json')+'&value='+encodeURIComponent(content)+'&message='+encodeURIComponent('Add NPC '+cfg.name);
-    window.open(url,'_blank','noopener');
-    npcDesignerStatus('Opened GitHub with the NPC file prefilled. Commit to a new branch, add "'+cfg.id+'.json" to npcs/index.json, then choose “Create pull request”. The JSON is also copied to your clipboard.',false);
-  }catch(e){npcDesignerStatus(e.message,true);}
+  window.open('https://github.com/ljacobsson/reinvent-simulator/blob/main/CONTRIBUTING.md','_blank','noopener');
+  npcDesignerStatus('Opened the contribution guide. Fork the repository first, then follow the short checklist.',false);
 };
 
 /* ---- Sponsor booth designer ---- */
@@ -5199,22 +5256,29 @@ async function loadOsmBuildings(){
 /* ---- character (GTA behind view) ---- */
 function makeHumanoid(opts){
   opts=opts||{};
-  var root=new THREEJS.Group(),skin=opts.skin||0xd2a078,top=opts.top||0x2a2050,bottom=opts.bottom||0x263047,hair=opts.hair||0x302019;
+  var root=new THREEJS.Group(),skin=opts.skin||0xd2a078,top=opts.top||0x2a2050,bottom=opts.bottom||0x263047,hair=opts.hair||0x302019,topStyle=opts.topStyle==='hoodie'?'hoodie':'t-shirt',bottomStyle=opts.bottomStyle==='shorts'||opts.bottomStyle==='skirt'?opts.bottomStyle:'trousers';
   function mat(c){return new THREEJS.MeshLambertMaterial({color:c});}
   function sphere(r,c,sx,sy,sz){var m=new THREEJS.Mesh(new THREEJS.SphereGeometry(r,14,10),mat(c));m.scale.set(sx||1,sy||1,sz||1);return m;}
   function cyl(r1,r2,h,c){return new THREEJS.Mesh(new THREEJS.CylinderGeometry(r1,r2,h,10),mat(c));}
   function limb(side,isArm){
-    var pivot=new THREEJS.Group(),upper=cyl(isArm?.38:.48,isArm?.44:.55,isArm?1.55:1.75,isArm?top:bottom);
+    var pivot=new THREEJS.Group(),upperColor=isArm?top:(bottomStyle==='skirt'?skin:bottom),upper=cyl(isArm?.38:.48,isArm?.44:.55,isArm?1.55:1.75,upperColor);
     upper.position.y=-(isArm?.78:.88);pivot.add(upper);
-    var joint=sphere(isArm?.42:.54,isArm?skin:bottom);joint.position.y=-(isArm?1.52:1.7);pivot.add(joint);
+    var jointColor=isArm?(topStyle==='hoodie'?top:skin):(bottomStyle==='trousers'?bottom:skin),joint=sphere(isArm?.42:.54,jointColor);joint.position.y=-(isArm?1.52:1.7);pivot.add(joint);
     var lowerPivot=new THREEJS.Group();lowerPivot.position.y=-(isArm?1.58:1.78);pivot.add(lowerPivot);
-    var lower=cyl(isArm?.32:.42,isArm?.38:.48,isArm?1.45:1.7,isArm?skin:bottom);lower.position.y=-(isArm?.72:.85);lowerPivot.add(lower);
+    var lowerColor=isArm?(topStyle==='hoodie'?top:skin):(bottomStyle==='trousers'?bottom:skin),lower=cyl(isArm?.32:.42,isArm?.38:.48,isArm?1.45:1.7,lowerColor);lower.position.y=-(isArm?.72:.85);lowerPivot.add(lower);
     var end=sphere(isArm?.4:.5,isArm?skin:bottom,1,isArm?1:0.72,isArm?1:1.35);end.position.set(0,-(isArm?1.42:1.67),isArm?.08:.18);lowerPivot.add(end);
     pivot.userData.lower=lowerPivot;return pivot;
   }
   var gender=opts.gender||'neutral',female=gender==='female',male=gender==='male';
   var hips=sphere(female?1.28:1.15,bottom,1,female?.62:.55,.72);hips.position.y=3.05;root.add(hips);
   var torsoMesh=cyl(female?1.02:.95,female?1.16:male?1.34:1.28,2.65,top);torsoMesh.position.y=4.55;root.add(torsoMesh);
+  if(topStyle==='hoodie'){
+    var hood=sphere(1.05,top,1,.82,.42);hood.position.set(0,6.02,-.48);root.add(hood);
+    var pocket=box(1.05,.55,.14,top);pocket.position.set(0,4.15,1.03);root.add(pocket);
+  }
+  if(bottomStyle==='skirt'){
+    var skirt=cyl(1.08,1.48,1.95,bottom);skirt.position.y=3.15;root.add(skirt);
+  }
   if(female){
     // One shallow, clothed chest contour blends into the torso without separate spherical forms.
     var bust=sphere(.82,top,1.34,.56,.46);
@@ -5261,6 +5325,30 @@ function makeHumanoid(opts){
     hairMesh.visible=false;
     for(var mh=0;mh<6;mh++){var spike=cyl(0,.18,.75,hair);spike.position.set(0,7.72,(-.55+mh*.22));root.add(spike);}
   }
+  var hat=opts.hat||'none';
+  var hatColor=opts.hatColor===undefined?top:opts.hatColor;
+  if(hat==='baseball-cap'){
+    var capCrown=sphere(1.12,hatColor,.9,.48,.9);capCrown.position.y=7.9;
+    var capBrim=box(1.45,.12,.72,hatColor);capBrim.position.set(0,7.82,.68);capBrim.rotation.x=-.1;
+    root.add(capCrown,capBrim);
+  }else if(hat==='beanie'){
+    var knit=sphere(1.13,hatColor,.89,.62,.89);knit.position.y=7.91;
+    root.add(knit);
+  }else if(hat==='cowboy'||hat==='fedora'||hat==='top-hat'){
+    var hatBrim=cyl(hat==='cowboy'?1.45:1.25,hat==='cowboy'?1.45:1.25,.13,hatColor);hatBrim.position.y=7.95;
+    root.add(hatBrim);
+    var crownHeight=hat==='top-hat'?1.5:hat==='cowboy'?.62:.72;
+    var hatCrown=cyl(hat==='top-hat'?.72:.68,hat==='top-hat'?.72:.84,crownHeight,hatColor);hatCrown.position.y=7.98+crownHeight*.5;
+    root.add(hatCrown);
+  }else if(hat==='party-hat'||hat==='wizard-hat'){
+    var coneHeight=hat==='wizard-hat'?2.3:1.55;
+    var cone=cyl(0,hat==='wizard-hat'?.78:.58,coneHeight,hatColor);cone.position.y=7.9+coneHeight*.5;
+    root.add(cone);
+    if(hat==='wizard-hat'){
+      var wizardBrim=cyl(1.25,1.25,.12,hatColor);wizardBrim.position.y=7.94;
+      root.add(wizardBrim);
+    }
+  }
   var eyeL=sphere(.12,0xffffff,1,.7,.35),eyeR=eyeL.clone();eyeL.position.set(-.34,7.17,.79);eyeR.position.set(.34,7.17,.79);root.add(eyeL,eyeR);
   var pupilL=sphere(.065,0x17202b,1,1,.45),pupilR=pupilL.clone();pupilL.position.set(-.34,7.16,.88);pupilR.position.set(.34,7.16,.88);root.add(pupilL,pupilR);
   var browL=box(.42,.07,.08,hair),browR=browL.clone();browL.position.set(-.34,7.43,.83);browR.position.set(.34,7.43,.83);root.add(browL,browR);
@@ -5279,6 +5367,25 @@ function makeHumanoid(opts){
   return root;
 }
 function avatarHex(value){return parseInt(String(value||'#000000').replace('#',''),16);}
+function addBackpack(model,label,color){
+  var backpack=box(1.6,2,1,color===undefined?0x3a7bd5:color);backpack.position.set(0,4.4,-1);model.add(backpack);
+  if(label){
+    var canvas=document.createElement('canvas');canvas.width=256;canvas.height=192;
+    var context=canvas.getContext('2d');context.clearRect(0,0,canvas.width,canvas.height);context.fillStyle='#ffffff';context.textAlign='center';context.textBaseline='middle';context.font=label==='HERO'?'bold 64px sans-serif':'bold 38px sans-serif';
+    var lines=label==='HERO'?['HERO']:['Community','Builder'];
+    lines.forEach(function(line,index){context.fillText(line,128,lines.length===1?96:65+index*65);});
+    var texture=new THREEJS.CanvasTexture(canvas);texture.minFilter=THREEJS.LinearFilter;
+    var material=new THREEJS.MeshBasicMaterial({map:texture,transparent:true,side:THREEJS.DoubleSide});
+    var sign=new THREEJS.Mesh(new THREEJS.PlaneGeometry(1.35,1.15),material);sign.position.set(0,0,-.511);sign.rotation.y=Math.PI;backpack.add(sign);
+  }
+  return backpack;
+}
+function npcBackpackLabel(cfg){
+  var accessories=cfg&&cfg.appearance&&cfg.appearance.accessories||[];
+  if(accessories.indexOf('aws-hero')>=0)return 'HERO';
+  if(accessories.indexOf('community-builder')>=0)return 'Community Builder';
+  return '';
+}
 function addConferencePass(model){
   if(!model||model.userData.conferencePass)return model&&model.userData.conferencePass;
   var pass=new THREEJS.Group();pass.name='conferencePass';
@@ -5297,7 +5404,7 @@ function rebuildAvatarPreview(){
   if(avatarPreviewModel){avatarPreviewScene.remove(avatarPreviewModel);avatarPreviewModel.traverse(function(o){if(o.geometry)o.geometry.dispose();if(o.material)o.material.dispose();});}
   avatarPreviewModel=makeHumanoid(avatarAppearance);
   // Match the backpack and badge used by the playable model.
-  var previewPack=box(1.6,2,1,0x3a7bd5);previewPack.position.set(0,4.4,-1);avatarPreviewModel.add(previewPack);
+  addBackpack(avatarPreviewModel,'',avatarAppearance.backpackColor);
   if(st.badge)addConferencePass(avatarPreviewModel);
   avatarPreviewModel.position.y=-4;avatarPreviewScene.add(avatarPreviewModel);
 }
@@ -5305,6 +5412,11 @@ function readAvatarBuilder(){
   avatarAppearance={
     gender:$("avGender").value,
     hairStyle:$("avHairStyle").value,
+    hat:$("avHat").value,
+    hatColor:avatarHex($("avHatColor").value),
+    backpackColor:avatarHex($("avBackpackColor").value),
+    topStyle:$("avTopStyle").value,
+    bottomStyle:$("avBottomStyle").value,
     skin:avatarHex($("avSkin").value),hair:avatarHex($("avHair").value),
     top:avatarHex($("avTop").value),bottom:avatarHex($("avBottom").value)
   };
@@ -5322,14 +5434,14 @@ function initAvatarBuilder(){
   avatarPreviewScene.add(new THREEJS.HemisphereLight(0xdcecff,0x30143f,2.1));
   var key=new THREEJS.DirectionalLight(0xffc77a,2.2);key.position.set(5,8,8);avatarPreviewScene.add(key);
   var rim=new THREEJS.DirectionalLight(0x25e0ff,1.8);rim.position.set(-6,4,-4);avatarPreviewScene.add(rim);
-  ['avGender','avHairStyle','avSkin','avHair','avTop','avBottom'].forEach(function(id){$(id).addEventListener('input',readAvatarBuilder);$(id).addEventListener('change',readAvatarBuilder);});
+  ['avGender','avHairStyle','avHat','avHatColor','avTopStyle','avBottomStyle','avBackpackColor','avSkin','avHair','avTop','avBottom'].forEach(function(id){$(id).addEventListener('input',readAvatarBuilder);$(id).addEventListener('change',readAvatarBuilder);});
   $("avatarRandom").onclick=function(){
-    var genders=['neutral','female','male'],styles=['short','buzz-cut','curly-short','side-part','bob','long-straight','long-wavy','ponytail','braided-bun','mohawk','bald'];
+    var genders=['neutral','female','male'],styles=['short','buzz-cut','curly-short','side-part','bob','long-straight','long-wavy','ponytail','braided-bun','mohawk','bald'],hats=['none','baseball-cap','beanie','cowboy','fedora','top-hat','party-hat','wizard-hat'],topStyles=['t-shirt','hoodie'],bottomStyles=['trousers','shorts','skirt'];
     var skins=['#f2c9a0','#d9a476','#b97850','#75452f','#4d2d22'],hairs=['#17120f','#3b2418','#7a3527','#d4aa6a','#6a5cff'];
     var tops=['#ff9900','#25e0ff','#ff2d95','#9b8cff','#4dff9d'],bottoms=['#24304a','#171923','#4b326f','#335a68'];
-    $("avGender").value=genders[Math.floor(Math.random()*genders.length)];$("avHairStyle").value=styles[Math.floor(Math.random()*styles.length)];
+    $("avGender").value=genders[Math.floor(Math.random()*genders.length)];$("avHairStyle").value=styles[Math.floor(Math.random()*styles.length)];$("avHat").value=hats[Math.floor(Math.random()*hats.length)];
     $("avSkin").value=skins[Math.floor(Math.random()*skins.length)];$("avHair").value=hairs[Math.floor(Math.random()*hairs.length)];
-    $("avTop").value=tops[Math.floor(Math.random()*tops.length)];$("avBottom").value=bottoms[Math.floor(Math.random()*bottoms.length)];readAvatarBuilder();
+    $("avTop").value=tops[Math.floor(Math.random()*tops.length)];$("avHatColor").value=tops[Math.floor(Math.random()*tops.length)];$("avBackpackColor").value=tops[Math.floor(Math.random()*tops.length)];$("avTopStyle").value=topStyles[Math.floor(Math.random()*topStyles.length)];$("avBottomStyle").value=bottomStyles[Math.floor(Math.random()*bottomStyles.length)];$("avBottom").value=bottoms[Math.floor(Math.random()*bottoms.length)];readAvatarBuilder();
   };
   readAvatarBuilder();avatarPreviewRunning=true;
   function renderAvatarPreview(){
@@ -5342,12 +5454,12 @@ function initAvatarBuilder(){
   }
   renderAvatarPreview();
 }
-function npcDesignerAppearance(){return {gender:$("ndGender").value,hairStyle:$("ndHair").value,skin:avatarHex($("ndSkin").value),hair:avatarHex($("ndHairColor").value),top:avatarHex($("ndTop").value),bottom:avatarHex($("ndBottom").value)};}
+function npcDesignerAppearance(){return {gender:$("ndGender").value,hairStyle:$("ndHair").value,hat:$("ndHat").value,hatColor:avatarHex($("ndHatColor").value),topStyle:$("ndTopStyle").value,bottomStyle:$("ndBottomStyle").value,backpackColor:avatarHex($("ndBackpackColor").value),skin:avatarHex($("ndSkin").value),hair:avatarHex($("ndHairColor").value),top:avatarHex($("ndTop").value),bottom:avatarHex($("ndBottom").value)};}
 function rebuildNpcDesignerAvatar(){
   if(!npcDesignerScene)return;
   if(npcDesignerModel){npcDesignerScene.remove(npcDesignerModel);npcDesignerModel.traverse(function(o){if(o.geometry)o.geometry.dispose();if(o.material){if(Array.isArray(o.material))o.material.forEach(function(m){m.dispose();});else o.material.dispose();}});}
   npcDesignerModel=makeHumanoid(npcDesignerAppearance());
-  var previewPack=box(1.6,2,1,0x3a7bd5);previewPack.position.set(0,4.4,-1);npcDesignerModel.add(previewPack);
+  addBackpack(npcDesignerModel,npcBuilderProgramLabel,npcDesignerAppearance().backpackColor);
   if(st.badge)addConferencePass(npcDesignerModel);
   npcDesignerModel.position.y=-4;npcDesignerScene.add(npcDesignerModel);
 }
@@ -5357,13 +5469,13 @@ function initNpcDesignerAvatar(){
   npcDesignerRenderer=new THREEJS.WebGLRenderer({canvas:canvas,alpha:true,antialias:true});npcDesignerRenderer.setPixelRatio(Math.min(devicePixelRatio||1,2));
   npcDesignerScene=new THREEJS.Scene();npcDesignerCamera=new THREEJS.PerspectiveCamera(32,1,.1,100);npcDesignerCamera.position.set(0,0,19);npcDesignerCamera.lookAt(0,0,0);
   npcDesignerScene.add(new THREEJS.HemisphereLight(0xdcecff,0x30143f,2.1));var key=new THREEJS.DirectionalLight(0xffc77a,2.2);key.position.set(5,8,8);npcDesignerScene.add(key);var rim=new THREEJS.DirectionalLight(0x25e0ff,1.8);rim.position.set(-6,4,-4);npcDesignerScene.add(rim);
-  ['ndGender','ndHair','ndSkin','ndHairColor','ndTop','ndBottom'].forEach(function(id){$(id).addEventListener('input',rebuildNpcDesignerAvatar);$(id).addEventListener('change',rebuildNpcDesignerAvatar);});rebuildNpcDesignerAvatar();
+  ['ndGender','ndHair','ndHat','ndHatColor','ndTopStyle','ndBottomStyle','ndBackpackColor','ndSkin','ndHairColor','ndTop','ndBottom'].forEach(function(id){$(id).addEventListener('input',rebuildNpcDesignerAvatar);$(id).addEventListener('change',rebuildNpcDesignerAvatar);});rebuildNpcDesignerAvatar();
   (function renderNpcDesigner(){requestAnimationFrame(renderNpcDesigner);if(!npcDesignerRenderer||$('npcDesigner').style.display==='none')return;if(npcDesignerModel)npcDesignerModel.rotation.y+=.008;var w=stage.clientWidth,h=stage.clientHeight;if(w&&h){npcDesignerRenderer.setSize(w,h,false);npcDesignerCamera.aspect=w/h;npcDesignerCamera.updateProjectionMatrix();npcDesignerRenderer.render(npcDesignerScene,npcDesignerCamera);}})();
 }
 function buildPlayer(){
   playerGroup=makeHumanoid(avatarAppearance);
   torso=playerGroup.userData.parts.torso;armL=playerGroup.userData.parts.armL;armR=playerGroup.userData.parts.armR;legL=playerGroup.userData.parts.legL;legR=playerGroup.userData.parts.legR;
-  pack=box(1.6,2,1,0x3a7bd5);pack.position.set(0,4.4,-1);playerGroup.add(pack);
+  pack=addBackpack(playerGroup,'',avatarAppearance.backpackColor);
   // The lanyard is awarded by registration, never by avatar creation.
   if(st.badge)addConferencePass(playerGroup);
   playerGroup.traverse(function(part){part.layers.set(1);});
@@ -5427,11 +5539,12 @@ function randomStripNpcPoint(){
   return {x:SPAWN.x,z:SPAWN.z};
 }
 function createNpcAt(cfg,x,z,area){
-  var shirt=npcColor(cfg.appearance.top.color,0x25e0ff),pants=npcColor(cfg.appearance.bottom.color,0x263047);
-  var npc=makeHumanoid({gender:cfg.appearance.gender,skin:npcSkin(cfg.appearance.skinTone),top:shirt,bottom:pants,hair:npcColor(cfg.appearance.hair.color,0x302019),hairStyle:cfg.appearance.hair.style});
+  var shirt=npcColor(cfg.appearance.top.color,0x25e0ff),pants=npcColor(cfg.appearance.bottom.color,0x263047),hatCfg=cfg.appearance.hat||'none';
+  var npc=makeHumanoid({gender:cfg.appearance.gender,skin:npcSkin(cfg.appearance.skinTone),top:shirt,bottom:pants,topStyle:cfg.appearance.top.style,bottomStyle:cfg.appearance.bottom.style,hair:npcColor(cfg.appearance.hair.color,0x302019),hairStyle:cfg.appearance.hair.style,hat:typeof hatCfg==='string'?hatCfg:hatCfg.style,hatColor:typeof hatCfg==='string'?shirt:npcColor(hatCfg.color,shirt)});
   // Configured NPCs are conference attendees. Entertainment characters such
   // as Thursday's rodeo cowboys use separate builders and remain unbadged.
   addConferencePass(npc);
+  addBackpack(npc,npcBackpackLabel(cfg),npcColor(cfg.appearance.backpack&&cfg.appearance.backpack.color,0x3a7bd5));
   npc.traverse(function(part){part.layers.set(1);});
   var a=Math.random()*Math.PI*2;
   npc.updateMatrixWorld(true);var bounds=new THREEJS.Box3().setFromObject(npc),footLift=Math.max(0,-bounds.min.y)+.04;
@@ -5672,6 +5785,7 @@ function interactWithNpc(npc){
   ];
   Object.keys(cfg.links||{}).forEach(function(label){actions.push({n:'Open '+label,d:cfg.links[label],f:function(){window.open(cfg.links[label],'_blank','noopener');}});});
   openMenu(cfg.name+' · '+cfg.title,'Choose what to ask.'+(cfg.tagline?'\n\n'+cfg.tagline:''),actions);
+  showNpcMenuPhoto(cfg.photoUrl,cfg.name);
   showNpcSpeech(npc,cfg.interaction.greeting,true);
 }
 
