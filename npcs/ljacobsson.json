@@ -1,0 +1,69 @@
+{
+  "id": "ljacobsson",
+  "name": "Lars Jacobsson",
+  "title": "Developer, Founder, CTO",
+  "tagline": "I build this game",
+  "photoUrl": "https://avatars.builderprofile.aws.dev/32SvoWEXeR9T21kiQ9KHuqUoXJw.webp",
+  "links": {
+    "github": "https://github.com/ljacobsson/",
+    "linkedIn": "https://www.linkedin.com/in/lajacobsson/"
+  },
+  "appearance": {
+    "gender": "male",
+    "skinTone": "#d9a476",
+    "hair": {
+      "style": "bald",
+      "color": "#3b2418"
+    },
+    "hat": {
+      "style": "baseball-cap",
+      "color": "#ff9900"
+    },
+    "top": {
+      "style": "t-shirt",
+      "color": "#ffaf24"
+    },
+    "bottom": {
+      "style": "shorts",
+      "color": "#24304a"
+    },
+    "backpack": {
+      "color": "#1c222c"
+    },
+    "accessories": [
+      "conference-badge",
+      "community-builder"
+    ],
+    "emote": "friendly-wave"
+  },
+  "factoids": [
+    "Casino Royale has the best value for money measured by time to strip (TTS) and time to expo (TTE). Casino Royale has a lower TTE than some rooms in the Venetian"
+  ],
+  "jokes": [
+    "My cloud joke is still scaling up."
+  ],
+  "roaming": {
+    "spawnAreas": [
+      "venetian",
+      "expo"
+    ],
+    "walkSpeed": 5.5,
+    "pauseSeconds": {
+      "min": 3,
+      "max": 9
+    },
+    "wanderRadius": 55
+  },
+  "interaction": {
+    "greeting": "Hello! Help make this game better :-)",
+    "dialogue": [
+      "Hi, please click contribute to design your own character. Submit it as a PR and you'll be wandering these streets with me forever"
+    ],
+    "rewards": {
+      "social": 6,
+      "knowledge": 6,
+      "vibes": 3
+    },
+    "cooldownSeconds": 90
+  }
+}
