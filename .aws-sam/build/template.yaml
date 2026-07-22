@@ -1,0 +1,54 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Builder profile lookup API for the reInvent simulator NPC designer
+Parameters:
+  BuilderSessionToken:
+    Type: String
+    Default: dummy
+    NoEcho: true
+  AllowedOrigin:
+    Type: String
+    Default: '*'
+Globals:
+  Function:
+    Runtime: nodejs24.x
+    Architectures:
+    - arm64
+    Timeout: 10
+    MemorySize: 1024
+Resources:
+  Api:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      CorsConfiguration:
+        AllowOrigins:
+        - Ref: AllowedOrigin
+        AllowHeaders:
+        - Content-Type
+        AllowMethods:
+        - POST
+  BuilderProfileFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: BuilderProfileFunction
+      Handler: profile.handler
+      Environment:
+        Variables:
+          BUILDER_SESSION_TOKEN:
+            Ref: BuilderSessionToken
+          ALLOWED_ORIGIN:
+            Ref: AllowedOrigin
+      Events:
+        LookupProfile:
+          Type: HttpApi
+          Properties:
+            ApiId:
+              Ref: Api
+            Path: /profile
+            Method: POST
+    Metadata:
+      SamResourceId: BuilderProfileFunction
+Outputs:
+  ApiUrl:
+    Value:
+      Fn::Sub: https://${Api}.execute-api.${AWS::Region}.${AWS::URLSuffix}/profile
