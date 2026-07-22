@@ -3,9 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>re:Invent Simulator — Survive a Week in Las Vegas</title>
-<meta name="description" content="Explore Las Vegas during a playful 3D re:Invent week. Attend sessions, meet community builders, visit sponsor booths, collect swag, and survive the conference.">
-<meta name="keywords" content="AWS re:Invent, re:Invent simulator, Las Vegas, 3D browser game, AWS community">
+<title>AWS re:Invent Simulator | Explore Las Vegas in 3D</title>
+<meta name="description" content="Play a free 3D AWS re:Invent simulator set in Las Vegas. Attend keynotes and sessions, meet builders, explore sponsor booths, collect swag, and survive the week.">
+<meta name="keywords" content="AWS re:Invent, AWS re:Invent simulator, re:Invent game, Las Vegas simulator, AWS conference, AWS community, cloud computing game, 3D browser game, AWS Builder, serverless">
+<meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
+<meta name="application-name" content="AWS re:Invent Simulator">
 <meta name="author" content="Lars Jacobsson">
 <meta name="theme-color" content="#0b0716">
 <meta name="color-scheme" content="dark">
@@ -13,11 +15,18 @@
 <meta property="og:site_name" content="re:Invent Simulator">
 <meta property="og:title" content="re:Invent Simulator — Survive a Week in Las Vegas">
 <meta property="og:description" content="Attend sessions, meet builders, explore the Strip, collect swag, and see if you can survive a full 3D conference week.">
-<meta name="twitter:card" content="summary">
+<meta property="og:image" content="./images/share.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1731">
+<meta property="og:image:height" content="909">
+<meta property="og:image:alt" content="AWS re:Invent Simulator on the Las Vegas Strip">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="re:Invent Simulator — Vegas 3D">
 <meta name="twitter:description" content="Explore the Strip, attend sessions, meet builders, and survive a playful 3D re:Invent week.">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <script>window.BUILDER_PROFILE_API_URL = 'https://3sg5bwuvf5.execute-api.eu-west-1.amazonaws.com/profile';</script>
+<meta name="twitter:image" content="./images/share.png">
+<meta name="twitter:image:alt" content="AWS re:Invent Simulator on the Las Vegas Strip">
 <script>
     !function(t,e){var o,n,p,r;e.__SV||(window.posthog && window.posthog.__loaded)||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.crossOrigin="anonymous",p.async=!0,p.src=s.api_host.replace(".i.posthog.com","-assets.i.posthog.com")+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="Ji Yi init fn mn Ur pn bn cn capture calculateEventProperties Sn register register_once register_for_session unregister unregister_for_session Tn getFeatureFlag getFeatureFlagPayload getFeatureFlagResult getAllFeatureFlags isFeatureEnabled reloadFeatureFlags updateFlags updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures on onFeatureFlags onSurveysLoaded onSessionId getSurveys getActiveMatchingSurveys renderSurvey displaySurvey cancelPendingSurvey canRenderSurvey canRenderSurveyAsync Mn identify setPersonProperties unsetPersonProperties group resetGroups setPersonPropertiesForFlags resetPersonPropertiesForFlags setGroupPropertiesForFlags resetGroupPropertiesForFlags reset shutdown setIdentity clearIdentity get_distinct_id getGroups get_session_id get_session_replay_url alias set_config startSessionRecording stopSessionRecording sessionRecordingStarted captureException addExceptionStep captureLog startExceptionAutocapture stopExceptionAutocapture loadToolbar get_property getSessionProperty Cn xn createPersonProfile setInternalOrTestUser In hn Pn opt_in_capturing opt_out_capturing has_opted_in_capturing has_opted_out_capturing get_explicit_consent_status is_capturing clear_opt_in_out_capturing debug Vr wt getPageViewId captureTraceFeedback captureTraceMetric an".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
     posthog.init('phc_t8qvpEPEuguDVkcb2UypiKg7spfmYrof84DT2h8Fz24S', {
@@ -621,7 +630,7 @@ var KEYNOTES=[
  {day:1,from:19*60,   to:21*60,   name:"Monday Night Live · Peter DeSantis",k:120,v:6, e:9,dur:120},
  {day:2,from:8*60,    to:10*60+30,name:"CEO Keynote · Matt Garman",          k:150,v:4, e:7,dur:150},
  {day:3,from:8*60+30, to:10*60+30,name:"AI Keynote · Swami Sivasubramanian", k:130,v:4, e:6,dur:120},
- {day:4,from:8*60+30, to:10*60+30,name:"Werner Vogels · Now Go Build",       k:200,v:14,e:6,dur:120}];
+ {day:4,from:8*60+30, to:10*60+30,name:"Thursday Innovation Keynote",         k:200,v:14,e:6,dur:120}];
 var SWAG=[
  ["AWS hoodie (THE hoodie)",40],["Vendor bucket hat",22],["Claw-machine plushie",25],
  ["LED yo-yo",18],["Pin set (3 rare)",20],["Compliance-themed socks",15],["Steel water bottle",14],
@@ -666,6 +675,56 @@ var RECAP_QUOTES=[
  "\u201cHydrate or die-drate. The desert does not negotiate.\u201d",
  "\u201cThe hallway track is the real conference.\u201d",
  "\u201cNobody has ever walked from the Venetian to Mandalay Bay just once.\u201d"];
+ROAM_EVENTS.push(
+ {t:"A chalk talk has consumed every writable surface nearby.",f:function(){},cls:"info"},
+ {t:"A service launched five minutes ago. Someone already has a production architecture for it.",f:function(){},cls:"info"},
+ {t:"The reserved seating queue is longer than the walk-in queue. Cloud economics.",f:function(){},cls:"info"},
+ {t:"You receive another tote bag. It contains two smaller tote bags.",f:function(){st.swag.push(["Recursive tote bag",4]);},cls:"good"},
+ {t:"The last hoodie is your size. This is statistically impossible. +6 vibes",f:function(){st.vibes+=6;},cls:"good"},
+ {t:"Two builders exchange business cards, then immediately connect on LinkedIn.",f:function(){st.s+=3;},cls:"good"},
+ {t:"A whiteboard diagram now has seventeen arrows and no data store.",f:function(){},cls:"info"},
+ {t:"You spot a Lambda sticker on a laptop older than Lambda.",f:function(){},cls:"info"},
+ {t:"The Certification Lounge has snacks and people pretending not to be exhausted.",f:function(){st.energy+=3;},cls:"good"},
+ {t:"You board the wrong shuttle and briefly become a conference venue.",f:function(){st.min+=8;},cls:"bad"},
+ {t:"The campus map says seven minutes. Your feet say twenty-two.",f:function(){st.energy-=3;},cls:"bad"},
+ {t:"A boxed lunch contains a cookie with enterprise support pricing.",f:function(){},cls:"info"},
+ {t:"Your power bank is charging another power bank. Distributed systems!",f:function(){},cls:"info"},
+ {t:"Conference Wi-Fi survives 60,000 laptops. Your hotel Wi-Fi fears one video call.",f:function(){},cls:"info"},
+ {t:"Someone begins a question with “This is more of a comment.” The room braces.",f:function(){},cls:"info"},
+ {t:"An architecture diagram uses every AWS icon except the service being discussed.",f:function(){},cls:"info"},
+ {t:"A Step Functions workflow would have made this coffee queue easier to debug.",f:function(){},cls:"info"},
+ {t:"Somebody whispers “us-east-1” and three architects knock on wood.",f:function(){},cls:"info"},
+ {t:"A CDK enthusiast says “just one quick synth.” Nobody believes them.",f:function(){},cls:"info"},
+ {t:"Serverless still has servers. This fact has now been announced for the 900th time.",f:function(){},cls:"info"},
+ {t:"Your badge flips backward exactly when someone tries to read your name.",f:function(){},cls:"info"},
+ {t:"The Expo carpet pattern has achieved eventual consistency with your vision.",f:function(){},cls:"info"},
+ {t:"A Community Builder recognizes you from the internet. +5 social",f:function(){st.s+=5;},cls:"good"},
+ {t:"An AWS Hero explains something complicated using a napkin and three french fries.",f:function(){st.k+=4;},cls:"good"},
+ {t:"A silent-disco headset is playing a keynote recap on the wrong channel.",f:function(){},cls:"info"},
+ {t:"The session room is cold enough to reduce your compute bill. -3 energy",f:function(){st.energy-=3;},cls:"bad"},
+ {t:"An escalator outage introduces you to multi-AZ leg day. -4 energy",f:function(){st.energy-=4;},cls:"bad"},
+ {t:"A water station appears exactly when you need it. +6 hydration",f:function(){st.hydration+=6;},cls:"good"},
+ {t:"A hallway conversation solves the problem your meeting could not. +4 knowledge",f:function(){st.k+=4;},cls:"good"},
+ {t:"A laptop has so many stickers that its original region is unknown.",f:function(){},cls:"info"}
+);
+RECAP_QUOTES.push(
+ "“My schedule had no conflicts until I started attending things.”",
+ "“The shortest path between two sessions always crosses three casinos.”",
+ "“I deployed to production from the Expo floor. This was a choice.”",
+ "“There is no such thing as too much swag, only insufficient luggage architecture.”",
+ "“The session was full, so I attended the queue.”",
+ "“I learned six new services and forgot where my hotel room is.”",
+ "“Every hallway is a track if two builders stop walking.”",
+ "“My watch asked whether I was training for a marathon. Technically, yes.”",
+ "“The cloud is elastic. My conference schedule is not.”",
+ "“I came with one backpack and left with a distributed storage system.”",
+ "“At re:Invent, breakfast is a race condition.”",
+ "“The real Well-Architected Framework is comfortable shoes, water, and a backup battery.”",
+ "“Vegas has no availability zones, only hotel towers.”",
+ "“If you can find the meeting room on the first try, you are overqualified.”",
+ "“One does not simply pop over to another campus.”",
+ "“Friday morning is the ultimate resilience test.”"
+);
 
 /* ================= UTIL ================= */
 function $(id){return document.getElementById(id);}
@@ -1020,7 +1079,7 @@ $("tAttend").onclick=function(){
   var c=theatreCtx,s=c.session;
   if(c.attended){toast("You already sat through this one.","info");return;}
   if(c.isKeynote){st.kAtt[st.day]=1;st.min=Math.max(st.min,c.knFrom||st.min)+s.dur;st.k+=s.k;st.vibes+=(s.v||0);st.energy-=(s.e||6);
-    toast("Keynote absorbed. +"+s.k+" knowledge.","good");if(s.k===200)toast("\u201cNow, go build!\u201d","good");}
+    toast("Keynote absorbed. +"+s.k+" knowledge.","good");if(s.k===200)toast("Thursday inspiration acquired.","good");}
   else{st.min+=s.dur;st.energy-=4;st.vibes-=2;var g=s.k;
     if(c.overflow){g=Math.round(g*0.55);st.k+=g;toast("Overflow room. +"+g+" knowledge (screens only).","bad");}
     else{st.k+=g;toast("Session complete. +"+g+" knowledge.","good");}}
@@ -1067,13 +1126,13 @@ function startRecap(forced,sleepPlan){
 }
 function dayBriefing(){
   var tips=({
-    1:["MONDAY. Sessions live in every conference hotel. Expo grand opening 16:00 at the Venetian.","Monday Night Live 19:00 — the Venetian."],
-    2:["TUESDAY. CEO keynote 08:00 at the Venetian. Coffee first.","Sponsor parties tonight — social points await."],
-    3:["WEDNESDAY. AI keynote 08:30. Your feet have opinions now.","Midweek wall is real. Hydrate."],
-    4:["THURSDAY. Werner at 08:30 — the big one. Do not miss it.","Tonight: re:PLAY at the festival grounds, 20:00. Last Expo day (closes 16:00)."],
-    5:["FRIDAY. Flight at noon. A couple of morning sessions if you dare.","Walk to the Vegas sign if you never did."]
+    1:["MONDAY. Sessions live in every conference hotel. Expo grand opening 16:00 at the Venetian.","Monday Night Live 19:00 — the Venetian.","Your carefully planned agenda will encounter its first dependency conflict today.","The hallway track requires no reservation and has unlimited seating.","Pro tip: a fifteen-minute campus transfer exists only in slide decks.","Collect swag responsibly. Your airline has opinions about dimensional weight."],
+    2:["TUESDAY. CEO keynote 08:00 at the Venetian. Coffee first.","Sponsor parties tonight — social points await.","Today is ideal for discovering a new database you absolutely need by Friday.","Builders' Fair demos pair nicely with emergency afternoon caffeine.","If a session is full, congratulations: you have unlocked the hallway track.","Your badge is credentials, map, social API, and occasional lanyard-based weapon."],
+    3:["WEDNESDAY. AI keynote 08:30. Your feet have opinions now.","Midweek wall is real. Hydrate.","Wednesday is when every attendee begins benchmarking shoe choices.","Find a chalk talk and watch a rectangle become an enterprise architecture.","Your calendar says lunch. The session catalog says otherwise.","Half the conference has now switched from coffee to coffee with extra coffee."],
+    4:["THURSDAY. The final full conference day is online. Make it count.","Tonight: re:PLAY at the festival grounds, 20:00. Last Expo day (closes 16:00).","Frugality begins with taking exactly enough Expo snacks for the flight.","Last call for the booth whose sticker your laptop architecture requires.","Your legs are a distributed system with degraded availability.","Save some energy for re:PLAY. Auto scaling is not available for attendees."],
+    5:["FRIDAY. Flight at noon. A couple of morning sessions if you dare.","Walk to the Vegas sign if you never did.","Friday attendees have achieved conference fault tolerance.","The final session is mostly people checking flight notifications.","Your suitcase now requires a swag migration strategy.","Take one last hallway lap and pretend your feet consented."]
   })[st.day]||[];
-  tips.forEach(function(t){toast(t,"info");});
+  for(var shown=0,used={};shown<Math.min(2,tips.length);){var pick=Math.floor(Math.random()*tips.length);if(used[pick])continue;used[pick]=1;toast(tips[pick],"info");shown++;}
 }
 
 function setConferenceTestTime(){
@@ -1105,7 +1164,7 @@ function rankFor(sc){
   if(sc<1200)return ["SESSION SAMPLER","You saw things. You learned things. You lost a shoe."];
   if(sc<2000)return ["CERTIFIED BUILDER","Solid week. Your step counter filed a complaint."];
   if(sc<2900)return ["ALL-IN ATTENDEE","Keynotes, parties, swag — you played the whole board."];
-  return ["LEGENDARY KEYNOTE WARRIOR","Werner would be proud. Now, go build."];
+  return ["LEGENDARY KEYNOTE WARRIOR","You mastered the week. Take that momentum home."];
 }
 function resultPayload(){
   return [st.k,st.s,swagPts(),st.steps,st.sessions,typeof st.sharedSwagCount==='number'?st.sharedSwagCount:st.swag.length,st.dead].map(function(n){return Math.max(0,Math.round(n)||0).toString(36);}).join('.');
